@@ -107,8 +107,17 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
                   type="submit"
                   className="w-full bg-white text-black py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-zinc-200 transition disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Processing...' : 'Order via WhatsApp'}
-                  {!isSubmitting && <ArrowRight className="w-5 h-5" />}
+                  {isSubmitting ? (
+                    <>
+                      <div className="h-5 w-5 rounded-full border-2 border-black/20 border-t-blue-500 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      Order via WhatsApp
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
                 </button>
                 <p className="text-center text-xs text-zinc-500 mt-4">
                   Data is used only for delivery coordination.

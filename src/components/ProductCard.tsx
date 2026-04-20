@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Product } from '@/lib/supabase';
+import Link from 'next/link';
+import { ProductWithFeatured } from '@/lib/localProducts';
 import LeadModal from './LeadModal';
 
 interface ProductCardProps {
-  product: Product;
+  product: ProductWithFeatured;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
@@ -24,6 +25,8 @@ export default function ProductCard({ product }: ProductCardProps) {
               src={product.images[0]}
               alt={product.name}
               fill
+              placeholder="blur"
+              blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
               className="object-cover group-hover:scale-105 transition duration-500"
             />
           ) : (
@@ -40,9 +43,13 @@ export default function ProductCard({ product }: ProductCardProps) {
           
           <div className="flex justify-between items-center mt-6">
             <span className="text-lg font-bold">{product.price_xaf.toLocaleString()} XAF</span>
-            <button className="bg-white text-black text-xs px-5 py-2.5 rounded-full font-bold hover:bg-zinc-200 transition">
+            <Link 
+              href={`/product/${product.id}`}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white text-black text-xs px-5 py-2.5 rounded-full font-bold hover:bg-zinc-200 transition"
+            >
               Details
-            </button>
+            </Link>
           </div>
         </div>
       </div>
