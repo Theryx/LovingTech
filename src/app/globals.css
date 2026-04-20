@@ -7,6 +7,11 @@
   --foreground: #fafafa;
 }
 
+html.light {
+  --background: #ffffff;
+  --foreground: #09090b;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
