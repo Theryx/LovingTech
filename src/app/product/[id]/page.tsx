@@ -39,23 +39,32 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             />
           </div>
 
-          {product.images.length > 1 && (
-            <div className="grid grid-cols-4 gap-4">
-              {product.images.map((img, idx) => (
-                <div key={idx} className="aspect-square relative bg-zinc-100 dark:bg-zinc-900 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800">
+          <div className="grid grid-cols-4 gap-4">
+              {(product.images.length > 0 ? product.images : ['/images/placeholder.svg']).slice(0, 4).map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setMainImgSrc(img)}
+                  className={`aspect-square relative bg-zinc-100 dark:bg-zinc-900 rounded-xl overflow-hidden border-2 transition ${
+                    mainImgSrc === img
+                      ? 'border-zinc-900 dark:border-white'
+                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600'
+                  }`}
+                >
                   <Image
                     src={img}
-                    alt={`${product.name} thumbnail ${idx}`}
+                    alt={`${product.name} view ${idx + 1}`}
                     fill
                     sizes="25vw"
                     className="object-cover"
                     placeholder="blur"
                     blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/placeholder.svg';
+                    }}
                   />
-                </div>
+                </button>
               ))}
             </div>
-          )}
         </div>
 
         {/* Info */}

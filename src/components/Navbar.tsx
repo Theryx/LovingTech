@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Moon, Sun, Globe } from 'lucide-react';
+import { Moon, Sun, Globe, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -27,6 +27,14 @@ export default function Navbar() {
         >
           <Globe className="w-5 h-5" />
         </button>
+
+        <Link
+          href="/admin"
+          className="p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition text-zinc-700 dark:text-white"
+          title="Admin"
+        >
+          <Settings className="w-5 h-5" />
+        </Link>
 
         <button
           onClick={toggleTheme}
