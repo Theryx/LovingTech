@@ -7,12 +7,14 @@ import { ArrowLeft, ShieldCheck, Truck, ShoppingBag } from 'lucide-react';
 import ProductDetailActions from '@/components/ProductDetailActions';
 import { LOCAL_PRODUCTS } from '@/lib/localProducts';
 import Navbar from '@/components/Navbar';
+import { useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function ProductPage({ params }: { params: { id: string } }) {
   const { id } = params;
   const { t } = useLanguage();
   const product = LOCAL_PRODUCTS.find((p) => p.id === id);
+  const [mainImgSrc, setMainImgSrc] = useState(product?.images?.[0] || '/images/placeholder.svg');
 
   if (!product) {
     notFound();
@@ -26,20 +28,15 @@ export default function ProductPage({ params }: { params: { id: string } }) {
         {/* Gallery */}
         <div className="space-y-6">
           <div className="aspect-square relative bg-zinc-100 dark:bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-200 dark:border-zinc-800">
-            {product.images?.[0] ? (
-              <Image
-                src={product.images[0]}
-                alt={product.name}
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
-                priority
-                placeholder="blur"
-                blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-zinc-400">No Image</div>
-            )}
+            <Image
+              src={mainImgSrc}
+              alt={product.name}
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+              priority
+              onError={() => setMainImgSrc('/images/placeholder.svg')}
+            />
           </div>
 
           {product.images.length > 1 && (
