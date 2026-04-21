@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Moon, Sun, Globe } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -22,10 +22,10 @@ export default function Navbar() {
       <div className="flex items-center gap-4">
         <button
           onClick={toggleLanguage}
-          className="p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition text-zinc-700 dark:text-white"
-          title={language === 'en' ? 'Switch to French' : 'Passer en anglais'}
+          className="px-3 py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition text-zinc-700 dark:text-white text-xs font-bold uppercase"
+          title={language === 'en' ? 'Passer en français' : 'Switch to English'}
         >
-          <Globe className="w-5 h-5" />
+          {language === 'en' ? 'FR' : 'EN'}
         </button>
 
         <button
