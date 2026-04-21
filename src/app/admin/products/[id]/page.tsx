@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Plus, X } from 'lucide-react';
 import { Product } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
 import ImageUploader from '@/components/ImageUploader';
