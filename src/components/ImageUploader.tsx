@@ -15,11 +15,13 @@ interface ImageUploaderProps {
 const labels = {
   dragDrop: { en: 'Drag images here or click to upload', fr: 'Glissez les images ici ou cliquez pour télécharger' },
   uploading: { en: 'Uploading...', fr: 'Téléchargement...' },
-  uploadFailed: { en: 'Upload failed', fr: 'Échec du téléchargement' },
+  uploadFailed: { en: 'Upload failed. Enter image URL below instead.', fr: 'Échec. Entrez l\'URL de l\'image ci-dessous.' },
+  bucketMissing: { en: 'Storage not configured. Use URL below instead.', fr: 'Stockage non configuré. Utilisez l\'URL ci-dessous.' },
   mainImage: { en: 'Main', fr: 'Principal' },
   remove: { en: 'Remove', fr: 'Supprimer' },
   supportedFormats: { en: 'Max: 5MB • 800-1200px • JPEG, PNG, WebP', fr: 'Max: 5Mo • 800-1200px • JPEG, PNG, WebP' },
   previewFailed: { en: 'Preview not available', fr: 'Aperçu non disponible' },
+  orUrl: { en: 'Or enter image URL:', fr: 'Ou entrez l\'URL de l\'image:' },
 };
 
 export default function ImageUploader({ images, onChange, bucket = 'products', folder = 'images' }: ImageUploaderProps) {
@@ -27,6 +29,8 @@ export default function ImageUploader({ images, onChange, bucket = 'products', f
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [previewErrors, setPreviewErrors] = useState<Record<number, boolean>>({});
+  const [uploadError, setUploadError] = useState<string>('');
+  const [urlInput, setUrlInput] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const uploadToSupabase = async (file: File): Promise<string | null> => {
@@ -34,18 +38,41 @@ export default function ImageUploader({ images, onChange, bucket = 'products', f
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
     const filePath = `${folder}/${fileName}`;
 
-    const { data, error } = await supabase.storage.from(bucket).upload(filePath, file, {
-      cacheControl: '3600',
-      upsert: false,
-    });
+    try {
+      const { data, error } = await supabase.storage.from(bucket).upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      });
 
-    if (error) {
-      console.error('Upload error:', error);
+      if (error) {
+        if (error.message.includes('Bucket not found') || error.message.includes('bucket')) {
+          setUploadError(t(labels.bucketMissing));
+          return null;
+        }
+        console.error('Upload error:', error);
+        setUploadError(t(labels.uploadFailed));
+        return null;
+      }
+
+      const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(filePath);
+      return publicUrl;
+    } catch (err: any) {
+      if (err?.message?.includes('Bucket not found')) {
+        setUploadError(t(labels.bucketMissing));
+      } else {
+        setUploadError(t(labels.uploadFailed));
+      }
       return null;
     }
+  };
 
-    const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(filePath);
-    return publicUrl;
+  const handleAddUrl = () => {
+    if (urlInput.trim()) {
+      const newImages = [...images, urlInput.trim()];
+      onChange(newImages);
+      setUrlInput('');
+      setUploadError('');
+    }
   };
 
   const handleFiles = useCallback(async (files: FileList | null) => {
@@ -135,6 +162,8 @@ export default function ImageUploader({ images, onChange, bucket = 'products', f
         className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition ${
           dragOver
             ? 'border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800'
+            : uploadError
+            ? 'border-red-300 dark:border-red-700'
             : 'border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600'
         }`}
       >
@@ -151,6 +180,29 @@ export default function ImageUploader({ images, onChange, bucket = 'products', f
           </>
         )}
       </div>
+
+      {uploadError && (
+        <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <p className="text-sm text-red-600 dark:text-red-400">{uploadError}</p>
+          <div className="flex gap-2 mt-2">
+            <input
+              type="text"
+              value={urlInput}
+              onChange={(e) => setUrlInput(e.target.value)}
+              placeholder="https://..."
+              className="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white text-sm"
+              onKeyDown={(e) => e.key === 'Enter' && handleAddUrl()}
+            />
+            <button
+              onClick={handleAddUrl}
+              className="px-4 py-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg text-sm font-medium"
+            >
+              Add
+            </button>
+          </div>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">{t(labels.orUrl)}</p>
+        </div>
+      )}
 
       {images.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
