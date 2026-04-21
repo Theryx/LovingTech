@@ -110,7 +110,7 @@ export default function AdminProductsPage() {
   const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [filterBrand, setFilterBrand] = useState<string>('');
-  const [products] = useState(mockProducts as Product[]);
+  const [products] = useState(mockProducts as unknown as Product[]);
 
   const filteredProducts = products.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
