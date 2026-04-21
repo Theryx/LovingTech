@@ -3,8 +3,9 @@
 -- Run this in your Supabase SQL Editor
 -- =====================================================
 
--- 1. Drop existing table if it has wrong column type
-DROP TABLE IF EXISTS products;
+-- 1. Drop existing tables (leads first due to foreign key)
+DROP TABLE IF EXISTS leads CASCADE;
+DROP TABLE IF EXISTS products CASCADE;
 
 -- 2. Create products table with TEXT id
 CREATE TABLE products (
