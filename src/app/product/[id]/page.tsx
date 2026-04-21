@@ -81,9 +81,26 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             {product.brand}
           </span>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-4">{product.name}</h1>
-          <p className="text-2xl font-semibold text-zinc-600 dark:text-zinc-300 mb-8">
+          <p className="text-2xl font-semibold text-zinc-600 dark:text-zinc-300 mb-4">
             {product.price_xaf.toLocaleString('fr-FR')} XAF
           </p>
+          <div className="mb-8">
+            <span
+              className={`inline-flex px-3 py-1.5 rounded-full text-sm font-medium ${
+                product.stock_status === 'in_stock'
+                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                  : product.stock_status === 'out_of_stock'
+                  ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                  : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+              }`}
+            >
+              {product.stock_status === 'in_stock'
+                ? t({ en: 'In Stock', fr: 'En stock' })
+                : product.stock_status === 'out_of_stock'
+                ? t({ en: 'Out of Stock', fr: 'Rupture de stock' })
+                : t({ en: 'Pre-order', fr: 'Pré-commande' })}
+            </span>
+          </div>
 
           <div className="space-y-8 mb-12">
             <div>

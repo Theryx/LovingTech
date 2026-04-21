@@ -14,6 +14,8 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imgSrc, setImgSrc] = useState(product.images?.[0] || '/images/placeholder.svg');
 
+  const isOutOfStock = product.stock_status === 'out_of_stock';
+
   return (
     <>
       <div
@@ -32,6 +34,11 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="absolute top-4 right-4 bg-white/70 dark:bg-black/50 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-zinc-900 dark:text-white">
             {product.brand}
           </div>
+          {isOutOfStock && (
+            <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+              Out of Stock
+            </div>
+          )}
         </div>
 
         <div className="p-6">
