@@ -3,8 +3,11 @@
 -- Run this in your Supabase SQL Editor
 -- =====================================================
 
--- 1. Create products table
-CREATE TABLE IF NOT EXISTS products (
+-- 1. Drop existing table if it has wrong column type
+DROP TABLE IF EXISTS products;
+
+-- 2. Create products table with TEXT id
+CREATE TABLE products (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT DEFAULT '',
