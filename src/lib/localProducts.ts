@@ -61,7 +61,7 @@ export const LOCAL_PRODUCTS: ProductWithFeatured[] = [
     },
     images: ['/images/logitech-g502-hero.png'],
     stock_status: 'in_stock',
-    featured: false,
+    featured: true,
   },
   {
     id: '5',

@@ -10,7 +10,7 @@ import { useLanguage } from '@/context/LanguageContext';
 export default function Home() {
   const { t } = useLanguage();
 
-  const featuredProducts = LOCAL_PRODUCTS.filter((p) => (p as ProductWithFeatured).featured);
+  const featuredProducts = LOCAL_PRODUCTS.filter((p) => (p as ProductWithFeatured).featured).slice(0, 4);
 
   const heroBgImage =
     'https://resource.logitech.com/w_692,c_lpad,ar_4:3,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/keyboards/signature-slim-solar-plus-k980-for-business/gallery/esp/b2b-k980-graphite-us-gallery1-esp.png?v=1';
