@@ -1,14 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function SplashScreen() {
   const [visible, setVisible] = useState(true);
   const [fading, setFading] = useState(false);
+  const { language } = useLanguage();
+
+  const messages = {
+    en: { brand: 'Loving Tech', tagline: 'Premium Gadgets', loading: 'Loading product catalogue...' },
+    fr: { brand: 'Loving Tech', tagline: 'Premium Gadgets', loading: 'Chargement du catalogue...' },
+  };
+
+  const msg = messages[language] || messages.en;
 
   useEffect(() => {
-    const fadeTimer = setTimeout(() => setFading(true), 1800);
-    const hideTimer = setTimeout(() => setVisible(false), 2300);
+    const fadeTimer = setTimeout(() => setFading(true), 2800);
+    const hideTimer = setTimeout(() => setVisible(false), 3300);
     return () => {
       clearTimeout(fadeTimer);
       clearTimeout(hideTimer);
@@ -29,10 +38,13 @@ export default function SplashScreen() {
         </div>
         <div className="text-center">
           <p className="text-xl font-semibold tracking-widest text-white uppercase">
-            Loving Tech
+            {msg.brand}
           </p>
           <p className="mt-1 text-xs tracking-widest text-zinc-500 uppercase">
-            Premium Gadgets
+            {msg.tagline}
+          </p>
+          <p className="mt-3 text-sm text-zinc-400">
+            {msg.loading}
           </p>
         </div>
       </div>
