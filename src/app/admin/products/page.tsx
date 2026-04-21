@@ -23,7 +23,7 @@ const labels = {
   noProducts: { en: 'No products found', fr: 'Aucun produit trouvé' },
 };
 
-const mockProducts: Product[] = [
+const mockProducts = [
   {
     id: '1',
     name: 'Logitech MX Master 3S',
@@ -110,7 +110,7 @@ export default function AdminProductsPage() {
   const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [filterBrand, setFilterBrand] = useState<string>('');
-  const [products] = useState<Product[]>(mockProducts);
+  const [products] = useState(mockProducts as Product[]);
 
   const filteredProducts = products.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
