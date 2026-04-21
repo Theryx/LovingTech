@@ -1,18 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Filter } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import Navbar from '@/components/Navbar';
 import { LOCAL_PRODUCTS } from '@/lib/localProducts';
+import { Product, productService } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function ProductsPage() {
   const { t } = useLanguage();
   const [stockFilter, setStockFilter] = useState<string>('');
+  const [products, setProducts] = useState<Product[]>(LOCAL_PRODUCTS as Product[]);
 
-  const filteredProducts = LOCAL_PRODUCTS.filter((product) => {
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const dbProducts = await productService.getAll();
+        if (dbProducts.length > 0) {
+          setProducts(dbProducts);
+        }
+      } catch (err) {
+        console.error('Failed to load products:', err);
+      }
+    }
+    loadProducts();
+  }, []);
+
+  const filteredProducts = products.filter((product) => {
     if (!stockFilter) return true;
     return product.stock_status === stockFilter;
   });

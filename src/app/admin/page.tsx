@@ -1,9 +1,11 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Package, Users, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts';
+import { Product, productService } from '@/lib/supabase';
 
 const labels = {
   dashboard: { en: 'Dashboard', fr: 'Tableau de bord' },
@@ -20,6 +22,23 @@ const labels = {
 
 export default function AdminDashboard() {
   const { t } = useLanguage();
+  const [products, setProducts] = useState<Product[]>(LOCAL_PRODUCTS as Product[]);
+
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const dbProducts = await productService.getAll();
+        if (dbProducts.length > 0) {
+          setProducts(dbProducts);
+        }
+      } catch (err) {
+        console.error('Failed to load products:', err);
+      }
+    }
+    loadProducts();
+  }, []);
+
+  const featuredCount = products.filter((p) => (p as ProductWithFeatured).featured).length;
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -34,7 +53,7 @@ export default function AdminDashboard() {
             <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{t(labels.totalProducts)}</span>
             <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-transform group-hover:translate-x-1" />
           </div>
-          <span className="text-4xl font-bold text-zinc-900 dark:text-white">{LOCAL_PRODUCTS.length}</span>
+          <span className="text-4xl font-bold text-zinc-900 dark:text-white">{products.length}</span>
         </Link>
         <Link
           href="/admin/products?featured=true"
@@ -44,7 +63,7 @@ export default function AdminDashboard() {
             <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{t(labels.featuredProducts)}</span>
             <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-transform group-hover:translate-x-1" />
           </div>
-          <span className="text-4xl font-bold text-zinc-900 dark:text-white">{LOCAL_PRODUCTS.filter((p) => (p as ProductWithFeatured).featured).length}</span>
+          <span className="text-4xl font-bold text-zinc-900 dark:text-white">{featuredCount}</span>
         </Link>
         <Link
           href="/admin/leads"

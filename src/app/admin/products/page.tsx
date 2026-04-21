@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Search, Filter, Star, Pencil, Trash2 } from 'lucide-react';
-import { Product } from '@/lib/supabase';
+import { Product, productService } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
 import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts';
 
@@ -22,13 +22,46 @@ const labels = {
   outOfStock: { en: 'Out of Stock', fr: 'Rupture de stock' },
   preOrder: { en: 'Pre-order', fr: 'Pré-commande' },
   noProducts: { en: 'No products found', fr: 'Aucun produit trouvé' },
+  loadingError: { en: 'Failed to load products', fr: 'Erreur de chargement' },
 };
 
 export default function AdminProductsPage() {
   const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [filterBrand, setFilterBrand] = useState<string>('');
-  const [products] = useState(LOCAL_PRODUCTS as unknown as Product[]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const dbProducts = await productService.getAll();
+        if (dbProducts.length > 0) {
+          setProducts(dbProducts as Product[]);
+        } else {
+          setProducts(LOCAL_PRODUCTS as unknown as Product[]);
+        }
+      } catch (err) {
+        console.error('Failed to load from DB, using local products:', err);
+        setProducts(LOCAL_PRODUCTS as unknown as Product[]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadProducts();
+  }, []);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    try {
+      await productService.delete(id);
+      setProducts(products.filter((p) => p.id !== id));
+    } catch (err) {
+      console.error('Failed to delete:', err);
+      setError('Failed to delete product');
+    }
+  };
 
   const filteredProducts = products.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -147,7 +180,10 @@ export default function AdminProductsPage() {
                     >
                       <Pencil className="w-4 h-4" />
                     </Link>
-                    <button className="p-2 text-zinc-400 hover:text-red-500 transition">
+                    <button 
+                      onClick={() => handleDelete(product.id)}
+                      className="p-2 text-zinc-400 hover:text-red-500 transition"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>

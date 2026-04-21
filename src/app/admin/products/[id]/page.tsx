@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, Plus, X } from 'lucide-react';
-import { Product } from '@/lib/supabase';
+import { Product, productService } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
 import ImageUploader from '@/components/ImageUploader';
 import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts';
@@ -108,12 +108,33 @@ export default function AdminProductEditorPage() {
 
   const handleSave = async () => {
     setSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => {
-      router.push('/admin/products');
-    }, 1000);
+    try {
+      if (isNew) {
+        const newProduct = {
+          ...product,
+          id: crypto.randomUUID(),
+          specs: product.specs || {},
+          images: product.images || [],
+          stock_status: product.stock_status || 'in_stock',
+          featured,
+        };
+        await productService.create(newProduct as any);
+      } else {
+        await productService.update(product.id, {
+          ...product,
+          featured,
+        } as any);
+      }
+      setSaved(true);
+      setTimeout(() => {
+        router.push('/admin/products');
+      }, 1000);
+    } catch (error) {
+      console.error('Failed to save:', error);
+      alert('Failed to save product. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const formatPrice = (price: number) => {

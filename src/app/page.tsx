@@ -1,16 +1,33 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ShoppingBag, ShieldCheck, Truck, ArrowRight } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import Navbar from '@/components/Navbar';
 import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts';
+import { Product, productService } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function Home() {
   const { t } = useLanguage();
+  const [products, setProducts] = useState<Product[]>(LOCAL_PRODUCTS as Product[]);
 
-  const featuredProducts = LOCAL_PRODUCTS.filter((p) => (p as ProductWithFeatured).featured).slice(0, 4);
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const dbProducts = await productService.getAll();
+        if (dbProducts.length > 0) {
+          setProducts(dbProducts);
+        }
+      } catch (err) {
+        console.error('Failed to load products:', err);
+      }
+    }
+    loadProducts();
+  }, []);
+
+  const featuredProducts = products.filter((p) => (p as ProductWithFeatured).featured).slice(0, 4);
 
   const heroBgImage =
     'https://resource.logitech.com/w_692,c_lpad,ar_4:3,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/keyboards/signature-slim-solar-plus-k980-for-business/gallery/esp/b2b-k980-graphite-us-gallery1-esp.png?v=1';
