@@ -30,6 +30,7 @@ const labels = {
   images: { en: 'Images', fr: 'Images' },
   imageUrl: { en: 'Image URL', fr: 'URL de l\'image' },
   addImage: { en: 'Add Image', fr: 'Ajouter une image' },
+  imageHint: { en: 'Max: 5MB • 800-1200px • JPEG, PNG, WebP', fr: 'Max: 5Mo • 800-1200px • JPEG, PNG, WebP' },
   save: { en: 'Save', fr: 'Enregistrer' },
   saving: { en: 'Saving...', fr: 'Enregistrement...' },
   saved: { en: 'Saved!', fr: 'Enregistré!' },
@@ -239,7 +240,8 @@ export default function NewProductPage() {
         </div>
 
         <div className="p-6 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">{t(labels.images)}</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">{t(labels.images)}</h2>
+          <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-4">{t(labels.imageHint)}</p>
           <div className="space-y-3">
             {(product.images.length > 0 ? product.images : ['']).map((image, index) => (
               <div key={index} className="flex items-center gap-3">

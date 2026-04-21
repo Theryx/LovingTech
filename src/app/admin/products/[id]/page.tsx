@@ -311,7 +311,8 @@ export default function AdminProductEditorPage() {
         </div>
 
         <div className="p-6 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">Images</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Images</h2>
+          <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-4">Max: 5MB • 800-1200px • JPEG, PNG, WebP</p>
           <div className="space-y-3">
             {product.images.map((image, index) => (
               <div key={index} className="flex items-center gap-3">
