@@ -119,7 +119,7 @@ export default function AdminProductsPage() {
     return matchesSearch && matchesBrand;
   });
 
-  const brands = [...new Set(products.map((p) => p.brand))];
+  const brands = Array.from(new Set(products.map((p) => p.brand)));
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-CM', { style: 'currency', currency: 'XAF' }).format(price);
