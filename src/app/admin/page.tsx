@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Package, Users, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts';
 
 const labels = {
   dashboard: { en: 'Dashboard', fr: 'Tableau de bord' },
@@ -33,7 +34,7 @@ export default function AdminDashboard() {
             <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{t(labels.totalProducts)}</span>
             <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-transform group-hover:translate-x-1" />
           </div>
-          <span className="text-4xl font-bold text-zinc-900 dark:text-white">15</span>
+          <span className="text-4xl font-bold text-zinc-900 dark:text-white">{LOCAL_PRODUCTS.length}</span>
         </Link>
         <Link
           href="/admin/products?featured=true"
@@ -43,7 +44,7 @@ export default function AdminDashboard() {
             <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{t(labels.featuredProducts)}</span>
             <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-transform group-hover:translate-x-1" />
           </div>
-          <span className="text-4xl font-bold text-zinc-900 dark:text-white">4</span>
+          <span className="text-4xl font-bold text-zinc-900 dark:text-white">{LOCAL_PRODUCTS.filter((p) => (p as ProductWithFeatured).featured).length}</span>
         </Link>
         <Link
           href="/admin/leads"

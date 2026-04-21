@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Plus, Search, Filter, Star, Pencil, Trash2 } from 'lucide-react';
 import { Product } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
+import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts';
 
 const labels = {
   products: { en: 'Products', fr: 'Produits' },
@@ -23,94 +24,11 @@ const labels = {
   noProducts: { en: 'No products found', fr: 'Aucun produit trouvé' },
 };
 
-const mockProducts = [
-  {
-    id: '1',
-    name: 'Logitech MX Master 3S',
-    description: 'Advanced wireless mouse with 8K DPI sensor, quiet clicks, and 70-day battery life.',
-    price_xaf: 35000,
-    brand: 'Logitech',
-    specs: { sensor: '8,000 DPI', battery: '70 days', connectivity: 'Bluetooth, USB Receiver' },
-    images: ['/images/logitech-mx-master-3s.png'],
-    stock_status: 'in_stock',
-  },
-  {
-    id: '2',
-    name: 'Logitech MX Keys S',
-    description: 'Smart illuminated wireless keyboard with perfect stroke keys and smart shortcuts.',
-    price_xaf: 28000,
-    brand: 'Logitech',
-    specs: { keys: 'Perfect Stroke', battery: '10 days' },
-    images: ['/images/logitech-mx-keys-s.png'],
-    stock_status: 'in_stock',
-  },
-  {
-    id: '3',
-    name: 'Keychron K2 Pro',
-    description: 'Wireless mechanical keyboard with QMK/VIA support and hot-swappable switches.',
-    price_xaf: 32000,
-    brand: 'Keychron',
-    specs: { switches: 'Hot-swappable Brown', battery: '80 hours' },
-    images: ['/images/keychron-k2-pro.png'],
-    stock_status: 'in_stock',
-  },
-  {
-    id: '4',
-    name: 'Logitech G502 Hero',
-    description: 'High-performance gaming mouse with 25,600 DPI sensor and 11 programmable buttons.',
-    price_xaf: 45000,
-    brand: 'Logitech',
-    specs: { sensor: '25,600 DPI', buttons: '11 programmable' },
-    images: ['/images/logitech-g502-hero.png'],
-    stock_status: 'in_stock',
-  },
-  {
-    id: '5',
-    name: 'Logitech Pebble Mouse 2',
-    description: 'Slim, quiet, and portable wireless mouse with customizable middle button.',
-    price_xaf: 25000,
-    brand: 'Logitech',
-    specs: { sensor: '4000 DPI', battery: '24 months' },
-    images: ['/images/logitech-pebble-mouse-2.png'],
-    stock_status: 'in_stock',
-  },
-  {
-    id: '6',
-    name: 'Anker PowerCore 20000',
-    description: '20000mAh portable charger with PowerIQ and fast charging support.',
-    price_xaf: 18000,
-    brand: 'Anker',
-    specs: { capacity: '20000mAh', output: '20W USB-C' },
-    images: ['/images/placeholder.svg'],
-    stock_status: 'in_stock',
-  },
-  {
-    id: '7',
-    name: 'Anker 737 Power Bank',
-    description: '24000mAh high-capacity power bank with 140W total output.',
-    price_xaf: 42000,
-    brand: 'Anker',
-    specs: { capacity: '24000mAh', output: '140W total' },
-    images: ['/images/anker-737.png'],
-    stock_status: 'in_stock',
-  },
-  {
-    id: '8',
-    name: 'Keychron Q1 Pro',
-    description: 'Premium mechanical keyboard with 2.4G wireless, QMK/VIA, and all-metal body.',
-    price_xaf: 48000,
-    brand: 'Keychron',
-    specs: { switches: 'Hot-swappable Red', battery: '100 hours' },
-    images: ['/images/keychron-q1-pro.png'],
-    stock_status: 'in_stock',
-  },
-].map((p) => ({ ...p, featured: ['1', '2', '3'].includes(p.id) }));
-
 export default function AdminProductsPage() {
   const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [filterBrand, setFilterBrand] = useState<string>('');
-  const [products] = useState(mockProducts as unknown as Product[]);
+  const [products] = useState(LOCAL_PRODUCTS as unknown as Product[]);
 
   const filteredProducts = products.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -215,7 +133,7 @@ export default function AdminProductsPage() {
                   </span>
                 </td>
                 <td className="px-6 py-4 text-center">
-                  {(product as any).featured ? (
+                  {(product as ProductWithFeatured).featured ? (
                     <Star className="w-5 h-5 text-yellow-500 fill-yellow-500 mx-auto" />
                   ) : (
                     <Star className="w-5 h-5 text-zinc-300 dark:text-zinc-600 mx-auto" />
