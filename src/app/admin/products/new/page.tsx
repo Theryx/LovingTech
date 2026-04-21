@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, Plus, X } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 import { Product } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
+import ImageUploader from '@/components/ImageUploader';
 
 const labels = {
   addProduct: { en: 'Add Product', fr: 'Ajouter un produit' },
@@ -241,40 +242,10 @@ export default function NewProductPage() {
 
         <div className="p-6 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800">
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">{t(labels.images)}</h2>
-          <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-4">{t(labels.imageHint)}</p>
-          <div className="space-y-3">
-            {(product.images.length > 0 ? product.images : ['']).map((image, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <input
-                  type="text"
-                  value={image}
-                  onChange={(e) => {
-                    const newImages = [...product.images];
-                    newImages[index] = e.target.value;
-                    setProduct({ ...product, images: newImages });
-                  }}
-                  className="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
-                  placeholder={t(labels.imageUrl)}
-                />
-                <button
-                  onClick={() => {
-                    const newImages = product.images.filter((_, i) => i !== index);
-                    setProduct({ ...product, images: newImages });
-                  }}
-                  className="p-2 text-zinc-400 hover:text-red-500 transition"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-            <button
-              onClick={() => setProduct({ ...product, images: [...product.images, ''] })}
-              className="flex items-center gap-1 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition"
-            >
-              <Plus className="w-4 h-4" />
-              {t(labels.addImage)}
-            </button>
-          </div>
+          <ImageUploader
+            images={product.images}
+            onChange={(images) => setProduct({ ...product, images })}
+          />
         </div>
       </div>
     </div>

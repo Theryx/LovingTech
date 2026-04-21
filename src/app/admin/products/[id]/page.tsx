@@ -3,10 +3,38 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, Plus, X } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 import { Product } from '@/lib/supabase';
+import { useLanguage } from '@/context/LanguageContext';
+import ImageUploader from '@/components/ImageUploader';
+import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts';
 
-const mockProducts: Record<string, Product> = {
+const labels = {
+  addProduct: { en: 'Add Product', fr: 'Ajouter un produit' },
+  editProduct: { en: 'Edit Product', fr: 'Modifier le produit' },
+  basicInfo: { en: 'Basic Information', fr: 'Informations de base' },
+  productName: { en: 'Product Name', fr: 'Nom du produit' },
+  enterProductName: { en: 'Enter product name', fr: 'Nom du produit' },
+  description: { en: 'Description', fr: 'Description' },
+  enterDescription: { en: 'Enter product description', fr: 'Description du produit' },
+  priceXaf: { en: 'Price (XAF)', fr: 'Prix (XAF)' },
+  brand: { en: 'Brand', fr: 'Marque' },
+  enterBrand: { en: 'Enter brand', fr: 'Marque' },
+  stockStatus: { en: 'Stock Status', fr: 'Statut du stock' },
+  inStock: { en: 'In Stock', fr: 'En stock' },
+  outOfStock: { en: 'Out of Stock', fr: 'Rupture de stock' },
+  preOrder: { en: 'Pre-order', fr: 'Pré-commande' },
+  featured: { en: 'Featured product', fr: 'Produit en vedette' },
+  specifications: { en: 'Specifications', fr: 'Spécifications' },
+  addSpec: { en: 'Add Spec', fr: 'Ajouter' },
+  specName: { en: 'Spec name', fr: 'Nom spec' },
+  value: { en: 'Value', fr: 'Valeur' },
+  noSpecs: { en: 'No specifications added', fr: 'Aucune spécification ajoutée' },
+  images: { en: 'Images', fr: 'Images' },
+  save: { en: 'Save', fr: 'Enregistrer' },
+  saving: { en: 'Saving...', fr: 'Enregistrement...' },
+  saved: { en: 'Saved!', fr: 'Enregistré!' },
+};
   '1': {
     id: '1',
     name: 'Logitech MX Master 3S',
@@ -103,6 +131,7 @@ const emptyProduct: Product = {
 export default function AdminProductEditorPage() {
   const router = useRouter();
   const params = useParams();
+  const { t } = useLanguage();
   const isNew = params.id === 'new';
   const productId = isNew ? '' : (params.id as string);
 
@@ -113,11 +142,13 @@ export default function AdminProductEditorPage() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    if (!isNew && mockProducts[productId]) {
-      const p = mockProducts[productId];
-      setProduct(p);
-      setSpecKeys(Object.keys(p.specs));
-      setFeatured(['1', '2', '3'].includes(p.id));
+    if (!isNew) {
+      const product = LOCAL_PRODUCTS.find((p) => p.id === productId);
+      if (product) {
+        setProduct(product);
+        setSpecKeys(Object.keys(product.specs));
+        setFeatured(!!(product as ProductWithFeatured).featured);
+      }
     } else if (isNew) {
       setSpecKeys(['spec1', 'spec2']);
     }
@@ -311,41 +342,11 @@ export default function AdminProductEditorPage() {
         </div>
 
         <div className="p-6 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">Images</h2>
-          <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-4">Max: 5MB • 800-1200px • JPEG, PNG, WebP</p>
-          <div className="space-y-3">
-            {product.images.map((image, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <input
-                  type="text"
-                  value={image}
-                  onChange={(e) => {
-                    const newImages = [...product.images];
-                    newImages[index] = e.target.value;
-                    setProduct({ ...product, images: newImages });
-                  }}
-                  className="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
-                  placeholder="Image URL"
-                />
-                <button
-                  onClick={() => {
-                    const newImages = product.images.filter((_, i) => i !== index);
-                    setProduct({ ...product, images: newImages });
-                  }}
-                  className="p-2 text-zinc-400 hover:text-red-500 transition"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-            <button
-              onClick={() => setProduct({ ...product, images: [...product.images, ''] })}
-              className="flex items-center gap-1 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition"
-            >
-              <Plus className="w-4 h-4" />
-              Add Image
-            </button>
-          </div>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">{t({ en: 'Images', fr: 'Images' })}</h2>
+          <ImageUploader
+            images={product.images}
+            onChange={(images) => setProduct({ ...product, images })}
+          />
         </div>
       </div>
     </div>
