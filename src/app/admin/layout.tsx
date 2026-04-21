@@ -7,7 +7,13 @@ import { Package, Users, LayoutDashboard, ArrowLeft, Globe } from 'lucide-react'
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage } from '@/context/LanguageContext';
 
-const adminNav = [
+type AdminNavItem = {
+  href: string;
+  labelKey: 'dashboard' | 'products' | 'leads';
+  icon: typeof LayoutDashboard;
+};
+
+const adminNav: AdminNavItem[] = [
   { href: '/admin', labelKey: 'dashboard', icon: LayoutDashboard },
   { href: '/admin/products', labelKey: 'products', icon: Package },
   { href: '/admin/leads', labelKey: 'leads', icon: Users },
@@ -18,7 +24,7 @@ const labels = {
   products: { en: 'Products', fr: 'Produits' },
   leads: { en: 'Leads', fr: 'Prospects' },
   backToStore: { en: 'Back to Store', fr: 'Retour à la boutique' },
-};
+} as const;
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { theme } = useTheme();
