@@ -77,7 +77,10 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
                   <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
                   <input
                     required
+                    id="whatsapp"
+                    name="whatsapp"
                     type="tel"
+                    autoComplete="tel"
                     placeholder="e.g. 677000000"
                     value={whatsapp}
                     onChange={(e) => setWhatsapp(e.target.value)}
@@ -92,7 +95,10 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
                   <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
                   <input
                     required
+                    id="address"
+                    name="address"
                     type="text"
+                    autoComplete="street-address"
                     placeholder="e.g. Bonamoussadi, Douala"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
