@@ -1,25 +1,13 @@
-'use client';
-
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, ShieldCheck, Truck, ShoppingBag } from 'lucide-react';
-import ProductDetailActions from '@/components/ProductDetailActions';
 import { LOCAL_PRODUCTS } from '@/lib/localProducts';
 import Navbar from '@/components/Navbar';
-import { useState, useEffect } from 'react';
-import { useLanguage } from '@/context/LanguageContext';
+import ProductGallery from '@/components/ProductGallery';
+import ProductDetailActions from '@/components/ProductDetailActions';
 
 export default function ProductPage({ params }: { params: { id: string } }) {
-  const { id } = params;
-  const { t } = useLanguage();
-  const product = LOCAL_PRODUCTS.find((p) => p.id === id);
-
-  const [mainImgSrc, setMainImgSrc] = useState(product?.images?.[0] || '/images/placeholder.svg');
-
-  useEffect(() => {
-    setMainImgSrc(product?.images?.[0] || '/images/placeholder.svg');
-  }, [id]);
+  const product = LOCAL_PRODUCTS.find((p) => p.id === params.id);
 
   if (!product) {
     notFound();
@@ -30,41 +18,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
       <Navbar />
 
       <section className="max-w-7xl mx-auto px-6 pt-28 pb-16 grid grid-cols-1 lg:grid-cols-2 gap-16">
-        {/* Gallery */}
-        <div className="space-y-6">
-          <div className="aspect-square relative bg-zinc-100 dark:bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-200 dark:border-zinc-800">
-            <Image
-              src={mainImgSrc}
-              alt={product.name}
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
-              priority
-            />
-          </div>
-
-          <div className="grid grid-cols-4 gap-4">
-              {(product.images.length > 0 ? product.images : ['/images/placeholder.svg']).slice(0, 4).map((img, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setMainImgSrc(img)}
-                  className={`aspect-square relative bg-zinc-100 dark:bg-zinc-900 rounded-xl overflow-hidden border-2 transition ${
-                    mainImgSrc === img
-                      ? 'border-zinc-900 dark:border-white'
-                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600'
-                  }`}
-                >
-                  <Image
-                    src={img}
-                    alt={`${product.name} view ${idx + 1}`}
-                    fill
-                    sizes="25vw"
-                    className="object-cover"
-                  />
-                </button>
-              ))}
-            </div>
-        </div>
+        <ProductGallery images={product.images} productName={product.name} />
 
         {/* Info */}
         <div className="flex flex-col">
@@ -73,7 +27,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             className="inline-flex items-center gap-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition group mb-8"
           >
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition" />
-            {t({ en: 'Back to Catalog', fr: 'Retour au catalogue' })}
+            Back to Catalog
           </Link>
 
           <span className="text-zinc-500 font-mono uppercase tracking-[0.3em] text-sm mb-4">
@@ -94,17 +48,17 @@ export default function ProductPage({ params }: { params: { id: string } }) {
               }`}
             >
               {product.stock_status === 'in_stock'
-                ? t({ en: 'In Stock', fr: 'En stock' })
+                ? 'In Stock'
                 : product.stock_status === 'out_of_stock'
-                ? t({ en: 'Out of Stock', fr: 'Rupture de stock' })
-                : t({ en: 'Pre-order', fr: 'Pré-commande' })}
+                ? 'Out of Stock'
+                : 'Pre-order'}
             </span>
           </div>
 
           <div className="space-y-8 mb-12">
             <div>
               <h3 className="text-zinc-500 uppercase text-xs font-bold tracking-widest mb-4">
-                {t({ en: 'Description', fr: 'Description' })}
+                Description
               </h3>
               <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed text-lg">{product.description}</p>
             </div>
@@ -112,7 +66,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             {product.specs && Object.keys(product.specs).length > 0 && (
               <div>
                 <h3 className="text-zinc-500 uppercase text-xs font-bold tracking-widest mb-4">
-                  {t({ en: 'Technical Specs', fr: 'Fiche technique' })}
+                  Technical Specs
                 </h3>
                 <div className="grid grid-cols-2 gap-y-4 gap-x-8 border-t border-zinc-200 dark:border-zinc-900 pt-4">
                   {Object.entries(product.specs).map(([key, value]) => (
@@ -131,15 +85,15 @@ export default function ProductPage({ params }: { params: { id: string } }) {
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 pt-12 border-t border-zinc-200 dark:border-zinc-900">
             <div className="flex items-center gap-3 text-sm text-zinc-500">
               <ShieldCheck className="w-5 h-5 text-zinc-900 dark:text-white" />
-              {t({ en: '100% Authentic', fr: '100% Authentique' })}
+              100% Authentic
             </div>
             <div className="flex items-center gap-3 text-sm text-zinc-500">
               <Truck className="w-5 h-5 text-zinc-900 dark:text-white" />
-              {t({ en: 'Fast Delivery', fr: 'Livraison rapide' })}
+              Fast Delivery
             </div>
             <div className="flex items-center gap-3 text-sm text-zinc-500">
               <ShoppingBag className="w-5 h-5 text-zinc-900 dark:text-white" />
-              {t({ en: 'Pay on Delivery', fr: 'Paiement à la livraison' })}
+              Pay on Delivery
             </div>
           </div>
         </div>
