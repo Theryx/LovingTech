@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Phone, MapPin, ArrowRight } from 'lucide-react';
 import { supabase, Product } from '@/lib/supabase';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface LeadModalProps {
   product: Product;
@@ -15,6 +16,7 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
   const [whatsapp, setWhatsapp] = useState('');
   const [address, setAddress] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { t } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +64,7 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
             className="w-full max-w-md bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-900 rounded-3xl overflow-hidden"
           >
             <div className="p-6 border-b border-zinc-200 dark:border-zinc-900 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Complete Your Order</h2>
+              <h2 className="text-xl font-bold text-zinc-900 dark:text-white">{t({ en: 'Complete Your Order', fr: 'Finaliser votre commande' })}</h2>
               <button onClick={onClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-full transition">
                 <X className="w-5 h-5" />
               </button>
@@ -70,7 +72,7 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
 
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-500">WhatsApp Number</label>
+                <label className="text-sm font-medium text-zinc-500">{t({ en: 'WhatsApp Number', fr: 'Numéro WhatsApp' })}</label>
                 <div className="relative">
                   <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
                   <input
@@ -85,7 +87,7 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-500">Delivery Address / Neighborhood</label>
+                <label className="text-sm font-medium text-zinc-500">{t({ en: 'Delivery Address / Neighborhood', fr: 'Adresse de livraison / Quartier' })}</label>
                 <div className="relative">
                   <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
                   <input
@@ -108,17 +110,17 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
                   {isSubmitting ? (
                     <>
                       <div className="h-5 w-5 rounded-full border-2 border-white/20 dark:border-black/20 border-t-blue-500 animate-spin" />
-                      Processing...
+                      {t({ en: 'Processing...', fr: 'Traitement...' })}
                     </>
                   ) : (
                     <>
-                      Order via WhatsApp
+                      {t({ en: 'Order via WhatsApp', fr: 'Commander via WhatsApp' })}
                       <ArrowRight className="w-5 h-5" />
                     </>
                   )}
                 </button>
                 <p className="text-center text-xs text-zinc-400 mt-4">
-                  Data is used only for delivery coordination.
+                  {t({ en: 'Data is used only for delivery coordination.', fr: 'Les données sont utilisées uniquement pour la coordination de livraison.' })}
                 </p>
               </div>
             </form>

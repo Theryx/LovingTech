@@ -7,14 +7,19 @@ import { ArrowLeft, ShieldCheck, Truck, ShoppingBag } from 'lucide-react';
 import ProductDetailActions from '@/components/ProductDetailActions';
 import { LOCAL_PRODUCTS } from '@/lib/localProducts';
 import Navbar from '@/components/Navbar';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function ProductPage({ params }: { params: { id: string } }) {
   const { id } = params;
   const { t } = useLanguage();
   const product = LOCAL_PRODUCTS.find((p) => p.id === id);
+
   const [mainImgSrc, setMainImgSrc] = useState(product?.images?.[0] || '/images/placeholder.svg');
+
+  useEffect(() => {
+    setMainImgSrc(product?.images?.[0] || '/images/placeholder.svg');
+  }, [id]);
 
   if (!product) {
     notFound();
