@@ -35,7 +35,6 @@ export default function ProductPage({ params }: { params: { id: string } }) {
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover"
               priority
-              onError={() => setMainImgSrc('/images/placeholder.svg')}
             />
           </div>
 
@@ -56,11 +55,6 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                     fill
                     sizes="25vw"
                     className="object-cover"
-                    placeholder="blur"
-                    blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/placeholder.svg';
-                    }}
                   />
                 </button>
               ))}
