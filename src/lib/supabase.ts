@@ -16,7 +16,6 @@ export type Product = {
   stock_status: 'in_stock' | 'out_of_stock' | 'pre_order';
   featured?: boolean;
   created_at?: string;
-  updated_at?: string;
 };
 
 export type Lead = {
@@ -48,10 +47,17 @@ export const productService = {
     return data;
   },
 
-  async create(product: Omit<Product, 'created_at' | 'updated_at'>): Promise<Product> {
+  async create(product: Omit<Product, 'created_at'>): Promise<Product> {
+    // Only send columns that exist in the database
+    const { featured, ...validProduct } = product as any;
+    
+    // Validate UUID or generate a new one (local products have non-UUID IDs like '1')
+    const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+    const id = isUUID(validProduct.id) ? validProduct.id : crypto.randomUUID();
+    
     const { data, error } = await supabase
       .from('products')
-      .insert([{ ...product, id: product.id || crypto.randomUUID() }])
+      .insert([{ ...validProduct, id }])
       .select()
       .single();
     if (error) throw error;
@@ -59,9 +65,12 @@ export const productService = {
   },
 
   async update(id: string, updates: Partial<Product>): Promise<Product> {
+    // Only send columns that exist in the database
+    const { featured, updated_at, ...validUpdates } = updates as any;
+    
     const { data, error } = await supabase
       .from('products')
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .update(validUpdates)
       .eq('id', id)
       .select()
       .single();

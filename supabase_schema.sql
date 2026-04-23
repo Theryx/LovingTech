@@ -8,8 +8,25 @@ CREATE TABLE products (
   specs JSONB DEFAULT '{}'::jsonb,
   images TEXT[] DEFAULT '{}',
   stock_status TEXT DEFAULT 'in_stock',
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  featured BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Function to handle updated_at
+CREATE OR REPLACE FUNCTION handle_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Trigger for updated_at
+CREATE TRIGGER set_updated_at
+BEFORE UPDATE ON products
+FOR EACH ROW
+EXECUTE PROCEDURE handle_updated_at();
 
 -- Leads Table
 CREATE TABLE leads (

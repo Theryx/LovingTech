@@ -163,9 +163,9 @@ export default function AdminProductEditorPage() {
       setTimeout(() => {
         router.push('/admin/products');
       }, 1000);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save:', error);
-      alert('Failed to save product. Please try again.');
+      alert(`Failed to save: ${error.message || 'Unknown error'}`);
     } finally {
       setSaving(false);
     }
