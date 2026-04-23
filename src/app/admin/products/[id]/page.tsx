@@ -59,18 +59,46 @@ export default function AdminProductEditorPage() {
   const [specKeys, setSpecKeys] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [isLocalProduct, setIsLocalProduct] = useState(false);
 
   useEffect(() => {
-    if (!isNew) {
-      const product = LOCAL_PRODUCTS.find((p) => p.id === productId);
-      if (product) {
-        setProduct(product);
-        setSpecKeys(Object.keys(product.specs));
-        setFeatured(!!(product as ProductWithFeatured).featured);
+    async function loadProduct() {
+      if (!isNew) {
+        // First check if it exists in the database
+        let foundProduct: Product | ProductWithFeatured | null = null;
+        let fromLocal = false;
+        
+        try {
+          const dbProduct = await productService.getById(productId);
+          if (dbProduct) {
+            foundProduct = dbProduct;
+            fromLocal = false;
+          }
+        } catch (err) {
+          console.error('Failed to fetch product from database:', err);
+        }
+
+        // Fallback to local products if not found in DB
+        if (!foundProduct) {
+          const localProduct = LOCAL_PRODUCTS.find((p) => p.id === productId);
+          if (localProduct) {
+            foundProduct = localProduct;
+            fromLocal = true;
+          }
+        }
+
+        if (foundProduct) {
+          setProduct(foundProduct);
+          setSpecKeys(Object.keys(foundProduct.specs || {}));
+          setFeatured(!!(foundProduct as ProductWithFeatured).featured);
+          setIsLocalProduct(fromLocal);
+        }
+      } else if (isNew) {
+        setSpecKeys(['spec1', 'spec2']);
       }
-    } else if (isNew) {
-      setSpecKeys(['spec1', 'spec2']);
     }
+    
+    loadProduct();
   }, [productId, isNew]);
 
   const handleSpecKeyChange = (index: number, value: string) => {
@@ -109,21 +137,27 @@ export default function AdminProductEditorPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const productData = {
+        ...product,
+        specs: product.specs || {},
+        images: product.images || [],
+        stock_status: product.stock_status || 'in_stock',
+        featured,
+      };
+
       if (isNew) {
-        const newProduct = {
-          ...product,
+        // Creating a brand new product
+        await productService.create({
+          ...productData,
           id: crypto.randomUUID(),
-          specs: product.specs || {},
-          images: product.images || [],
-          stock_status: product.stock_status || 'in_stock',
-          featured,
-        };
-        await productService.create(newProduct as any);
-      } else {
-        await productService.update(product.id, {
-          ...product,
-          featured,
         } as any);
+      } else if (isLocalProduct) {
+        // Product was loaded from local data and doesn't exist in DB yet.
+        // We need to INSERT it into the database (not update).
+        await productService.create(productData as any);
+      } else {
+        // Product exists in the database — do a normal update
+        await productService.update(product.id, productData as any);
       }
       setSaved(true);
       setTimeout(() => {

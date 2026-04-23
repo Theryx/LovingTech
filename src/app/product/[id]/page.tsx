@@ -2,12 +2,25 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, ShieldCheck, Truck, ShoppingBag } from 'lucide-react';
 import { LOCAL_PRODUCTS } from '@/lib/localProducts';
+import { productService } from '@/lib/supabase';
 import Navbar from '@/components/Navbar';
 import ProductGallery from '@/components/ProductGallery';
 import ProductDetailActions from '@/components/ProductDetailActions';
 
-export default function ProductPage({ params }: { params: { id: string } }) {
-  const product = LOCAL_PRODUCTS.find((p) => p.id === params.id);
+export default async function ProductPage({ params }: { params: { id: string } }) {
+  // Try local products first, then fall back to database
+  let product = LOCAL_PRODUCTS.find((p) => p.id === params.id);
+
+  if (!product) {
+    try {
+      const dbProduct = await productService.getById(params.id);
+      if (dbProduct) {
+        product = dbProduct;
+      }
+    } catch (err) {
+      console.error('Failed to fetch product from database:', err);
+    }
+  }
 
   if (!product) {
     notFound();
