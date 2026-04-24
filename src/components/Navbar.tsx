@@ -15,7 +15,8 @@ export default function Navbar() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-white/80 backdrop-blur-xl border-b border-zinc-200 dark:bg-black/50 dark:border-zinc-800">
-      <Link href="/" className="text-xl font-bold italic tracking-tighter text-zinc-900 dark:text-white">
+      <Link href="/" className="flex items-center gap-2 text-xl font-bold italic tracking-tighter text-zinc-900 dark:text-white">
+        <img src="/logo.png" alt="Loving Tech Logo" className="h-8 w-8 object-contain" />
         LOVING TECH
       </Link>
 

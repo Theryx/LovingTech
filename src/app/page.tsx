@@ -356,7 +356,10 @@ export default function Home() {
       <footer className="border-t border-zinc-200 px-6 py-20 dark:border-zinc-800">
         <div className="mx-auto flex max-w-7xl flex-col gap-8 md:flex-row md:items-center md:justify-between">
           <div>
-            <div className="text-2xl font-bold italic tracking-tighter">LOVING TECH</div>
+            <div className="flex items-center gap-3 text-2xl font-bold italic tracking-tighter">
+              <img src="/logo.png" alt="Loving Tech Logo" className="h-8 w-8 object-contain" />
+              LOVING TECH
+            </div>
             <p className="mt-3 max-w-md text-sm text-zinc-500">
               {t({
                 en: 'Premium accessories for professionals, creators, and gamers across Cameroon.',

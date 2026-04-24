@@ -4,228 +4,453 @@ export type ProductWithFeatured = Product & { featured?: boolean };
 
 export const LOCAL_PRODUCTS: ProductWithFeatured[] = [
   {
-    id: '1',
-    name: 'Logitech MX Master 3S',
-    description: 'Advanced wireless mouse with 8K DPI sensor, quiet clicks, and 70-day battery life.',
-    price_xaf: 85802,
-    brand: 'Logitech',
-    specs: {
-      sensor: '8,000 DPI',
-      battery: '70 days',
-      connectivity: 'Bluetooth, USB Receiver',
+    "id": "1",
+    "name": "Logitech MX Master 3S",
+    "description": "Advanced wireless mouse with 8K DPI sensor, quiet clicks, and 70-day battery life.",
+    "price_xaf": 85802,
+    "brand": "Logitech",
+    "specs": {
+      "sensor": "8,000 DPI",
+      "battery": "70 days",
+      "connectivity": "Bluetooth, USB Receiver"
     },
-    images: ['/images/logitech-mx-master-3s.png'],
-    stock_status: 'out_of_stock',
-    featured: true,
+    "images": [
+      "/images/logitech-mx-master-3s.png"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
   },
   {
-    id: '2',
-    name: 'Logitech MX Keys S',
-    description: 'Smart illuminated wireless keyboard with perfect stroke keys and smart shortcuts.',
-    price_xaf: 5950,
-    brand: 'Logitech',
-    specs: {
-      keys: 'Perfect Stroke',
-      battery: '10 days (backlight on)',
-      connectivity: 'Bluetooth, USB Receiver',
+    "id": "2",
+    "name": "Logitech MX Keys S",
+    "description": "Smart illuminated wireless keyboard with perfect stroke keys and smart shortcuts.",
+    "price_xaf": 5950,
+    "brand": "Logitech",
+    "specs": {
+      "keys": "Perfect Stroke",
+      "battery": "10 days (backlight on)",
+      "connectivity": "Bluetooth, USB Receiver"
     },
-    images: ['/images/logitech-mx-keys-s.png'],
-    stock_status: 'out_of_stock',
-    featured: true,
+    "images": [
+      "/images/logitech-mx-keys-s.png"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": true
   },
   {
-    id: '3',
-    name: 'Keychron K2 Pro',
-    description: 'Wireless mechanical keyboard with QMK/VIA support and hot-swappable switches.',
-    price_xaf: 32000,
-    brand: 'Keychron',
-    specs: {
-      switches: 'Hot-swappable Brown',
-      battery: '80 hours',
-      connectivity: 'Bluetooth, USB-C',
+    "id": "3",
+    "name": "Keychron K2 Pro",
+    "description": "Wireless mechanical keyboard with QMK/VIA support and hot-swappable switches.",
+    "price_xaf": 32000,
+    "brand": "Keychron",
+    "specs": {
+      "switches": "Hot-swappable Brown",
+      "battery": "80 hours",
+      "connectivity": "Bluetooth, USB-C"
     },
-    images: ['/images/keychron-k2-pro.png'],
-    stock_status: 'in_stock',
-    featured: true,
+    "images": [
+      "/images/keychron-k2-pro.png"
+    ],
+    "stock_status": "in_stock",
+    "featured": true
   },
   {
-    id: '4',
-    name: 'Logitech G502 Hero',
-    description: 'High-performance gaming mouse with 25,600 DPI sensor and 11 programmable buttons.',
-    price_xaf: 46407,
-    brand: 'Logitech',
-    specs: {
-      sensor: '25,600 DPI',
-      buttons: '11 programmable',
-      weight: '121g (adjustable)',
+    "id": "4",
+    "name": "Logitech G502 Hero",
+    "description": "High-performance gaming mouse with 25,600 DPI sensor and 11 programmable buttons.",
+    "price_xaf": 46407,
+    "brand": "Logitech",
+    "specs": {
+      "sensor": "25,600 DPI",
+      "buttons": "11 programmable",
+      "weight": "121g (adjustable)"
     },
-    images: ['/images/logitech-g502-hero.png'],
-    stock_status: 'in_stock',
-    featured: true,
+    "images": [
+      "/images/logitech-g502-hero.png"
+    ],
+    "stock_status": "in_stock",
+    "featured": true
   },
   {
-    id: '5',
-    name: 'Logitech Pebble Mouse 2 M350s',
-    description: 'Slim, quiet, and portable wireless mouse with customizable middle button.',
-    price_xaf: 26710,
-    brand: 'Logitech',
-    specs: {
-      sensor: '4000 DPI',
-      battery: '24 months',
-      connectivity: 'Bluetooth, USB Receiver',
+    "id": "5",
+    "name": "Logitech Pebble Mouse 2 M350s",
+    "description": "Slim, quiet, and portable wireless mouse with customizable middle button.",
+    "price_xaf": 26710,
+    "brand": "Logitech",
+    "specs": {
+      "sensor": "4000 DPI",
+      "battery": "24 months",
+      "connectivity": "Bluetooth, USB Receiver"
     },
-    images: ['/images/logitech-pebble-mouse-2.png'],
-    stock_status: 'in_stock',
-    featured: false,
+    "images": [
+      "/images/logitech-pebble-mouse-2.png"
+    ],
+    "stock_status": "in_stock",
+    "featured": true
   },
   {
-    id: '6',
-    name: 'Anker PowerCore 20000',
-    description: '20000mAh portable charger with PowerIQ and fast charging support.',
-    price_xaf: 18000,
-    brand: 'Anker',
-    specs: {
-      capacity: '20000mAh',
-      output: '20W USB-C',
-      weight: '345g',
+    "id": "6",
+    "name": "Anker PowerCore 20000",
+    "description": "20000mAh portable charger with PowerIQ and fast charging support.",
+    "price_xaf": 18000,
+    "brand": "Anker",
+    "specs": {
+      "capacity": "20000mAh",
+      "output": "20W USB-C",
+      "weight": "345g"
     },
-    images: ['/images/placeholder.svg'],
-    stock_status: 'out_of_stock',
-    featured: false,
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
   },
   {
-    id: '7',
-    name: 'Anker 737 Power Bank',
-    description: '24000mAh high-capacity power bank with 140W total output.',
-    price_xaf: 42000,
-    brand: 'Anker',
-    specs: {
-      capacity: '24000mAh',
-      output: '140W total',
-      display: 'Smart IPS',
+    "id": "7",
+    "name": "Anker 737 Power Bank",
+    "description": "24000mAh high-capacity power bank with 140W total output.",
+    "price_xaf": 42000,
+    "brand": "Anker",
+    "specs": {
+      "capacity": "24000mAh",
+      "output": "140W total",
+      "display": "Smart IPS"
     },
-    images: ['/images/anker-737.png'],
-    stock_status: 'out_of_stock',
-    featured: false,
+    "images": [
+      "/images/anker-737.png"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
   },
   {
-    id: '8',
-    name: 'Keychron Q1 Pro',
-    description: 'Premium mechanical keyboard with 2.4G wireless, QMK/VIA, and all-metal body.',
-    price_xaf: 48000,
-    brand: 'Keychron',
-    specs: {
-      switches: 'Hot-swappable Red',
-      battery: '100 hours (wireless)',
-      connectivity: '2.4G, Bluetooth, USB-C',
+    "id": "8",
+    "name": "Keychron Q1 Pro",
+    "description": "Premium mechanical keyboard with 2.4G wireless, QMK/VIA, and all-metal body.",
+    "price_xaf": 48000,
+    "brand": "Keychron",
+    "specs": {
+      "switches": "Hot-swappable Red",
+      "battery": "100 hours (wireless)",
+      "connectivity": "2.4G, Bluetooth, USB-C"
     },
-    images: ['/images/keychron-q1-pro.png'],
-    stock_status: 'out_of_stock',
-    featured: false,
+    "images": [
+      "/images/keychron-q1-pro.png"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
   },
   {
-    id: '9',
-    name: 'Logitech G413 TKL SE',
-    description: 'Mechanical gaming keyboard with TKL layout, tactile switches, and dedicated media keys.',
-    price_xaf: 70044,
-    brand: 'Logitech',
-    specs: {
-      switches: 'Tactile',
-      layout: 'TKL (87 keys)',
-      connectivity: 'USB-C',
+    "id": "9",
+    "name": "Logitech G413 TKL SE",
+    "description": "Mechanical gaming keyboard with TKL layout, tactile switches, and dedicated media keys.",
+    "price_xaf": 70044,
+    "brand": "Logitech",
+    "specs": {
+      "switches": "Tactile",
+      "layout": "TKL (87 keys)",
+      "connectivity": "USB-C"
     },
-    images: ['/images/placeholder.svg'],
-    stock_status: 'in_stock',
-    featured: false,
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "in_stock",
+    "featured": false
   },
   {
-    id: '10',
-    name: 'Logitech Pebble Keys 2 K380s',
-    description: 'Multi-device wireless keyboard with Easy-Switch and silent typing.',
-    price_xaf: 38529,
-    brand: 'Logitech',
-    specs: {
-      keys: 'Silent',
-      devices: '3 devices',
-      battery: '36 months',
+    "id": "10",
+    "name": "Logitech Pebble Keys 2 K380s",
+    "description": "Multi-device wireless keyboard with Easy-Switch and silent typing.",
+    "price_xaf": 38529,
+    "brand": "Logitech",
+    "specs": {
+      "keys": "Silent",
+      "devices": "3 devices",
+      "battery": "36 months"
     },
-    images: ['/images/placeholder.svg'],
-    stock_status: 'in_stock',
-    featured: false,
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "in_stock",
+    "featured": true
   },
   {
-    id: '11',
-    name: 'Logitech Lift',
-    description: 'Vertical ergonomic mouse with 57° angle for natural hand position.',
-    price_xaf: 54286,
-    brand: 'Logitech',
-    specs: {
-      sensor: '4000 DPI',
-      angle: '57°',
-      battery: '24 months',
+    "id": "11",
+    "name": "Logitech Lift",
+    "description": "Vertical ergonomic mouse with 57° angle for natural hand position.",
+    "price_xaf": 54286,
+    "brand": "Logitech",
+    "specs": {
+      "sensor": "4000 DPI",
+      "angle": "57°",
+      "battery": "24 months"
     },
-    images: ['/images/placeholder.svg'],
-    stock_status: 'in_stock',
-    featured: false,
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "in_stock",
+    "featured": true
   },
   {
-    id: '12',
-    name: 'Logitech C270 HD Webcam',
-    description: 'HD 720p webcam with automatic light correction.',
-    price_xaf: 5950,
-    brand: 'Logitech',
-    specs: {
-      resolution: 'HD 720p',
-      focus: 'Fixed',
-      mic: 'Integrated',
+    "id": "12",
+    "name": "Logitech C270 HD Webcam",
+    "description": "HD 720p webcam with automatic light correction.",
+    "price_xaf": 7021,
+    "brand": "Logitech",
+    "specs": {
+      "resolution": "HD 720p",
+      "focus": "Fixed",
+      "mic": "Integrated"
     },
-    images: ['/images/placeholder.svg'],
-    stock_status: 'out_of_stock',
-    featured: false,
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
   },
   {
-    id: '13',
-    name: 'Logitech Tablet Stand - Gris',
-    description: 'Adjustable tablet stand with sleek aluminum design.',
-    price_xaf: 5950,
-    brand: 'Logitech',
-    specs: {
-      material: 'Aluminum',
-      angle: 'Adjustable',
-      compatibility: 'Universal',
+    "id": "13",
+    "name": "Logitech Tablet Stand - Gris",
+    "description": "Adjustable tablet stand with sleek aluminum design.",
+    "price_xaf": 7021,
+    "brand": "Logitech",
+    "specs": {
+      "material": "Aluminum",
+      "angle": "Adjustable",
+      "compatibility": "Universal"
     },
-    images: ['/images/placeholder.svg'],
-    stock_status: 'in_stock',
-    featured: false,
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "in_stock",
+    "featured": true
   },
   {
-    id: '14',
-    name: 'Logitech POP Mouse',
-    description: 'Compact wireless mouse with customizable emoji button.',
-    price_xaf: 5950,
-    brand: 'Logitech',
-    specs: {
-      sensor: '4000 DPI',
-      battery: '24 months',
-      connectivity: 'Bluetooth, USB Receiver',
+    "id": "14",
+    "name": "Logitech POP Mouse",
+    "description": "Compact wireless mouse with customizable emoji button.",
+    "price_xaf": 7021,
+    "brand": "Logitech",
+    "specs": {
+      "sensor": "4000 DPI",
+      "battery": "24 months",
+      "connectivity": "Bluetooth, USB Receiver"
     },
-    images: ['/images/placeholder.svg'],
-    stock_status: 'out_of_stock',
-    featured: false,
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
   },
   {
-    id: '15',
-    name: 'Logitech Signature M650',
-    description: 'Ergonomic wireless mouse with SmartWheel scrolling.',
-    price_xaf: 5950,
-    brand: 'Logitech',
-    specs: {
-      sensor: '2000 DPI',
-      battery: '24 months',
-      connectivity: 'Bluetooth, USB Receiver',
+    "id": "15",
+    "name": "Logitech Signature M650",
+    "description": "Ergonomic wireless mouse with SmartWheel scrolling.",
+    "price_xaf": 7021,
+    "brand": "Logitech",
+    "specs": {
+      "sensor": "2000 DPI",
+      "battery": "24 months",
+      "connectivity": "Bluetooth, USB Receiver"
     },
-    images: ['/images/placeholder.svg'],
-    stock_status: 'out_of_stock',
-    featured: false,
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
   },
+  {
+    "id": "115",
+    "name": "Logi USB Type-C to USB Type-C Cable",
+    "description": "Logi USB Type-C to USB Type-C Cable",
+    "price_xaf": 7021,
+    "brand": "Logitech",
+    "specs": {},
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
+  },
+  {
+    "id": "116",
+    "name": "MX Anywhere 3S",
+    "description": "MX Anywhere 3S",
+    "price_xaf": 7021,
+    "brand": "Logitech",
+    "specs": {},
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
+  },
+  {
+    "id": "117",
+    "name": "G413 TKL SE Mechanical Gaming Keyboard",
+    "description": "G413 TKL SE Mechanical Gaming Keyboard",
+    "price_xaf": 70044,
+    "brand": "Logitech",
+    "specs": {},
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "in_stock",
+    "featured": true
+  },
+  {
+    "id": "118",
+    "name": "G213 Prodigy",
+    "description": "G213 Prodigy",
+    "price_xaf": 7021,
+    "brand": "Logitech",
+    "specs": {},
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
+  },
+  {
+    "id": "119",
+    "name": "G703 Mouse",
+    "description": "G703 Mouse",
+    "price_xaf": 7021,
+    "brand": "Logitech",
+    "specs": {},
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
+  },
+  {
+    "id": "120",
+    "name": "G502 LIGHTSPEED",
+    "description": "G502 LIGHTSPEED",
+    "price_xaf": 7021,
+    "brand": "Logitech",
+    "specs": {},
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
+  },
+  {
+    "id": "121",
+    "name": "G502 X PLUS",
+    "description": "G502 X PLUS",
+    "price_xaf": 7021,
+    "brand": "Logitech",
+    "specs": {},
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
+  },
+  {
+    "id": "122",
+    "name": "Signature Slim Solar+",
+    "description": "Signature Slim Solar+",
+    "price_xaf": 7021,
+    "brand": "Logitech",
+    "specs": {},
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
+  },
+  {
+    "id": "123",
+    "name": "MX Master 4",
+    "description": "MX Master 4",
+    "price_xaf": 7021,
+    "brand": "Logitech",
+    "specs": {},
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
+  },
+  {
+    "id": "124",
+    "name": "POP Icon Keys",
+    "description": "POP Icon Keys",
+    "price_xaf": 7021,
+    "brand": "Logitech",
+    "specs": {},
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
+  },
+  {
+    "id": "125",
+    "name": "MX Keys Mini",
+    "description": "MX Keys Mini",
+    "price_xaf": 7021,
+    "brand": "Logitech",
+    "specs": {},
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
+  },
+  {
+    "id": "126",
+    "name": "MX Keys S Keyboard",
+    "description": "MX Keys S Keyboard",
+    "price_xaf": 7021,
+    "brand": "Logitech",
+    "specs": {},
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
+  },
+  {
+    "id": "127",
+    "name": "MX Mechanical",
+    "description": "MX Mechanical",
+    "price_xaf": 7021,
+    "brand": "Logitech",
+    "specs": {},
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
+  },
+  {
+    "id": "128",
+    "name": "MX Mini Keys S",
+    "description": "MX Mini Keys S",
+    "price_xaf": 7021,
+    "brand": "Logitech",
+    "specs": {},
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
+  },
+  {
+    "id": "129",
+    "name": "MX Master Key mini",
+    "description": "MX Master Key mini",
+    "price_xaf": 75461,
+    "brand": "Logitech",
+    "specs": {},
+    "images": [
+      "/images/placeholder.svg"
+    ],
+    "stock_status": "out_of_stock",
+    "featured": false
+  }
 ];

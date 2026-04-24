@@ -46,7 +46,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <span className="text-sm font-medium">{t(labels.backToStore)}</span>
           </Link>
           <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-700" />
-          <Link href="/admin" className="text-lg font-bold italic tracking-tighter text-zinc-900 dark:text-white">
+          <Link href="/admin" className="flex items-center gap-2 text-lg font-bold italic tracking-tighter text-zinc-900 dark:text-white">
+            <img src="/logo.png" alt="Loving Tech Admin" className="h-6 w-6 object-contain" />
             ADMIN
           </Link>
         </div>
