@@ -46,6 +46,14 @@ ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read on products" ON products
   FOR SELECT USING (true);
 
+-- Policies for products (Public Insert)
+CREATE POLICY "Allow public insert on products" ON products
+  FOR INSERT WITH CHECK (true);
+
+-- Policies for products (Public Update)
+CREATE POLICY "Allow public update on products" ON products
+  FOR UPDATE USING (true);
+
 -- Policies for leads (Public Insert)
 CREATE POLICY "Allow public insert on leads" ON leads
   FOR INSERT WITH CHECK (true);

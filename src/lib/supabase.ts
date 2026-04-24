@@ -48,8 +48,7 @@ export const productService = {
   },
 
   async create(product: Omit<Product, 'created_at'>): Promise<Product> {
-    // Only send columns that exist in the database
-    const { featured, ...validProduct } = product as any;
+    const { updated_at, ...validProduct } = product as any;
     
     // Validate UUID or generate a new one (local products have non-UUID IDs like '1')
     const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
@@ -65,17 +64,29 @@ export const productService = {
   },
 
   async update(id: string, updates: Partial<Product>): Promise<Product> {
-    // Only send columns that exist in the database
-    const { featured, updated_at, ...validUpdates } = updates as any;
+    const { updated_at, ...validUpdates } = updates as any;
     
     const { data, error } = await supabase
       .from('products')
       .update(validUpdates)
       .eq('id', id)
       .select()
-      .single();
-    if (error) throw error;
-    return data;
+      .maybeSingle();
+
+    if (error && error.code !== 'PGRST116') {
+      throw error;
+    }
+
+    if (data) {
+      return data;
+    }
+
+    const existingProduct = await this.getById(id);
+    if (!existingProduct) {
+      throw new Error(`Product "${id}" was not found, or the update was not permitted.`);
+    }
+
+    return existingProduct;
   },
 
   async delete(id: string): Promise<void> {
