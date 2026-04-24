@@ -39,13 +39,20 @@ export default function Home() {
     loadProducts();
   }, []);
 
+  const [searchQuery, setSearchQuery] = useState('');
+
   const featuredProducts = products
     .filter((p) => (p as ProductWithFeatured).featured)
     .sort((a, b) => {
       const availabilityScore = { in_stock: 0, pre_order: 1, out_of_stock: 2 };
       return availabilityScore[a.stock_status] - availabilityScore[b.stock_status];
-    })
-    .slice(0, 4);
+    });
+
+  const filteredFeatured = featuredProducts.filter((p) =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const displayProducts = searchQuery ? filteredFeatured : featuredProducts.slice(0, 4);
 
   const inStockCount = products.filter((product) => product.stock_status === 'in_stock').length;
   const businessNumber = process.env.NEXT_PUBLIC_WHATSAPP_PHONE_NUMBER || '237600000000';
@@ -211,20 +218,27 @@ export default function Home() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-24">
-        <div className="mb-14 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-2xl">
+        <div className="mb-14 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl flex-1">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-zinc-500">
               {t({ en: 'Featured now', fr: 'En vedette actuellement' })}
             </p>
             <h2 className="mt-3 text-4xl font-bold tracking-tight">
               {t({ en: 'Best picks for work, travel, and gaming', fr: 'Les meilleurs choix pour le travail, la mobilité et le gaming' })}
             </h2>
-            <p className="mt-4 text-lg text-zinc-500">
-              {t({
-                en: 'We surface available products first so visitors can move from discovery to order without dead ends.',
-                fr: 'Nous mettons d’abord en avant les produits disponibles pour éviter les impasses au moment de commander.',
-              })}
-            </p>
+            
+            <div className="mt-8 relative max-w-md">
+              <input
+                type="text"
+                placeholder={t({ en: 'Search featured products...', fr: 'Rechercher des produits vedettes...' })}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 text-sm bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white transition"
+              />
+              <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
           </div>
           <Link
             href="/products"
@@ -236,7 +250,7 @@ export default function Home() {
         </div>
 
         <div id="catalog" className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          {featuredProducts.map((product) => (
+          {displayProducts.map((product) => (
             <ProductCard key={product.id} product={product as ProductWithFeatured} />
           ))}
         </div>

@@ -50,9 +50,13 @@ export default function ProductCard({ product }: ProductCardProps) {
             <Link
               href={`/product/${product.id}`}
               onClick={(e) => e.stopPropagation()}
-              className="bg-zinc-900 text-white dark:bg-white dark:text-black text-xs px-5 py-2.5 rounded-full font-bold hover:bg-zinc-700 dark:hover:bg-zinc-200 transition"
+              className={`text-xs px-5 py-2.5 rounded-full font-bold transition ${
+                isOutOfStock 
+                  ? 'bg-amber-500 text-white hover:bg-amber-600' 
+                  : 'bg-zinc-900 text-white dark:bg-white dark:text-black hover:bg-zinc-700 dark:hover:bg-zinc-200'
+              }`}
             >
-              Details
+              {isOutOfStock ? 'Notify Me' : 'Details'}
             </Link>
           </div>
         </div>

@@ -11,8 +11,10 @@ import { useLanguage } from '@/context/LanguageContext';
 
 export default function ProductsPage() {
   const { t } = useLanguage();
-  const [stockFilter, setStockFilter] = useState<string>('');
   const [products, setProducts] = useState<Product[]>(LOCAL_PRODUCTS as Product[]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [brandFilter, setBrandFilter] = useState('');
+  const [stockFilter, setStockFilter] = useState('');
 
   useEffect(() => {
     async function loadProducts() {
@@ -28,9 +30,15 @@ export default function ProductsPage() {
     loadProducts();
   }, []);
 
+  const brands = Array.from(new Set(products.map(p => p.brand))).sort();
+
   const filteredProducts = products.filter((product) => {
-    if (!stockFilter) return true;
-    return product.stock_status === stockFilter;
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         product.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesBrand = !brandFilter || product.brand === brandFilter;
+    const matchesStock = !stockFilter || product.stock_status === stockFilter;
+    
+    return matchesSearch && matchesBrand && matchesStock;
   });
 
   return (
@@ -46,26 +54,59 @@ export default function ProductsPage() {
           {t({ en: 'Back to Home', fr: 'Retour à l\'accueil' })}
         </Link>
 
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-12">
+        <div className="flex flex-col gap-8 mb-16">
           <div>
             <h1 className="text-4xl font-bold mb-3 tracking-tight">
               {t({ en: 'All Products', fr: 'Tous les produits' })}
             </h1>
             <p className="text-zinc-500 text-lg">
-              {t({ en: 'Everything we have in stock.', fr: 'Tout ce que nous avons en stock.' })}
+              {t({ en: 'Premium tech accessories delivered nationwide.', fr: 'Accessoires tech premium livrés dans tout le pays.' })}
             </p>
           </div>
-          <div className="relative">
-            <select
-              value={stockFilter}
-              onChange={(e) => setStockFilter(e.target.value)}
-              className="appearance-none pl-10 pr-8 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white cursor-pointer"
-            >
-              <option value="">{t({ en: 'All Stock', fr: 'Tout le stock' })}</option>
-              <option value="in_stock">{t({ en: 'In Stock', fr: 'En stock' })}</option>
-              <option value="out_of_stock">{t({ en: 'Out of Stock', fr: 'Rupture de stock' })}</option>
-            </select>
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="md:col-span-2 relative">
+              <input
+                type="text"
+                placeholder={t({ en: 'Search products...', fr: 'Rechercher des produits...' })}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white transition"
+              />
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+
+            <div className="relative">
+              <select
+                value={brandFilter}
+                onChange={(e) => setBrandFilter(e.target.value)}
+                className="appearance-none w-full pl-10 pr-8 py-3 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white cursor-pointer transition"
+              >
+                <option value="">{t({ en: 'All Brands', fr: 'Toutes les marques' })}</option>
+                {brands.map(brand => (
+                  <option key={brand} value={brand}>{brand}</option>
+                ))}
+              </select>
+              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
+            </div>
+
+            <div className="relative">
+              <select
+                value={stockFilter}
+                onChange={(e) => setStockFilter(e.target.value)}
+                className="appearance-none w-full pl-10 pr-8 py-3 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white cursor-pointer transition"
+              >
+                <option value="">{t({ en: 'All Stock', fr: 'Tout le stock' })}</option>
+                <option value="in_stock">{t({ en: 'In Stock', fr: 'En stock' })}</option>
+                <option value="pre_order">{t({ en: 'Pre-order', fr: 'Pré-commande' })}</option>
+                <option value="out_of_stock">{t({ en: 'Out of Stock', fr: 'Rupture de stock' })}</option>
+              </select>
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none flex items-center justify-center">
+                 <div className="w-2 h-2 rounded-full bg-zinc-400" />
+              </div>
+            </div>
           </div>
         </div>
 
