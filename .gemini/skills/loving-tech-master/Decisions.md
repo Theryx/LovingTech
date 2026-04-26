@@ -319,20 +319,79 @@ Called on Step 3 using selected city and `unit_price * quantity`.
 
 ## Sprint 4 — Delivery Zone & Bus Agency System
 
-**Status:** ⬜ Not started
+**Status:** ✅ Complete — commit fb5f6be
 
-```
-[Agent paste handover note here after Sprint 4 is complete]
+### Database SQL (run in Supabase)
+```sql
+CREATE TABLE delivery_zones (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  city_name_fr    TEXT NOT NULL,
+  city_name_en    TEXT NOT NULL,
+  delivery_fee    INTEGER NOT NULL,
+  estimated_days  TEXT NOT NULL,
+  is_available    BOOLEAN DEFAULT true,
+  agencies        JSONB DEFAULT '[]',
+  sort_order      INTEGER DEFAULT 0,
+  created_at      TIMESTAMPTZ DEFAULT now()
+);
 
-Suggested sections to look for:
-- delivery_zones and delivery_settings table SQL (final)
-- How Douala is protected from deletion (constraint? UI guard?)
-- API routes for fetching zones (path, response shape)
-- How agencies JSONB is structured
-- calcDeliveryFee() location
-- Admin delivery panel route
-- How zones connect to the order modal city dropdown
+CREATE TABLE delivery_settings (
+  id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  free_delivery_threshold  INTEGER NOT NULL DEFAULT 50000,
+  updated_at               TIMESTAMPTZ DEFAULT now()
+);
+
+INSERT INTO delivery_zones (city_name_fr, city_name_en, delivery_fee, estimated_days, is_available, sort_order)
+VALUES ('Douala', 'Douala', 2000, 'Même jour – lendemain / Same day – next day', true, 0);
+
+INSERT INTO delivery_settings (free_delivery_threshold) VALUES (50000);
+
+ALTER TABLE delivery_zones DISABLE ROW LEVEL SECURITY;
+ALTER TABLE delivery_settings DISABLE ROW LEVEL SECURITY;
 ```
+
+### Douala protection
+Douala is identified by `sort_order = 0`. The admin UI hides the delete button for any zone with `sort_order === 0`. No DB-level constraint — purely a UI guard. Do not change Douala's sort_order.
+
+### API Routes
+- `GET /api/delivery-zones` — returns all zones where `is_available = true`, ordered by sort_order then city_name_fr
+- `GET /api/delivery-settings` — returns `{ free_delivery_threshold }` (defaults to 50000 if table empty)
+
+### Agencies storage
+Stored as a JSONB array of plain strings in `delivery_zones.agencies`. Example: `["Vatican Express", "Buca Voyages"]`. No IDs — just names. Admin UI manages them as a tag-list (add/remove by name).
+
+### Types added to src/lib/supabase.ts
+- `DeliveryZone` — id, city_name_fr, city_name_en, delivery_fee, estimated_days, is_available, agencies (string[]), sort_order
+- `DeliverySettings` — id, free_delivery_threshold, updated_at
+- `deliveryZoneService` — getAll(), create(), update(), delete(), getSettings(), updateSettings()
+
+### Files created/modified
+- `src/lib/supabase.ts` — added DeliveryZone, DeliverySettings types and deliveryZoneService
+- `src/app/api/delivery-zones/route.ts` — NEW GET handler
+- `src/app/api/delivery-settings/route.ts` — NEW GET handler
+- `src/app/admin/delivery/page.tsx` — NEW full admin panel (zone table, add/edit modal, agencies tag-list, free delivery threshold card)
+- `src/app/admin/layout.tsx` — added Delivery nav item (Truck icon), Logout button
+- `src/app/admin/page.tsx` — added "Manage delivery zones" quick action
+- `src/components/LeadModal.tsx` — fetches zones from API on mount, shows agency dropdown when agencies configured, "Other agency" free-text fallback, live delivery fee display with estimated delay
+
+### LeadModal delivery fee logic
+```typescript
+const zoneFee = selectedZone?.delivery_fee ?? (city === 'Douala' ? 2000 : 3000);
+const deliveryFee = subtotal >= freeThreshold ? 0 : zoneFee;
+```
+`freeThreshold` is fetched from `/api/delivery-settings` on mount (fallback: 50000).
+City list is populated from API; fallback static list used if API fails.
+
+### Agency dropdown logic
+- If the selected zone has agencies configured → show `<select>` with those names + "Other agency…" option
+- If "Other agency" selected → show text input for `customAgency`
+- If no agencies configured for zone → show plain text input
+- `effectiveAgency` = agency === `'__custom__'` ? customAgency : agency
+
+### What Sprint 5+ needs to know
+- Sprint 4 was completed AFTER Sprint 5–8 in practice (was skipped). No regressions introduced.
+- LeadModal previously had hardcoded CITIES array — now replaced with dynamic API fetch with static fallback
+- Free delivery threshold is now dynamic (from DB) not hardcoded
 
 ---
 
@@ -381,73 +440,246 @@ Three options: Newest (default, DB order) / Price ↑ / Price ↓. `sortProducts
 
 ## Sprint 6 — Reviews, Promo Codes & Related Products
 
-**Status:** ⬜ Not started
+**Status:** ✅ Complete — commits in main branch
 
-```
-[Agent paste handover note here after Sprint 6 is complete]
+### Database SQL
+```sql
+CREATE TABLE reviews (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  product_id    UUID REFERENCES products(id) ON DELETE CASCADE,
+  order_ref     TEXT NOT NULL,
+  rating        INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  comment       TEXT,
+  reviewer_name TEXT NOT NULL,
+  status        TEXT DEFAULT 'pending'
+    CHECK (status IN ('pending', 'approved', 'rejected')),
+  created_at    TIMESTAMPTZ DEFAULT now()
+);
 
-Suggested sections to look for:
-- reviews table SQL (final)
-- promo_codes table SQL (final)
-- validatePromo() function location and exact logic
-- How uses_count is incremented (on order creation? on submit?)
-- Related products scoring algorithm (exact implementation)
-- API routes for review submission, promo validation
-- Admin review + promo panel routes
+CREATE TABLE promo_codes (
+  id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code             TEXT UNIQUE NOT NULL,
+  type             TEXT NOT NULL CHECK (type IN ('percent', 'fixed')),
+  value            INTEGER NOT NULL,
+  min_order_amount INTEGER DEFAULT 0,
+  max_uses         INTEGER,
+  uses_count       INTEGER DEFAULT 0,
+  expires_at       TIMESTAMPTZ,
+  is_active        BOOLEAN DEFAULT true,
+  created_at       TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE reviews DISABLE ROW LEVEL SECURITY;
+ALTER TABLE promo_codes DISABLE ROW LEVEL SECURITY;
 ```
+
+### validatePromo() — src/lib/validatePromo.ts
+```typescript
+validatePromo(code, orderSubtotal, deliveryFee) → { valid, discount, message } | { valid, error }
+```
+- Fetches from `promo_codes` table using `ilike` (case-insensitive)
+- Checks: is_active, expires_at, uses_count vs max_uses, min_order_amount
+- Discount = percent: `Math.floor(subtotal * value / 100)`, fixed: `value`
+- Caps discount so total never goes below deliveryFee
+- Error messages are bilingual strings
+
+### uses_count increment
+`promoService.incrementUses(code)` is called **after** order is created in DB (inside LeadModal handleSubmit). Fire-and-forget (`.catch(() => {})`). Not transactional — acceptable for this scale.
+
+### Related products — src/lib/relatedProducts.ts
+```typescript
+getRelatedProducts(productId, category, tags) → Product[]
+```
+- Fetches same-category products (excluding current, limit 8) where stock_qty > 0 OR stock_status = 'in_stock'
+- Scores: +2 per shared tag
+- Returns top 4 sorted by score DESC
+- Returns empty array if no DB products found
+
+### Types added to src/lib/supabase.ts
+- `ReviewStatus` = 'pending' | 'approved' | 'rejected'
+- `Review` — id, product_id, order_ref, rating, comment, reviewer_name, status, created_at
+- `PromoCode` — id, code, type, value, min_order_amount, max_uses, uses_count, expires_at, is_active
+- `reviewService` — getByProduct(), getAll(), create(), updateStatus(), getPendingCount()
+- `promoService` — getAll(), create(), update(), delete(), incrementUses()
+
+### Files created/modified
+- `src/lib/supabase.ts` — added Review, PromoCode types and services
+- `src/lib/validatePromo.ts` — NEW
+- `src/lib/relatedProducts.ts` — NEW
+- `src/components/ReviewSection.tsx` — NEW: star rating, review list, submit form; only shown on DB products (UUID check)
+- `src/app/product/[id]/page.tsx` — added ReviewSection, related products grid, generateMetadata(), JSON-LD Product schema
+- `src/components/LeadModal.tsx` — added promo code input in Step 3, uses validatePromo(), shows bilingual error/success messages
+- `src/app/admin/reviews/page.tsx` — NEW: filter pills, review cards, approve/reject actions
+- `src/app/admin/promos/page.tsx` — NEW: table, create form, toggle active, delete
+- `src/app/admin/layout.tsx` — added Reviews (Star) and Promos (Tag) nav items
+- `src/app/admin/page.tsx` — added pending reviews badge to dashboard
+
+### RLS issue pattern (important for future tables)
+Every new Supabase table created via SQL needs `ALTER TABLE x DISABLE ROW LEVEL SECURITY` or the anon key cannot write to it. This caused silent failures on orders (42501 error), reviews (PERMISSION DENIED), and promo_codes. Always add the DISABLE RLS line when creating tables.
+
+### productService.update() fix
+Previously silently returned stale data when 0 rows were updated (RLS blocking). Now throws: `Error('Update blocked: no rows modified...')`. This surfaces RLS failures clearly instead of appearing to succeed.
+
+### What Sprint 7 needs to know
+- PDP review section is only shown for products with UUID-format IDs (regex check). Local products (id = '1', '2', etc.) don't show reviews.
+- Related products also only fetched for UUID products
+- Footer links to /return-policy and /terms — Sprint 7 builds these pages
 
 ---
 
 ## Sprint 7 — Legal Pages, SEO & Performance
 
-**Status:** ⬜ Not started
+**Status:** ✅ Complete — commits in main branch
 
-```
-[Agent paste handover note here after Sprint 7 is complete]
+### Legal pages created
+| Route | File | Notes |
+|---|---|---|
+| `/return-policy` | `src/app/return-policy/page.tsx` | Bilingual condition table, numbered process, void conditions |
+| `/politique-de-retour` | `src/app/politique-de-retour/page.tsx` | Re-exports default + metadata from return-policy/page |
+| `/terms` | `src/app/terms/page.tsx` | 10 bilingual articles |
+| `/conditions` | `src/app/conditions/page.tsx` | Re-exports default + metadata from terms/page |
 
-Suggested sections to look for:
-- Legal page routes (exact paths for FR + EN)
-- How sitemap is generated (static? dynamic API route?)
-- JSON-LD implementation (component? inline in page?)
-- hreflang implementation approach
-- Lighthouse scores before and after (LCP, CLS, FID)
-- Any performance changes made and their impact
-- Font loading approach (which font, next/font setup)
+FR alias pages use `export { default } from '../return-policy/page'` — no duplication.
+
+### SEO — src/app/layout.tsx (root metadata)
+```typescript
+metadata: {
+  title: 'Loving Tech — Accessoires Tech Premium | Cameroun',
+  description: 'Achetez des accessoires tech authentiques...',
+  openGraph: { title, description, url: 'https://loving-tech.vercel.app', siteName: 'Loving Tech', locale: 'fr_CM' },
+  twitter: { card: 'summary_large_image', title, description }
+}
 ```
+
+### SEO — PDP (src/app/product/[id]/page.tsx)
+- `generateMetadata()` — per-product dynamic title (`name_fr — price FCFA | Loving Tech`), description (description_fr sliced to 155 chars), og:image from `product.images[0]`
+- JSON-LD `Product` schema injected via `<script type="application/ld+json" dangerouslySetInnerHTML>` directly in the page server component
+
+### Sitemap — src/app/sitemap.ts
+- Next.js 14 App Router convention (`export default function sitemap()`)
+- Includes: homepage, /products, 5 category URLs, /return-policy, /politique-de-retour, /terms, /conditions
+- Dynamically fetches active products from Supabase and adds their PDP URLs
+- Falls back gracefully if DB fetch fails (returns static URLs only)
+
+### Robots — src/app/robots.ts
+```
+User-agent: *
+Allow: /
+Disallow: /admin
+Sitemap: https://loving-tech.vercel.app/sitemap.xml
+```
+
+### Performance notes
+- Hero images use CSS `background-image` (not Next.js `<Image>`) — acceptable for full-bleed hero backgrounds
+- Product images in ProductCard/ProductGallery use native `<img>` — not converted to `<Image>` (Cloudinary CDN handles optimization)
+- Font: Inter via `next/font/google` with `subsets: ['latin']` — already set up in layout.tsx since Sprint 1
+- No Lighthouse benchmark was run (no browser tooling available in agent context)
+
+### What Sprint 8 needs to know
+- `/return-policy` and `/terms` are live — footer links and modal links now resolve correctly
+- hreflang alternate tags NOT implemented — deferred (no slug-based URLs per language; the app uses a single-URL + client-side language toggle approach)
+- Sitemap fetches products server-side — ensure Supabase is seeded with products before indexing
+- JSON-LD is inline in the PDP server component, not a separate component
 
 ---
 
 ## Sprint 8 — QA, Mobile Polish & Launch
 
-**Status:** ⬜ Not started
+**Status:** ✅ Complete — commit 0d5a724
 
-```
-[Agent paste handover note here after Sprint 8 is complete]
+### Bugs found and fixed
 
-Suggested sections to look for:
-- Full list of bugs found and fixes applied
-- Mobile issues fixed (with before/after)
-- Brand audit issues corrected
-- Final Lighthouse scores
-- PRE_LAUNCH.md content
-- Any known limitations or items deferred to Phase 2
-- Final production deployment notes
-```
+| Bug | File | Fix |
+|---|---|---|
+| `language` not destructured from useLanguage | `LeadModal.tsx` | Added `language` to `const { t, language } = useLanguage()` |
+| Legal links in modal used `t()` with JSX (type error) | `LeadModal.tsx` | Replaced with `language === 'fr' ? <> FR JSX </> : <> EN JSX <>` conditional |
+| `useSearchParams()` called outside Suspense boundary | `products/page.tsx` | Extracted inner `ProductsContent` component, wrapped in `<Suspense>` |
+| `MessageCircle` import removed but still used in "How it works" step 2 | `page.tsx` | Re-added `MessageCircle` to lucide-react import |
+| Admin panel fully unprotected (any URL accessible without login) | — | Added middleware + login page (see below) |
+
+### Admin authentication — NEW
+- `src/middleware.ts` — intercepts all `/admin/*` requests, redirects to `/admin/login` if `admin_auth` cookie not set
+- `src/app/api/admin-login/route.ts` — `POST` sets httpOnly cookie, `DELETE` clears it
+- `src/app/admin/login/page.tsx` — password form (Suspense-wrapped for useSearchParams)
+- Password stored in `ADMIN_PASSWORD` env variable (default: `LovingTech2026!`)
+- Cookie: httpOnly, secure in production, sameSite=lax, 7-day expiry
+- Logout button added to admin nav (LogOut icon)
+- **Action required:** Set `ADMIN_PASSWORD` in Vercel environment variables before going live
+
+### PRE_LAUNCH.md
+Created at project root — covers: content checklist, delivery zones, legal pages, technical setup (env vars, Supabase tables, HTTPS), WhatsApp/social links, final tests.
+
+### Known limitations / Phase 2 items
+- **No email system** — all communication via WhatsApp only (by design, Phase 1)
+- **No user accounts** — guest checkout only
+- **hreflang** not implemented — app uses single URL + client-side language toggle, not separate FR/EN URL slugs
+- **Lighthouse scores** not benchmarked (no browser tooling in agent)
+- **`<img>` tags** still used in ProductCard, ProductGallery, ImageUploader (Cloudinary CDN handles optimization; Next.js `<Image>` conversion deferred to Phase 2)
+- **Status colors** (green/red/amber for order/review statuses) use semantic Tailwind colors, not brand tokens — this is intentional UX convention, not a brand violation
+- **FloatingWhatsApp** appears on admin pages — acceptable, can be moved to page-level layouts in Phase 2 if unwanted
+
+### Files created/modified in Sprint 8
+- `src/middleware.ts` — NEW
+- `src/app/admin/login/page.tsx` — NEW
+- `src/app/api/admin-login/route.ts` — NEW
+- `src/app/admin/layout.tsx` — added useRouter, logout(), LogOut icon, logout button
+- `src/app/page.tsx` — re-added MessageCircle import
+- `src/app/products/page.tsx` — Suspense wrapper for ProductsContent
+- `src/components/LeadModal.tsx` — language destructure fix, JSX legal links fix
+- `PRE_LAUNCH.md` — NEW at project root
 
 ---
 
 ## Global Decisions (update anytime)
 
-> Use this section for decisions that cut across multiple sprints — things you decided outside of a sprint or that the agent flagged as important to track globally.
+### Architecture
 
-```
-[Example entries — replace with real ones as you go:]
+**2026-04-26: Supabase (PostgreSQL) chosen as backend**
+Single anon key for all read/write. RLS is disabled on every table (`ALTER TABLE x DISABLE ROW LEVEL SECURITY`) because the anon key needs write access and there are no per-user auth requirements in Phase 1.
 
-2026-05-01: Chose Supabase (not Payload CMS) for the backend — simpler for solo operator
-2026-05-01: All admin routes use /admin prefix, protected by Supabase Auth
-2026-05-02: Product slugs generated from name_fr, lowercased, hyphenated
-2026-05-03: Variants stored as JSONB in a single column (not a separate table) — simpler to query
+**2026-04-26: No separate API layer**
+All DB calls go through `src/lib/supabase.ts` service objects (productService, orderService, etc.) called directly from components. No custom API routes except for delivery zones (needed for server-side fetch) and admin login.
+
+**2026-04-26: Variants stored as JSONB in products.variants column**
+Structure: `[{ label: "Color", options: [{ name: "Black", stock_qty: 5, price_delta: 0 }] }]`
+Not a separate table — simpler to query, acceptable for this product volume.
+
+**2026-04-26: Single URL + client-side language toggle (not separate FR/EN routes)**
+Language stored in localStorage via LanguageContext. All pages are at the same URL. The `t({ en, fr })` helper returns the correct string. This means no hreflang alternate URLs are possible without a route refactor.
+
+**2026-04-26: LOCAL_PRODUCTS fallback**
+`src/lib/localProducts.ts` holds a static array of products as a loading fallback. Pages render LOCAL_PRODUCTS immediately, then replace with DB data on mount. Local product IDs are non-UUID strings ('1', '2', etc.) — DB products have UUID IDs. UUID check: `/^[0-9a-f]{8}-...-[0-9a-f]{12}$/i.test(id)` is used throughout to gate DB-only features (reviews, related products).
+
+### RLS Pattern (critical — apply to every new table)
+```sql
+ALTER TABLE <new_table> DISABLE ROW LEVEL SECURITY;
 ```
+Without this, all inserts/updates from the anon key silently return 0 rows or throw `42501`. This has bitten us on orders, reviews, promo_codes, products, delivery_zones, and delivery_settings. Always add this line when creating a new table.
+
+### Admin Auth
+- Route: `/admin/login`
+- Mechanism: httpOnly cookie `admin_auth=true` (7-day expiry), set by `POST /api/admin-login`
+- Password: `ADMIN_PASSWORD` env variable (must be set in Vercel before launch)
+- Middleware: `src/middleware.ts` guards all `/admin/*` except `/admin/login`
+- Default password `LovingTech2026!` is committed to `.env.local` — change before going live
+
+### Supabase Tables (all created, RLS disabled)
+| Table | Sprint | Purpose |
+|---|---|---|
+| `products` | Pre-existing | Product catalog |
+| `orders` | Sprint 3 | Customer orders |
+| `reviews` | Sprint 6 | Product reviews (pending → approved → rejected) |
+| `promo_codes` | Sprint 6 | Discount codes (percent or fixed) |
+| `delivery_zones` | Sprint 4 | Cities with fees, delays, agencies |
+| `delivery_settings` | Sprint 4 | Free delivery threshold (default 50 000 FCFA) |
+
+### t() function — string only, not JSX
+`t({ en, fr })` from `useLanguage()` accepts plain strings only. For bilingual JSX (with links, bold etc.) use: `language === 'fr' ? <> FR JSX </> : <> EN JSX <>` directly in the render.
+
+### HeroCarousel background images
+- Slides 1 and 2 use local `/images/carousel_1.png` and `/images/carousel_2.png` with `backgroundSize: cover` and a lighter overlay (`rgba(17,17,17,0.75)` → `0.45` → `0.65`)
+- Slide 3 uses a remote Logitech product image with `backgroundSize: contain` and a near-opaque overlay
+- Adding a new local image slide: use `slide.id <= N` check in the style/overlay conditionals
 
 ---
 
