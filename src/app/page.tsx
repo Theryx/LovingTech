@@ -4,13 +4,11 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowRight,
-  BadgeCheck,
   CheckCircle2,
   Clock3,
   MessageCircle,
   ShieldCheck,
   ShoppingBag,
-  Star,
   Truck,
 } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
@@ -279,42 +277,6 @@ export default function Home() {
                 <p className="mt-3 text-brand-dark/60">{item.body}</p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Brand statement */}
-      <section className="mx-auto max-w-7xl px-6 py-24">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-[2rem] bg-brand-dark p-10 text-white">
-            <div className="flex items-center gap-2 text-brand-orange" aria-hidden="true">
-              {[...Array(5)].map((_, i) => <Star key={i} className="h-5 w-5 fill-current" />)}
-            </div>
-            <p className="mt-8 max-w-2xl text-2xl font-semibold leading-10">
-              {t({
-                en: '"The biggest friction in local tech commerce is trust. We remove that friction before you even scroll."',
-                fr: "« Le plus grand frein du commerce tech local, c'est la confiance. Nous supprimons ce frein avant même le premier scroll. »",
-              })}
-            </p>
-            <p className="mt-6 text-sm uppercase tracking-[0.24em] text-white/50">Loving Tech</p>
-          </div>
-
-          <div className="rounded-[2rem] border border-brand-grey/20 p-10">
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand-dark/50">
-              {t({ en: 'Why customers trust us', fr: 'Pourquoi les clients nous font confiance' })}
-            </p>
-            <div className="mt-8 space-y-5">
-              {[
-                t({ en: 'Premium brands sourced directly — never counterfeit.', fr: 'Marques premium sourcées directement — jamais de contrefaçons.' }),
-                t({ en: 'Cash on delivery nationwide — no risk for the buyer.', fr: 'Paiement à la livraison partout — aucun risque pour l\'acheteur.' }),
-                t({ en: 'WhatsApp support before, during, and after your order.', fr: 'Assistance WhatsApp avant, pendant et après votre commande.' }),
-              ].map((text, i) => (
-                <div key={i} className="flex gap-4">
-                  <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-brand-blue" aria-hidden="true" />
-                  <p className="text-brand-dark/60">{text}</p>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </section>
