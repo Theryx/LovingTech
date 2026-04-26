@@ -218,21 +218,102 @@ Sprint 2 was committed as two commits due to a rebase conflict with a concurrent
 
 ## Sprint 3 — Full Order System
 
-**Status:** ⬜ Not started
+**Status:** ✅ Complete — commit d0599b4
 
+### Orders Table SQL (final — ran successfully)
+```sql
+CREATE TABLE IF NOT EXISTS orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_ref TEXT NOT NULL UNIQUE,
+  product_id UUID,
+  product_name TEXT NOT NULL,
+  variant_chosen TEXT,
+  quantity INTEGER NOT NULL DEFAULT 1,
+  unit_price INTEGER NOT NULL,
+  total_price INTEGER NOT NULL,
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,
+  customer_email TEXT,
+  city TEXT NOT NULL,
+  bus_agency TEXT,
+  quartier TEXT NOT NULL,
+  address_details TEXT,
+  delivery_fee INTEGER NOT NULL DEFAULT 0,
+  promo_code TEXT,
+  promo_discount INTEGER DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'pending',
+  admin_notes TEXT,
+  status_history JSONB DEFAULT '[]'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
 ```
-[Agent paste handover note here after Sprint 3 is complete]
+**Key decision:** `product_id` is UUID with NO foreign key — products table has mixed TEXT/UUID IDs from legacy local products data. FK would fail.
 
-Suggested sections to look for:
-- Orders table SQL (final version, not the draft)
-- generateOrderRef() location and implementation
-- Modal state management (which library/approach)
-- How WhatsApp message is constructed and encoded
-- Which "Prospects" tables/routes were deleted
-- Admin orders routes created
-- Customer status page route
-- How delivery fee is calculated in the modal
+### generateOrderRef()
+- File: `src/lib/generateOrderRef.ts`
+- Format: `LT-YYYYMMDD-XXXX` where XXXX is a 4-digit random number (1000–9999)
+- Called client-side inside LeadModal before orderService.create()
+
+### Modal State Machine
+- Pure React useState — no external library
+- `step: 1 | 2 | 3` controls which screen renders
+- Step 1: customer name + WhatsApp phone
+- Step 2: city (dropdown from static CITIES array), bus agency (text input), quartier, address_details
+- Step 3: read-only summary with subtotal / delivery / total, submit button
+- Has `role="dialog"`, `aria-modal`, focus trap, Escape key closes
+
+### Delivery Fee Calculation (in modal)
+```typescript
+function calcDeliveryFee(city: string, subtotal: number): number {
+  if (subtotal >= 50000) return 0;
+  return city.toLowerCase() === 'douala' ? 2000 : 3000;
+}
 ```
+Called on Step 3 using selected city and `unit_price * quantity`.
+
+### WhatsApp Message Construction
+- Built as a template string inside LeadModal `handleSubmit()`
+- Encoded with `encodeURIComponent()` and appended to `https://wa.me/237655163248?text=`
+- Window opened via `window.open(url, '_blank')`
+- Order is saved to DB BEFORE opening WhatsApp (so ref exists if customer closes WA)
+
+### Admin Orders Panel
+- `/admin/orders` — list with search (ref/name/phone), status filter select, CSV export
+- `/admin/orders/[id]` — detail: customer info, order breakdown, delivery, status update buttons, status timeline (from `status_history` JSONB array reversed), admin notes (auto-save on blur)
+- Status updates call `orderService.updateStatus(id, status)` which appends to `status_history`
+
+### Customer Tracking Page
+- Route: `/suivi/[ref]` (server component)
+- Fetches order via `orderService.getByRef(ref.toUpperCase())`
+- Shows status card (bilingual), order summary, timeline, WhatsApp help button
+- Returns 404 via `notFound()` if ref not found
+
+### Admin Dashboard Updates
+- Replaced leads stats with: orders today (count), revenue today (FCFA), pending orders (count, orange when > 0)
+- Pending card turns orange-tinted when pendingCount > 0
+- Quick links: Add product, View all orders, conditional "View N pending orders" shortcut
+
+### Leads → Orders Migration
+- `src/app/admin/layout.tsx` nav: replaced Leads (Users icon) with Orders (ShoppingBag icon)
+- `src/app/admin/leads/` route left in place (not deleted) — still compiles but `Lead` type removed from supabase.ts causes TS errors in that file and `src/test/lib/supabase.test.ts`. These are pre-existing dead routes — Sprint 4 should delete them.
+- `Lead` type removed from `src/lib/supabase.ts`
+
+### orderService methods in supabase.ts
+- `getAll()` — returns all orders ordered by created_at DESC
+- `getByRef(ref)` — for public tracking page
+- `getById(id)` — for admin detail page
+- `create(order)` — inserts and returns created row
+- `updateStatus(id, status)` — updates status + appends to status_history JSONB + sets updated_at
+- `updateNotes(id, notes)` — updates admin_notes
+- `getTodayStats()` — returns `{ count, revenue, pending }` for dashboard
+
+### What Sprint 4 Should Know
+- Delete `src/app/admin/leads/` and `src/test/lib/supabase.test.ts` (or update the test)
+- CITIES static array in LeadModal is hardcoded — consider moving to admin config or a constants file
+- No auth on admin panel yet — all routes are public
+- `status_history` JSONB is append-only; there's no rollback/undo
+- The `updateStatus` RPC in supabase.ts uses a raw SQL update with jsonb_append logic (verify this works in Supabase's REST API or switch to a Supabase function if needed)
 
 ---
 
