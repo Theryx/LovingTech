@@ -8,8 +8,20 @@ import { LanguageProvider } from "@/context/LanguageContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Loving Tech | Premium Tech Catalog",
-  description: "Authentic Logitech, Anker, and Keychron gadgets in Cameroon.",
+  title: 'Loving Tech — Accessoires Tech Premium | Cameroun',
+  description: 'Achetez des accessoires tech authentiques (claviers, souris, câbles) livrés partout au Cameroun. Paiement à la livraison. WhatsApp: +237 655 163 248',
+  openGraph: {
+    title: 'Loving Tech',
+    description: 'Accessoires tech premium livrés partout au Cameroun. Paiement à la livraison.',
+    url: 'https://loving-tech.vercel.app',
+    siteName: 'Loving Tech',
+    locale: 'fr_CM',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Loving Tech — Accessoires Tech Premium | Cameroun',
+    description: 'Achetez des accessoires tech authentiques livrés partout au Cameroun.',
+  },
 };
 
 export default function RootLayout({

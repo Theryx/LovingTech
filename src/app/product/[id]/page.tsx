@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, ShieldCheck, Truck, ShoppingBag } from 'lucide-react';
 import { LOCAL_PRODUCTS } from '@/lib/localProducts';
@@ -9,6 +10,20 @@ import ProductGallery from '@/components/ProductGallery';
 import ProductDetailActions from '@/components/ProductDetailActions';
 import ProductCard from '@/components/ProductCard';
 import ReviewSection from '@/components/ReviewSection';
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const product = await productService.getById(params.id);
+  if (!product) return {};
+  const title = `${product.name_fr || product.name} — ${product.price_xaf.toLocaleString('fr-FR')} FCFA | Loving Tech`;
+  const description = (product.description_fr || product.description || '').slice(0, 155);
+  const image = product.images?.[0];
+  return {
+    title,
+    description,
+    openGraph: { title, description, images: image ? [{ url: image }] : [] },
+    twitter: { card: 'summary_large_image', title, description, images: image ? [image] : [] },
+  };
+}
 
 const CONDITION_BADGE: Record<string, { bg: string; text: string; labelFr: string; labelEn: string }> = {
   new:          { bg: '#D1FAE5', text: '#065F46', labelFr: 'Neuf',          labelEn: 'New' },
@@ -37,8 +52,26 @@ export default async function ProductPage({ params }: { params: { id: string } }
     ? await getRelatedProducts(product.id, product.category || '', product.tags || [])
     : [];
 
+  const isInStock = product.stock_status === 'in_stock';
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name_fr || product.name,
+    image: product.images || [],
+    description: product.description_fr || product.description || '',
+    brand: { '@type': 'Brand', name: product.brand || 'Loving Tech' },
+    offers: {
+      '@type': 'Offer',
+      price: product.price_xaf,
+      priceCurrency: 'XAF',
+      availability: `https://schema.org/${isInStock ? 'InStock' : 'OutOfStock'}`,
+      seller: { '@type': 'Organization', name: 'Loving Tech', url: 'https://loving-tech.vercel.app' },
+    },
+  };
+
   return (
     <main className="min-h-screen bg-white text-brand-dark">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Navbar />
 
       <section className="max-w-7xl mx-auto px-6 pt-28 pb-16 grid grid-cols-1 lg:grid-cols-2 gap-16">
