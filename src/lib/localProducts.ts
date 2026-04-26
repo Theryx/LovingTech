@@ -454,38 +454,30 @@ export const LOCAL_PRODUCTS: ProductWithFeatured[] = [
     "featured": false
   },
   {
-  "id": "a8ce8778-e0a2-48ae-b616-48d50d54e02b",
-  "name": "Duracell 3000 Lumens Solar Lantern",
-  "description": "A powerful and versatile TRI-Power lighting solution. Features solar, USB-C, and QI wireless charging. Dual battery source (rechargeable + D-cells) provides up to 200 hours of light. Built-in USB-C power bank to charge your devices.",
-  "price_xaf": 55000,
-  "brand": "Duracell",
-  "specs": {
-    "lumens": "3000 (Max)",
-    "charging": "Solar, USB-C, QI Wireless",
-    "features": "Power Bank, Red Flasher, Dimming",
-    "battery_life": "Up to 200 hours",
-    "water_resistance": "IPX4",
-    "impact_resistance": "1m"
-  },
-  "images": [
-    "https://myproduct.duracelllights.com/cdn/shop/files/DURACELL_3000L_Wireless_Charging_Lantern_360_0014_1440x.webp?v=1741378686",
-    "https://myproduct.duracelllights.com/cdn/shop/files/DURACELL3000LWirelessChargingLanterndetail1_1440x.webp?v=1741378677"
-  ],
-  "stock_status": "in_stock",
-  "created_at": "2026-04-26T20:03:47.195855+00:00",
-  "featured": true,
-  "updated_at": "2026-04-26T20:03:47.195855+00:00",
-  "condition": "new",
-  "category": "solar_lamp",
-  "name_fr": null,
-  "name_en": null,
-  "description_fr": null,
-  "description_en": null,
-  "stock_qty": 0,
-  "low_stock_threshold": 3,
-  "compare_at_price": null,
-  "warranty_info": null,
-  "variants": [],
-  "tags": []
-}
+    "id": "a8ce8778-e0a2-48ae-b616-48d50d54e02b",
+    "name": "Duracell 3000 Lumens Solar Lantern",
+    "description": "A powerful and versatile TRI-Power lighting solution. Features solar, USB-C, and QI wireless charging. Dual battery source (rechargeable + D-cells) provides up to 200 hours of light. Built-in USB-C power bank to charge your devices.",
+    "price_xaf": 45200,
+    "brand": "Duracell",
+    "specs": {
+      "lumens": "3000 (Max)",
+      "charging": "Solar, USB-C, QI Wireless",
+      "features": "Power Bank, Red Flasher, Dimming",
+      "battery_life": "Up to 200 hours",
+      "water_resistance": "IPX4",
+      "impact_resistance": "1m"
+    },
+    "images": [
+      "https://myproduct.duracelllights.com/cdn/shop/files/DURACELL_3000L_Wireless_Charging_Lantern_360_0014_1440x.webp?v=1741378686",
+      "https://myproduct.duracelllights.com/cdn/shop/files/DURACELL3000LWirelessChargingLanterndetail1_1440x.webp?v=1741378677"
+    ],
+    "stock_status": "in_stock",
+    "featured": true,
+    "condition": "new",
+    "category": "solar_lamp",
+    "stock_qty": 10,
+    "low_stock_threshold": 3,
+    "variants": [],
+    "tags": []
+  }
 ];
