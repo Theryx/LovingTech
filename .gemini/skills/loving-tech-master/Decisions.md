@@ -338,19 +338,44 @@ Suggested sections to look for:
 
 ## Sprint 5 — Homepage & PLP Redesign
 
-**Status:** ⬜ Not started
+**Status:** ✅ Complete — commit 5ee7649
 
-```
-[Agent paste handover note here after Sprint 5 is complete]
+### Files changed
+- `src/app/page.tsx` — full homepage rewrite
+- `src/app/products/page.tsx` — PLP with URL params + sort
+- `src/app/layout.tsx` — added FloatingWhatsApp to root layout
+- `src/components/FloatingWhatsApp.tsx` — NEW
 
-Suggested sections to look for:
-- Category icon source (SVG files? Inline? Library?)
-- How featured products are fetched (query, limit)
-- PLP filter URL param structure (e.g. ?category=keyboard&condition=new)
-- Footer component location and social links format
-- Floating WhatsApp button component path
-- Any layout changes to existing sections
-```
+### Homepage changes
+- **Hero:** Updated copy per sprint spec. Stats row simplified to inline text (not stat cards anymore — cleaner at mobile).
+- **Category grid:** 5 cards (keyboard/mouse/cable/speaker/solar_lamp), inline SVG icons (no library, no file imports), grid-cols-2 mobile / grid-cols-5 desktop. Links to `/products?category=[slug]`. Hover turns icon brand-blue + border.
+- **Trust badges:** Updated copy to match sprint spec exactly.
+- **How it works:** Kept layout, updated bilingual copy.
+- **Brand statement:** Kept dark card + trust checklist. Updated copy.
+- **Footer:** Full rebuild — 3 columns: brand+tagline, navigation links, social links. Social: Facebook/Instagram/TikTok/WhatsApp with correct URLs from SKILL.md. Nav: Products, Return Policy (links to `/return-policy` and `/terms` — pages not built yet, Sprint 7). Copyright: "© 2026 Loving Tech Cameroun." Tagline "Elevate Your Performance" included.
+
+### Floating WhatsApp button
+- File: `src/components/FloatingWhatsApp.tsx`
+- Rendered in `src/app/layout.tsx` (root) — appears on ALL pages including admin. Sprint 6/7 can exclude from admin layout if desired.
+- Inline WhatsApp SVG path (no library), bg-brand-orange, fixed bottom-right, z-50, h-14 w-14 circle.
+
+### PLP — URL query params
+URL structure: `/products?category=keyboard&condition=new&sort=price_asc&stock=1`
+- `category` — one of: keyboard | mouse | cable | speaker | solar_lamp | (empty = all)
+- `condition` — one of: new | refurbished | second_hand | (empty = all)
+- `sort` — one of: newest (default, omitted from URL) | price_asc | price_desc
+- `stock` — `1` = in-stock only | (absent = all)
+- Search query is NOT in URL (local state only, resets on reload — acceptable for now)
+- Uses `useSearchParams()` + `router.replace()` with `scroll: false`
+
+### PLP — Sort
+Three options: Newest (default, DB order) / Price ↑ / Price ↓. `sortProducts()` function sorts a copy of the array.
+
+### What Sprint 6 needs to know
+- Footer links to `/return-policy` and `/terms` — these 404 until Sprint 7 builds them
+- FloatingWhatsApp renders on admin pages too — if unwanted, move it out of root layout and into page-level layouts instead
+- PLP search is still local state (not URL param) — if needed for Sprint 7 SEO/sharing, add `q=` param
+- Category grid on homepage links to `/products?category=slug` — the PLP handles this correctly via `useSearchParams`
 
 ---
 
