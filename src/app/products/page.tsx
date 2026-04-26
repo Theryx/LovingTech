@@ -2,27 +2,42 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Filter } from 'lucide-react';
+import { ArrowLeft, Search } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import Navbar from '@/components/Navbar';
 import { LOCAL_PRODUCTS } from '@/lib/localProducts';
-import { Product, productService } from '@/lib/supabase';
+import { Product, ProductCategory, ProductCondition, productService } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
 
+const CATEGORIES: { value: ProductCategory | ''; labelEn: string; labelFr: string }[] = [
+  { value: '', labelEn: 'All', labelFr: 'Tout' },
+  { value: 'keyboard', labelEn: 'Keyboards', labelFr: 'Claviers' },
+  { value: 'mouse', labelEn: 'Mice', labelFr: 'Souris' },
+  { value: 'cable', labelEn: 'Cables', labelFr: 'Câbles' },
+  { value: 'speaker', labelEn: 'Speakers', labelFr: 'Enceintes' },
+  { value: 'solar_lamp', labelEn: 'Solar Lamps', labelFr: 'Lampes solaires' },
+];
+
+const CONDITIONS: { value: ProductCondition | ''; labelEn: string; labelFr: string }[] = [
+  { value: '', labelEn: 'All conditions', labelFr: 'Tous les états' },
+  { value: 'new', labelEn: 'New', labelFr: 'Neuf' },
+  { value: 'refurbished', labelEn: 'Refurbished', labelFr: 'Reconditionné' },
+  { value: 'second_hand', labelEn: 'Second-hand', labelFr: 'Occasion' },
+];
+
 export default function ProductsPage() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [products, setProducts] = useState<Product[]>(LOCAL_PRODUCTS as Product[]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [brandFilter, setBrandFilter] = useState('');
-  const [stockFilter, setStockFilter] = useState('');
+  const [category, setCategory] = useState<ProductCategory | ''>('');
+  const [condition, setCondition] = useState<ProductCondition | ''>('');
+  const [stockFilter, setStockFilter] = useState<'in_stock' | ''>('');
 
   useEffect(() => {
     async function loadProducts() {
       try {
-        const dbProducts = await productService.getAll();
-        if (dbProducts.length > 0) {
-          setProducts(dbProducts);
-        }
+        const db = await productService.getAll();
+        if (db.length > 0) setProducts(db);
       } catch (err) {
         console.error('Failed to load products:', err);
       }
@@ -30,94 +45,115 @@ export default function ProductsPage() {
     loadProducts();
   }, []);
 
-  const brands = Array.from(new Set(products.map(p => p.brand))).sort();
-
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         product.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesBrand = !brandFilter || product.brand === brandFilter;
-    const matchesStock = !stockFilter || product.stock_status === stockFilter;
-    
-    return matchesSearch && matchesBrand && matchesStock;
+  const filtered = products.filter(p => {
+    if (searchQuery && !p.name.toLowerCase().includes(searchQuery.toLowerCase()) && !p.description?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (category && p.category !== category) return false;
+    if (condition && p.condition !== condition) return false;
+    if (stockFilter && p.stock_status !== stockFilter) return false;
+    return true;
   });
 
+  const clearFilters = () => {
+    setSearchQuery('');
+    setCategory('');
+    setCondition('');
+    setStockFilter('');
+  };
+
   return (
-    <main className="min-h-screen bg-white dark:bg-[#09090b] text-zinc-900 dark:text-white">
+    <main className="min-h-screen bg-white text-brand-dark">
       <Navbar />
 
       <section className="pt-32 pb-24 px-6 max-w-7xl mx-auto">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition group mb-12"
+          className="inline-flex items-center gap-2 text-brand-dark/50 hover:text-brand-dark transition group mb-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded"
         >
-          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition" />
-          {t({ en: 'Back to Home', fr: 'Retour à l\'accueil' })}
+          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition" aria-hidden="true" />
+          {t({ en: 'Back to Home', fr: "Retour à l'accueil" })}
         </Link>
 
-        <div className="flex flex-col gap-8 mb-16">
-          <div>
-            <h1 className="text-4xl font-bold mb-3 tracking-tight">
-              {t({ en: 'All Products', fr: 'Tous les produits' })}
-            </h1>
-            <p className="text-zinc-500 text-lg">
-              {t({ en: 'Premium tech accessories delivered nationwide.', fr: 'Accessoires tech premium livrés dans tout le pays.' })}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="md:col-span-2 relative">
-              <input
-                type="text"
-                placeholder={t({ en: 'Search products...', fr: 'Rechercher des produits...' })}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white transition"
-              />
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-
-            <div className="relative">
-              <select
-                value={brandFilter}
-                onChange={(e) => setBrandFilter(e.target.value)}
-                className="appearance-none w-full pl-10 pr-8 py-3 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white cursor-pointer transition"
-              >
-                <option value="">{t({ en: 'All Brands', fr: 'Toutes les marques' })}</option>
-                {brands.map(brand => (
-                  <option key={brand} value={brand}>{brand}</option>
-                ))}
-              </select>
-              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
-            </div>
-
-            <div className="relative">
-              <select
-                value={stockFilter}
-                onChange={(e) => setStockFilter(e.target.value)}
-                className="appearance-none w-full pl-10 pr-8 py-3 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white cursor-pointer transition"
-              >
-                <option value="">{t({ en: 'All Stock', fr: 'Tout le stock' })}</option>
-                <option value="in_stock">{t({ en: 'In Stock', fr: 'En stock' })}</option>
-                <option value="pre_order">{t({ en: 'Pre-order', fr: 'Pré-commande' })}</option>
-                <option value="out_of_stock">{t({ en: 'Out of Stock', fr: 'Rupture de stock' })}</option>
-              </select>
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none flex items-center justify-center">
-                 <div className="w-2 h-2 rounded-full bg-zinc-400" />
-              </div>
-            </div>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2 tracking-tight">{t({ en: 'All Products', fr: 'Tous les produits' })}</h1>
+          <p className="text-brand-dark/60 text-lg">{t({ en: 'Premium tech accessories delivered nationwide.', fr: 'Accessoires tech premium livrés dans tout le pays.' })}</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+        {/* Search */}
+        <div className="relative mb-6 max-w-md">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-dark/30 pointer-events-none" aria-hidden="true" />
+          <input
+            type="text"
+            placeholder={t({ en: 'Search products...', fr: 'Rechercher des produits...' })}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-11 pr-4 py-2.5 bg-white border border-brand-grey/30 rounded-xl text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-blue transition"
+          />
+        </div>
+
+        {/* Category tabs */}
+        <div className="flex gap-2 flex-wrap mb-4" role="group" aria-label={t({ en: 'Filter by category', fr: 'Filtrer par catégorie' })}>
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat.value}
+              onClick={() => setCategory(cat.value)}
+              aria-pressed={category === cat.value}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 ${
+                category === cat.value
+                  ? 'bg-brand-blue text-white'
+                  : 'bg-brand-grey/20 text-brand-dark hover:bg-brand-grey/40'
+              }`}
+            >
+              {language === 'fr' ? cat.labelFr : cat.labelEn}
+            </button>
           ))}
         </div>
+
+        {/* Condition + stock filters */}
+        <div className="flex flex-wrap gap-2 mb-10">
+          {CONDITIONS.map(cond => (
+            <button
+              key={cond.value}
+              onClick={() => setCondition(cond.value)}
+              aria-pressed={condition === cond.value}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 ${
+                condition === cond.value
+                  ? 'border-brand-dark bg-brand-dark text-white'
+                  : 'border-brand-grey/40 text-brand-dark/60 hover:border-brand-dark/40'
+              }`}
+            >
+              {language === 'fr' ? cond.labelFr : cond.labelEn}
+            </button>
+          ))}
+          <button
+            onClick={() => setStockFilter(stockFilter ? '' : 'in_stock')}
+            aria-pressed={stockFilter === 'in_stock'}
+            className={`rounded-full border px-3 py-1 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 ${
+              stockFilter === 'in_stock'
+                ? 'border-brand-blue bg-brand-blue/10 text-brand-blue'
+                : 'border-brand-grey/40 text-brand-dark/60 hover:border-brand-blue/40'
+            }`}
+          >
+            {t({ en: 'In stock only', fr: 'En stock uniquement' })}
+          </button>
+        </div>
+
+        {filtered.length === 0 ? (
+          <div className="py-24 text-center text-brand-dark/40">
+            <p className="text-xl font-medium mb-2">{t({ en: 'No products found', fr: 'Aucun produit trouvé' })}</p>
+            <button onClick={clearFilters} className="text-sm text-brand-blue hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded">
+              {t({ en: 'Clear filters', fr: 'Effacer les filtres' })}
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            {filtered.map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </section>
 
-      <footer className="py-12 px-6 border-t border-zinc-200 dark:border-zinc-800 text-center text-zinc-500 text-sm">
+      <footer className="py-12 px-6 border-t border-brand-grey/20 text-center text-brand-dark/50 text-sm">
         © 2026 Loving Tech Cameroon. {t({ en: 'All rights reserved.', fr: 'Tous droits réservés.' })}
       </footer>
     </main>
