@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Search, Filter, CheckCircle, Clock, XCircle, MessageSquare } from 'lucide-react';
@@ -94,8 +94,8 @@ export default function AdminLeadsPage() {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">{t(labels.leads)}</h1>
-        <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+        <h1 className="text-3xl font-bold text-brand-dark">{t(labels.leads)}</h1>
+        <div className="flex items-center gap-2 text-sm text-brand-grey">
           <span>{leads.length} {t(labels.total)}</span>
           <span>•</span>
           <span>{leads.filter((l) => l.status === 'pending').length} {t(labels.pendingCount)}</span>
@@ -104,63 +104,63 @@ export default function AdminLeadsPage() {
 
       <div className="flex items-center gap-4 mb-6">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-grey" />
           <input
             type="text"
             placeholder={t(labels.searchLeads)}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
+            className="w-full rounded-lg border border-brand-grey/30 bg-white py-2 pl-10 pr-4 text-brand-dark placeholder:text-brand-dark/30 focus:outline-none focus:ring-2 focus:ring-brand-blue"
           />
         </div>
         <div className="relative">
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="appearance-none pl-10 pr-8 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white cursor-pointer"
+            className="appearance-none rounded-lg border border-brand-grey/30 bg-white py-2 pl-10 pr-8 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-blue cursor-pointer"
           >
             <option value="">{t(labels.allStatus)}</option>
             <option value="pending">{t(labels.pending)}</option>
             <option value="contacted">{t(labels.contacted)}</option>
             <option value="completed">{t(labels.completed)}</option>
           </select>
-          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
+          <Filter className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-grey" />
         </div>
       </div>
 
-      <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+      <div className="overflow-hidden rounded-xl border border-brand-grey/20 bg-white">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-zinc-200 dark:border-zinc-800">
-              <th className="px-6 py-4 text-left text-sm font-medium text-zinc-500 dark:text-zinc-400">{t(labels.product)}</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-zinc-500 dark:text-zinc-400">{t(labels.whatsapp)}</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-zinc-500 dark:text-zinc-400">{t(labels.address)}</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-zinc-500 dark:text-zinc-400">{t(labels.status)}</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-zinc-500 dark:text-zinc-400">{t(labels.date)}</th>
-              <th className="px-6 py-4 text-right text-sm font-medium text-zinc-500 dark:text-zinc-400">{t(labels.actions)}</th>
+            <tr className="border-b border-brand-grey/20">
+              <th className="px-6 py-4 text-left text-sm font-medium text-brand-grey">{t(labels.product)}</th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-brand-grey">{t(labels.whatsapp)}</th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-brand-grey">{t(labels.address)}</th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-brand-grey">{t(labels.status)}</th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-brand-grey">{t(labels.date)}</th>
+              <th className="px-6 py-4 text-right text-sm font-medium text-brand-grey">{t(labels.actions)}</th>
             </tr>
           </thead>
           <tbody>
             {filteredLeads.map((lead) => (
               <tr
                 key={lead.id}
-                className="border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition"
+                className="border-b border-brand-grey/10 transition hover:bg-brand-grey/5"
               >
                 <td className="px-6 py-4">
-                  <span className="font-medium text-zinc-900 dark:text-white">
+                  <span className="font-medium text-brand-dark">
                     {mockProducts[lead.product_id] || t(labels.unknownProduct)}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-zinc-600 dark:text-zinc-300">{lead.whatsapp_number}</td>
-                <td className="px-6 py-4 text-zinc-600 dark:text-zinc-300">{lead.address}</td>
+                <td className="px-6 py-4 text-brand-grey">{lead.whatsapp_number}</td>
+                <td className="px-6 py-4 text-brand-grey">{lead.address}</td>
                 <td className="px-6 py-4">
                   <span
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full ${
                       lead.status === 'pending'
-                        ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                        ? 'bg-brand-orange/15 text-brand-orange'
                         : lead.status === 'contacted'
-                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                        : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                        ? 'bg-brand-blue/15 text-brand-blue'
+                        : 'bg-brand-dark text-white'
                     }`}
                   >
                     {lead.status === 'pending' ? (
@@ -173,18 +173,18 @@ export default function AdminLeadsPage() {
                     {lead.status === 'pending' ? t(labels.pending) : lead.status === 'contacted' ? t(labels.contacted) : t(labels.completed)}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400">
+                <td className="px-6 py-4 text-sm text-brand-grey">
                   {formatDate(lead.created_at)}
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-end gap-2">
                     {lead.status === 'pending' && (
-                      <button className="px-3 py-1.5 text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition">
+                      <button className="rounded-lg px-3 py-1.5 text-xs font-medium text-brand-grey transition hover:bg-brand-grey/10 hover:text-brand-blue">
                         {t(labels.markContacted)}
                       </button>
                     )}
                     {lead.status === 'contacted' && (
-                      <button className="px-3 py-1.5 text-xs font-medium text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition">
+                      <button className="rounded-lg px-3 py-1.5 text-xs font-medium text-brand-blue transition hover:bg-brand-blue/10 hover:text-brand-dark">
                         {t(labels.markCompleted)}
                       </button>
                     )}
@@ -195,7 +195,7 @@ export default function AdminLeadsPage() {
           </tbody>
         </table>
         {filteredLeads.length === 0 && (
-          <div className="p-12 text-center text-zinc-500 dark:text-zinc-400">{t(labels.noLeads)}</div>
+          <div className="p-12 text-center text-brand-grey">{t(labels.noLeads)}</div>
         )}
       </div>
     </div>

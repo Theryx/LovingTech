@@ -5,6 +5,7 @@ import { ShoppingCart } from 'lucide-react';
 import { ProductWithFeatured } from '@/lib/localProducts';
 import { useLanguage } from '@/context/LanguageContext';
 import LeadModal from './LeadModal';
+import Button from './ui/Button';
 
 interface ProductDetailActionsProps {
   product: ProductWithFeatured;
@@ -16,13 +17,14 @@ export default function ProductDetailActions({ product }: ProductDetailActionsPr
 
   return (
     <>
-      <button
+      <Button
         onClick={() => setIsModalOpen(true)}
-        className="w-full bg-zinc-900 text-white dark:bg-white dark:text-black py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 hover:bg-zinc-700 dark:hover:bg-zinc-200 transition active:scale-[0.98]"
+        variant="whatsapp"
+        className="rounded-2xl py-5 text-lg font-bold active:scale-[0.98]"
       >
         <ShoppingCart className="w-6 h-6" />
         {t({ en: 'Order via WhatsApp', fr: 'Commander via WhatsApp' })}
-      </button>
+      </Button>
 
       <LeadModal
         product={product}

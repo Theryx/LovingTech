@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback, useRef } from 'react';
 import { Upload, X, Image, GripVertical, Star } from 'lucide-react';
@@ -161,46 +161,46 @@ export default function ImageUploader({ images, onChange, bucket = 'products', f
         onDragLeave={handleDragLeave}
         className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition ${
           dragOver
-            ? 'border-zinc-900 dark:border-white bg-zinc-50 dark:bg-zinc-800'
+            ? 'border-brand-blue bg-brand-blue/5'
             : uploadError
-            ? 'border-red-300 dark:border-red-700'
-            : 'border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600'
+            ? 'border-brand-orange'
+            : 'border-brand-grey/40 hover:border-brand-blue/60'
         }`}
       >
         {uploading ? (
-          <div className="flex items-center justify-center gap-2 text-zinc-500">
-            <div className="w-5 h-5 border-2 border-zinc-300 border-t-zinc-900 dark:border-t-white rounded-full animate-spin" />
+          <div className="flex items-center justify-center gap-2 text-brand-grey">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-brand-grey/40 border-t-brand-blue" />
             {t(labels.uploading)}
           </div>
         ) : (
           <>
-            <Upload className="w-8 h-8 mx-auto mb-2 text-zinc-400" />
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">{t(labels.dragDrop)}</p>
-            <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">{t(labels.supportedFormats)}</p>
+            <Upload className="mx-auto mb-2 h-8 w-8 text-brand-blue" />
+            <p className="text-sm text-brand-grey">{t(labels.dragDrop)}</p>
+            <p className="mt-1 text-xs text-brand-grey">{t(labels.supportedFormats)}</p>
           </>
         )}
       </div>
 
       {uploadError && (
-        <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-sm text-red-600 dark:text-red-400">{uploadError}</p>
+        <div className="rounded-lg border border-brand-orange/30 bg-brand-orange/10 p-3">
+          <p className="text-sm text-brand-orange">{uploadError}</p>
           <div className="flex gap-2 mt-2">
             <input
               type="text"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               placeholder="https://..."
-              className="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white text-sm"
+              className="flex-1 rounded-lg border border-brand-grey/30 bg-white px-3 py-2 text-sm text-brand-dark"
               onKeyDown={(e) => e.key === 'Enter' && handleAddUrl()}
             />
             <button
               onClick={handleAddUrl}
-              className="px-4 py-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg text-sm font-medium"
+              className="rounded-lg bg-brand-orange px-4 py-2 text-sm font-medium text-white transition hover:brightness-95"
             >
               Add
             </button>
           </div>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">{t(labels.orUrl)}</p>
+          <p className="mt-2 text-xs text-brand-grey">{t(labels.orUrl)}</p>
         </div>
       )}
 
@@ -210,13 +210,13 @@ export default function ImageUploader({ images, onChange, bucket = 'products', f
             <div
               key={index}
               className={`relative group rounded-lg overflow-hidden border-2 transition ${
-                index === 0 ? 'border-zinc-900 dark:border-white' : 'border-zinc-200 dark:border-zinc-700'
+                index === 0 ? 'border-brand-blue' : 'border-brand-grey/30'
               }`}
             >
-              <div className="aspect-square relative bg-zinc-100 dark:bg-zinc-800">
+              <div className="relative aspect-square bg-brand-grey/10">
                 {previewErrors[index] ? (
-                  <div className="flex items-center justify-center w-full h-full text-zinc-400">
-                    <Image className="w-8 h-8" />
+                  <div className="flex h-full w-full items-center justify-center text-brand-grey">
+                    <Image className="h-8 w-8" />
                     <span className="text-xs ml-2">{t(labels.previewFailed)}</span>
                   </div>
                 ) : (
@@ -230,8 +230,8 @@ export default function ImageUploader({ images, onChange, bucket = 'products', f
                 
                 <div className="absolute top-2 left-2">
                   {index === 0 ? (
-                    <span className="px-2 py-1 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-[10px] font-bold uppercase rounded flex items-center gap-1">
-                      <Star className="w-3 h-3" />
+                    <span className="flex items-center gap-1 rounded bg-brand-blue px-2 py-1 text-[10px] font-bold uppercase text-white">
+                      <Star className="h-3 w-3" />
                       {t(labels.mainImage)}
                     </span>
                   ) : null}
@@ -241,10 +241,10 @@ export default function ImageUploader({ images, onChange, bucket = 'products', f
                   <button
                     type="button"
                     onClick={() => handleMakeMain(index)}
-                    className="p-1.5 bg-white dark:bg-zinc-900 rounded shadow text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700"
+                    className="rounded bg-white p-1.5 text-brand-dark shadow transition hover:bg-brand-grey/10"
                     title="Make main"
                   >
-                    <Star className="w-3 h-3" />
+                    <Star className="h-3 w-3" />
                   </button>
                 </div>
 
@@ -255,7 +255,7 @@ export default function ImageUploader({ images, onChange, bucket = 'products', f
                         type="button"
                         onClick={() => handleMoveUp(index)}
                         disabled={index === 0}
-                        className="p-1.5 bg-white/80 dark:bg-zinc-900/80 rounded text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-800 disabled:opacity-30"
+                        className="rounded bg-white/90 p-1.5 text-brand-dark transition hover:bg-white disabled:opacity-30"
                       >
                         <GripVertical className="w-3 h-3 rotate-[-90deg]" />
                       </button>
@@ -263,7 +263,7 @@ export default function ImageUploader({ images, onChange, bucket = 'products', f
                         type="button"
                         onClick={() => handleMoveDown(index)}
                         disabled={index === images.length - 1}
-                        className="p-1.5 bg-white/80 dark:bg-zinc-900/80 rounded text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-800 disabled:opacity-30"
+                        className="rounded bg-white/90 p-1.5 text-brand-dark transition hover:bg-white disabled:opacity-30"
                       >
                         <GripVertical className="w-3 h-3 rotate-90deg" />
                       </button>
@@ -271,7 +271,7 @@ export default function ImageUploader({ images, onChange, bucket = 'products', f
                     <button
                       type="button"
                       onClick={() => handleRemove(index)}
-                      className="p-1.5 bg-red-500 text-white rounded hover:bg-red-600"
+                      className="rounded bg-brand-orange p-1.5 text-white transition hover:brightness-95"
                     >
                       <X className="w-3 h-3" />
                     </button>

@@ -3,263 +3,344 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, Plus, X } from 'lucide-react';
-import { Product, productService } from '@/lib/supabase';
+import { ArrowLeft, Save, Plus, X, AlertTriangle } from 'lucide-react';
+import { Product, ProductCondition, ProductCategory, Variant, productService } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
 import ImageUploader from '@/components/ImageUploader';
 
-const labels = {
-  addProduct: { en: 'Add Product', fr: 'Ajouter un produit' },
-  basicInfo: { en: 'Basic Information', fr: 'Informations de base' },
-  productName: { en: 'Product Name', fr: 'Nom du produit' },
-  enterProductName: { en: 'Enter product name', fr: 'Nom du produit' },
-  description: { en: 'Description', fr: 'Description' },
-  enterDescription: { en: 'Enter product description', fr: 'Description du produit' },
-  priceXaf: { en: 'Price (XAF)', fr: 'Prix (XAF)' },
-  brand: { en: 'Brand', fr: 'Marque' },
-  enterBrand: { en: 'Enter brand', fr: 'Marque' },
-  stockStatus: { en: 'Stock Status', fr: 'Statut du stock' },
-  inStock: { en: 'In Stock', fr: 'En stock' },
-  outOfStock: { en: 'Out of Stock', fr: 'Rupture de stock' },
-  preOrder: { en: 'Pre-order', fr: 'Pré-commande' },
-  featured: { en: 'Featured product', fr: 'Produit en vedette' },
-  specifications: { en: 'Specifications', fr: 'Spécifications' },
-  addSpec: { en: 'Add Spec', fr: 'Ajouter' },
-  specName: { en: 'Spec name', fr: 'Nom spec' },
-  value: { en: 'Value', fr: 'Valeur' },
-  noSpecs: { en: 'No specifications added', fr: 'Aucune spécification ajoutée' },
-  images: { en: 'Images', fr: 'Images' },
-  imageUrl: { en: 'Image URL', fr: 'URL de l\'image' },
-  addImage: { en: 'Add Image', fr: 'Ajouter une image' },
-  imageHint: { en: 'Max: 5MB • 800-1200px • JPEG, PNG, WebP', fr: 'Max: 5Mo • 800-1200px • JPEG, PNG, WebP' },
-  save: { en: 'Save', fr: 'Enregistrer' },
-  saving: { en: 'Saving...', fr: 'Enregistrement...' },
-  saved: { en: 'Saved!', fr: 'Enregistré!' },
+const WARRANTY_DEFAULTS: Record<ProductCondition, string> = {
+  new: 'Garantie fabricant / Manufacturer warranty',
+  refurbished: '30 jours / 30 days',
+  second_hand: 'Aucune garantie / No warranty',
 };
 
-const emptyProduct: Product = {
+const emptyProduct: Omit<Product, 'created_at'> = {
   id: '',
   name: '',
   description: '',
   price_xaf: 0,
+  compare_at_price: undefined,
   brand: '',
   specs: {},
   images: [],
   stock_status: 'in_stock',
+  stock_qty: 0,
+  low_stock_threshold: 3,
+  condition: 'new',
+  category: 'keyboard',
+  name_fr: '',
+  name_en: '',
+  description_fr: '',
+  description_en: '',
+  warranty_info: WARRANTY_DEFAULTS.new,
+  variants: [],
+  tags: [],
 };
+
+const inputCls = 'w-full rounded-lg border border-brand-grey/30 bg-white px-4 py-2 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-blue';
+const labelCls = 'mb-2 block text-sm font-medium text-brand-dark';
 
 export default function NewProductPage() {
   const router = useRouter();
   const { t } = useLanguage();
-  const [product, setProduct] = useState<Product>(emptyProduct);
-  const [featured, setFeatured] = useState(false);
-  const [specKeys, setSpecKeys] = useState<string[]>(['spec1', 'spec2']);
+  const [product, setProduct] = useState<Omit<Product, 'created_at'>>(emptyProduct);
+  const [specKeys, setSpecKeys] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  const set = (patch: Partial<typeof product>) => setProduct(p => ({ ...p, ...patch }));
+
+  const handleConditionChange = (condition: ProductCondition) => {
+    set({ condition, warranty_info: WARRANTY_DEFAULTS[condition] });
+  };
+
+  // Specs helpers
   const handleSpecKeyChange = (index: number, value: string) => {
     const newKeys = [...specKeys];
     const oldKey = newKeys[index];
     newKeys[index] = value;
     setSpecKeys(newKeys);
-
-    if (oldKey && product.specs[oldKey]) {
+    if (oldKey && product.specs[oldKey] !== undefined) {
       const newSpecs = { ...product.specs };
+      const val = newSpecs[oldKey];
       delete newSpecs[oldKey];
-      if (value) {
-        newSpecs[value] = product.specs[oldKey];
-      }
-      setProduct({ ...product, specs: newSpecs });
+      if (value) newSpecs[value] = val;
+      set({ specs: newSpecs });
     }
   };
 
   const handleSpecValueChange = (key: string, val: string) => {
-    setProduct({ ...product, specs: { ...product.specs, [key]: val } });
+    set({ specs: { ...product.specs, [key]: val } });
   };
 
-  const addSpec = () => {
-    setSpecKeys([...specKeys, `spec${specKeys.length + 1}`]);
-  };
-
+  const addSpec = () => setSpecKeys([...specKeys, '']);
   const removeSpec = (index: number) => {
     const key = specKeys[index];
     const newKeys = specKeys.filter((_, i) => i !== index);
     const newSpecs = { ...product.specs };
     delete newSpecs[key];
     setSpecKeys(newKeys);
-    setProduct({ ...product, specs: newSpecs });
+    set({ specs: newSpecs });
+  };
+
+  // Variant helpers
+  const addVariantGroup = () => {
+    set({ variants: [...(product.variants || []), { label: '', options: [{ name: '', stock_qty: 0, price_delta: 0 }] }] });
+  };
+
+  const updateVariantLabel = (vi: number, label: string) => {
+    const variants = [...(product.variants || [])];
+    variants[vi] = { ...variants[vi], label };
+    set({ variants });
+  };
+
+  const addVariantOption = (vi: number) => {
+    const variants = [...(product.variants || [])];
+    variants[vi] = { ...variants[vi], options: [...variants[vi].options, { name: '', stock_qty: 0, price_delta: 0 }] };
+    set({ variants });
+  };
+
+  const updateVariantOption = (vi: number, oi: number, patch: Partial<Variant['options'][0]>) => {
+    const variants = [...(product.variants || [])];
+    const options = [...variants[vi].options];
+    options[oi] = { ...options[oi], ...patch };
+    variants[vi] = { ...variants[vi], options };
+    set({ variants });
+  };
+
+  const removeVariantOption = (vi: number, oi: number) => {
+    const variants = [...(product.variants || [])];
+    variants[vi] = { ...variants[vi], options: variants[vi].options.filter((_, i) => i !== oi) };
+    set({ variants });
+  };
+
+  const removeVariantGroup = (vi: number) => {
+    set({ variants: (product.variants || []).filter((_, i) => i !== vi) });
   };
 
   const handleSave = async () => {
+    if (product.condition === 'second_hand' && (product.images || []).length < 2) {
+      alert('Second-hand products require at least 2 photos of the actual item.');
+      return;
+    }
     setSaving(true);
     try {
-      const newProduct = {
+      await productService.create({
         ...product,
         id: crypto.randomUUID(),
         specs: product.specs || {},
         images: product.images || [],
-        stock_status: product.stock_status || 'in_stock',
-        featured,
-      };
-      await productService.create(newProduct as any);
+      } as any);
       setSaved(true);
-      setTimeout(() => {
-        router.push('/admin/products');
-      }, 1000);
-    } catch (error) {
+      setTimeout(() => router.push('/admin/products'), 1000);
+    } catch (error: any) {
       console.error('Failed to save:', error);
-      alert('Failed to save product. Please try again.');
+      alert(`Failed to save: ${error.message || 'Unknown error'}`);
     } finally {
       setSaving(false);
     }
   };
 
+  const hasVariants = (product.variants || []).length > 0;
+
   return (
     <div className="max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
-          <Link
-            href="/admin/products"
-            className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition"
-          >
+          <Link href="/admin/products" className="p-2 text-brand-grey transition hover:text-brand-blue">
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">
-            {t(labels.addProduct)}
+          <h1 className="text-3xl font-bold text-brand-dark">
+            {t({ en: 'Add Product', fr: 'Ajouter un produit' })}
           </h1>
         </div>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-4 py-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg font-medium hover:bg-zinc-800 dark:hover:bg-zinc-100 transition disabled:opacity-50"
+          className="flex items-center gap-2 rounded-lg bg-brand-orange px-4 py-2 font-medium text-white transition hover:brightness-95 disabled:opacity-50"
         >
           <Save className="w-4 h-4" />
-          {saving ? t(labels.saving) : saved ? t(labels.saved) : t(labels.save)}
+          {saving ? t({ en: 'Saving...', fr: 'Enregistrement...' }) : saved ? t({ en: 'Saved!', fr: 'Enregistré!' }) : t({ en: 'Save', fr: 'Enregistrer' })}
         </button>
       </div>
 
       <div className="space-y-6">
-        <div className="p-6 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">{t(labels.basicInfo)}</h2>
-          <div className="space-y-4">
+        {/* Condition & Category */}
+        <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold text-brand-dark">{t({ en: 'Classification', fr: 'Classification' })}</h2>
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t(labels.productName)}</label>
-              <input
-                type="text"
-                value={product.name}
-                onChange={(e) => setProduct({ ...product, name: e.target.value })}
-                className="w-full px-4 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
-                placeholder={t(labels.enterProductName)}
-              />
+              <label className={labelCls}>{t({ en: 'Condition', fr: 'État' })} *</label>
+              <select
+                value={product.condition}
+                onChange={(e) => handleConditionChange(e.target.value as ProductCondition)}
+                className={inputCls}
+              >
+                <option value="new">{t({ en: 'New', fr: 'Neuf' })}</option>
+                <option value="refurbished">{t({ en: 'Refurbished', fr: 'Reconditionné' })}</option>
+                <option value="second_hand">{t({ en: 'Second-hand', fr: 'Occasion' })}</option>
+              </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t(labels.description)}</label>
-              <textarea
-                value={product.description}
-                onChange={(e) => setProduct({ ...product, description: e.target.value })}
-                rows={4}
-                className="w-full px-4 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white resize-none"
-                placeholder={t(labels.enterDescription)}
-              />
+              <label className={labelCls}>{t({ en: 'Category', fr: 'Catégorie' })} *</label>
+              <select
+                value={product.category}
+                onChange={(e) => set({ category: e.target.value as ProductCategory })}
+                className={inputCls}
+              >
+                <option value="keyboard">{t({ en: 'Keyboard', fr: 'Clavier' })}</option>
+                <option value="mouse">{t({ en: 'Mouse', fr: 'Souris' })}</option>
+                <option value="cable">{t({ en: 'Cable', fr: 'Câble' })}</option>
+                <option value="speaker">{t({ en: 'Speaker', fr: 'Enceinte' })}</option>
+                <option value="solar_lamp">{t({ en: 'Solar Lamp', fr: 'Lampe solaire' })}</option>
+              </select>
+            </div>
+          </div>
+          {product.condition === 'second_hand' && (
+            <div className="mt-3 flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+              <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+              {t({ en: 'Second-hand products require at least 2 actual photos of the item. No returns accepted.', fr: "Les produits d'occasion nécessitent au moins 2 photos réelles de l'article. Aucun retour accepté." })}
+            </div>
+          )}
+        </div>
+
+        {/* Basic Info */}
+        <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold text-brand-dark">{t({ en: 'Basic Information', fr: 'Informations de base' })}</h2>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>Nom (FR)</label>
+                <input type="text" value={product.name_fr || ''} onChange={(e) => set({ name_fr: e.target.value })} className={inputCls} placeholder="Nom en français" />
+              </div>
+              <div>
+                <label className={labelCls}>Name (EN)</label>
+                <input type="text" value={product.name_en || ''} onChange={(e) => set({ name_en: e.target.value })} className={inputCls} placeholder="Name in English" />
+              </div>
+            </div>
+            <div>
+              <label className={labelCls}>{t({ en: 'Display Name (fallback)', fr: 'Nom affiché (fallback)' })}</label>
+              <input type="text" value={product.name} onChange={(e) => set({ name: e.target.value })} className={inputCls} placeholder="Used if FR/EN names are empty" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t(labels.priceXaf)}</label>
-                <input
-                  type="number"
-                  value={product.price_xaf}
-                  onChange={(e) => setProduct({ ...product, price_xaf: Number(e.target.value) })}
-                  className="w-full px-4 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
-                  placeholder="0"
-                />
+                <label className={labelCls}>Description (FR)</label>
+                <textarea value={product.description_fr || ''} onChange={(e) => set({ description_fr: e.target.value })} rows={3} className={`${inputCls} resize-none`} placeholder="Description en français" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t(labels.brand)}</label>
-                <input
-                  type="text"
-                  value={product.brand}
-                  onChange={(e) => setProduct({ ...product, brand: e.target.value })}
-                  className="w-full px-4 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
-                  placeholder={t(labels.enterBrand)}
-                />
+                <label className={labelCls}>Description (EN)</label>
+                <textarea value={product.description_en || ''} onChange={(e) => set({ description_en: e.target.value })} rows={3} className={`${inputCls} resize-none`} placeholder="Description in English" />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t(labels.stockStatus)}</label>
-              <select
-                value={product.stock_status}
-                onChange={(e) => setProduct({ ...product, stock_status: e.target.value as any })}
-                className="w-full px-4 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
-              >
-                <option value="in_stock">{t(labels.inStock)}</option>
-                <option value="out_of_stock">{t(labels.outOfStock)}</option>
-                <option value="pre_order">{t(labels.preOrder)}</option>
-              </select>
+              <label className={labelCls}>{t({ en: 'Brand', fr: 'Marque' })}</label>
+              <input type="text" value={product.brand} onChange={(e) => set({ brand: e.target.value })} className={inputCls} placeholder="Logitech, Apple..." />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>{t({ en: 'Price (XAF)', fr: 'Prix (XAF)' })} *</label>
+                <input type="number" value={product.price_xaf} onChange={(e) => set({ price_xaf: Number(e.target.value) })} className={inputCls} placeholder="0" />
+              </div>
+              <div>
+                <label className={labelCls}>{t({ en: 'Compare-at Price (XAF)', fr: 'Prix barré (XAF)' })}</label>
+                <input type="number" value={product.compare_at_price || ''} onChange={(e) => set({ compare_at_price: e.target.value ? Number(e.target.value) : undefined })} className={inputCls} placeholder={t({ en: 'Optional', fr: 'Optionnel' })} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>{t({ en: 'Stock Status', fr: 'Statut du stock' })}</label>
+                <select value={product.stock_status} onChange={(e) => set({ stock_status: e.target.value as any })} className={inputCls}>
+                  <option value="in_stock">{t({ en: 'In Stock', fr: 'En stock' })}</option>
+                  <option value="out_of_stock">{t({ en: 'Out of Stock', fr: 'Rupture de stock' })}</option>
+                  <option value="pre_order">{t({ en: 'Pre-order', fr: 'Pré-commande' })}</option>
+                </select>
+              </div>
+              {!hasVariants && (
+                <div>
+                  <label className={labelCls}>{t({ en: 'Stock Qty', fr: 'Quantité en stock' })}</label>
+                  <input type="number" value={product.stock_qty ?? 0} onChange={(e) => set({ stock_qty: Number(e.target.value) })} className={inputCls} placeholder="0" />
+                </div>
+              )}
+            </div>
+            <div>
+              <label className={labelCls}>{t({ en: 'Warranty', fr: 'Garantie' })}</label>
+              <input type="text" value={product.warranty_info || ''} onChange={(e) => set({ warranty_info: e.target.value })} className={inputCls} />
             </div>
             <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="featured"
-                checked={featured}
-                onChange={(e) => setFeatured(e.target.checked)}
-                className="w-4 h-4 rounded border-zinc-300 dark:border-zinc-600 text-zinc-900 dark:text-white focus:ring-zinc-900 dark:focus:ring-white"
-              />
-              <label htmlFor="featured" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                {t(labels.featured)}
-              </label>
+              <input type="checkbox" id="featured" checked={!!product.featured} onChange={(e) => set({ featured: e.target.checked })} className="h-4 w-4 rounded border-brand-grey text-brand-blue focus:ring-brand-blue" />
+              <label htmlFor="featured" className="text-sm font-medium text-brand-dark">{t({ en: 'Featured product', fr: 'Produit en vedette' })}</label>
             </div>
           </div>
         </div>
 
-        <div className="p-6 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800">
+        {/* Variants */}
+        <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">{t(labels.specifications)}</h2>
-            <button
-              onClick={addSpec}
-              className="flex items-center gap-1 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition"
-            >
+            <h2 className="text-lg font-semibold text-brand-dark">{t({ en: 'Variants', fr: 'Variantes' })}</h2>
+            <button onClick={addVariantGroup} className="flex items-center gap-1 text-sm text-brand-grey transition hover:text-brand-blue">
               <Plus className="w-4 h-4" />
-              {t(labels.addSpec)}
+              {t({ en: 'Add Group', fr: 'Ajouter groupe' })}
+            </button>
+          </div>
+          {(product.variants || []).length === 0 ? (
+            <p className="text-sm text-brand-dark/40">{t({ en: 'No variants — uses stock qty above', fr: 'Aucune variante — utilise la quantité ci-dessus' })}</p>
+          ) : (
+            <div className="space-y-6">
+              {(product.variants || []).map((variant, vi) => (
+                <div key={vi} className="rounded-lg border border-brand-grey/20 p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <input type="text" value={variant.label} onChange={(e) => updateVariantLabel(vi, e.target.value)} className={`${inputCls} flex-1`} placeholder={t({ en: 'Group label (e.g. Color, Size)', fr: 'Nom du groupe (ex. Couleur, Taille)' })} />
+                    <button onClick={() => removeVariantGroup(vi)} className="p-2 text-brand-grey hover:text-brand-orange transition"><X className="w-4 h-4" /></button>
+                  </div>
+                  <div className="space-y-2">
+                    {variant.options.map((opt, oi) => (
+                      <div key={oi} className="grid grid-cols-[1fr_100px_100px_auto] gap-2 items-center">
+                        <input type="text" value={opt.name} onChange={(e) => updateVariantOption(vi, oi, { name: e.target.value })} className={inputCls} placeholder={t({ en: 'Option name', fr: 'Nom option' })} />
+                        <input type="number" value={opt.stock_qty} onChange={(e) => updateVariantOption(vi, oi, { stock_qty: Number(e.target.value) })} className={inputCls} placeholder="Qty" />
+                        <input type="number" value={opt.price_delta} onChange={(e) => updateVariantOption(vi, oi, { price_delta: Number(e.target.value) })} className={inputCls} placeholder="±XAF" />
+                        <button onClick={() => removeVariantOption(vi, oi)} className="p-2 text-brand-grey hover:text-brand-orange transition"><X className="w-3 h-3" /></button>
+                      </div>
+                    ))}
+                    <button onClick={() => addVariantOption(vi)} className="flex items-center gap-1 text-xs text-brand-grey hover:text-brand-blue transition mt-1">
+                      <Plus className="w-3 h-3" />
+                      {t({ en: 'Add option', fr: 'Ajouter option' })}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Specs */}
+        <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-brand-dark">{t({ en: 'Specifications', fr: 'Spécifications' })}</h2>
+            <button onClick={addSpec} className="flex items-center gap-1 text-sm text-brand-grey transition hover:text-brand-blue">
+              <Plus className="w-4 h-4" />
+              {t({ en: 'Add Spec', fr: 'Ajouter' })}
             </button>
           </div>
           <div className="space-y-3">
             {specKeys.map((key, index) => (
               <div key={index} className="flex items-center gap-3">
-                <input
-                  type="text"
-                  value={key}
-                  onChange={(e) => handleSpecKeyChange(index, e.target.value)}
-                  className="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
-                  placeholder={t(labels.specName)}
-                />
-                <span className="text-zinc-400">:</span>
-                <input
-                  type="text"
-                  value={product.specs[key] || ''}
-                  onChange={(e) => handleSpecValueChange(key, e.target.value)}
-                  className="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-white"
-                  placeholder={t(labels.value)}
-                />
-                <button
-                  onClick={() => removeSpec(index)}
-                  className="p-2 text-zinc-400 hover:text-red-500 transition"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                <input type="text" value={key} onChange={(e) => handleSpecKeyChange(index, e.target.value)} className="flex-1 rounded-lg border border-brand-grey/30 bg-white px-3 py-2 text-sm text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-blue" placeholder={t({ en: 'Spec name', fr: 'Nom spec' })} />
+                <span className="text-brand-grey">:</span>
+                <input type="text" value={product.specs[key] || ''} onChange={(e) => handleSpecValueChange(key, e.target.value)} className="flex-1 rounded-lg border border-brand-grey/30 bg-white px-3 py-2 text-sm text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-blue" placeholder={t({ en: 'Value', fr: 'Valeur' })} />
+                <button onClick={() => removeSpec(index)} className="p-2 text-brand-grey transition hover:text-brand-orange"><X className="w-4 h-4" /></button>
               </div>
             ))}
-            {specKeys.length === 0 && (
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">{t(labels.noSpecs)}</p>
-            )}
+            {specKeys.length === 0 && <p className="text-sm text-brand-dark/40">{t({ en: 'No specifications added', fr: 'Aucune spécification ajoutée' })}</p>}
           </div>
         </div>
 
-        <div className="p-6 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">{t(labels.images)}</h2>
-          <ImageUploader
-            images={product.images}
-            onChange={(images) => setProduct({ ...product, images })}
-          />
+        {/* Images */}
+        <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
+          <h2 className="mb-1 text-lg font-semibold text-brand-dark">{t({ en: 'Images', fr: 'Images' })}</h2>
+          {product.condition === 'second_hand' && (
+            <p className="mb-3 text-xs text-amber-700">{t({ en: 'Min. 2 photos required for second-hand', fr: "Min. 2 photos requises pour l'occasion" })}</p>
+          )}
+          <ImageUploader images={product.images} onChange={(images) => set({ images })} />
         </div>
       </div>
     </div>

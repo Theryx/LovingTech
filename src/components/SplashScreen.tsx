@@ -28,22 +28,22 @@ export default function SplashScreen() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#09090b]"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-brand-dark"
       style={{ transition: 'opacity 0.5s ease', opacity: fading ? 0 : 1 }}
     >
       <div className="flex flex-col items-center gap-6">
         <div className="relative flex items-center justify-center">
-          <div className="absolute h-20 w-20 rounded-full border-2 border-blue-500 opacity-30 animate-ping" />
-          <div className="h-14 w-14 rounded-full border-4 border-t-blue-500 border-r-blue-500 border-b-transparent border-l-transparent animate-spin" />
+          <div className="absolute h-20 w-20 rounded-full border-2 border-brand-blue opacity-30 animate-ping" />
+          <div className="h-14 w-14 rounded-full border-4 border-t-brand-blue border-r-brand-blue border-b-transparent border-l-transparent animate-spin" />
         </div>
         <div className="text-center">
           <p className="text-xl font-semibold tracking-widest text-white uppercase">
             {msg.brand}
           </p>
-          <p className="mt-1 text-xs tracking-widest text-zinc-500 uppercase">
+          <p className="mt-1 text-xs uppercase tracking-widest text-brand-grey">
             {msg.tagline}
           </p>
-          <p className="mt-3 text-sm text-zinc-400">
+          <p className="mt-3 text-sm text-brand-grey">
             {msg.loading}
           </p>
         </div>

@@ -5,6 +5,20 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholde
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+export type ProductCondition = 'new' | 'refurbished' | 'second_hand';
+export type ProductCategory = 'keyboard' | 'mouse' | 'cable' | 'speaker' | 'solar_lamp';
+
+export type VariantOption = {
+  name: string;
+  stock_qty: number;
+  price_delta: number;
+};
+
+export type Variant = {
+  label: string;
+  options: VariantOption[];
+};
+
 export type Product = {
   id: string;
   name: string;
@@ -16,6 +30,19 @@ export type Product = {
   stock_status: 'in_stock' | 'out_of_stock' | 'pre_order';
   featured?: boolean;
   created_at?: string;
+  // Sprint 2 fields
+  condition?: ProductCondition;
+  category?: ProductCategory;
+  name_fr?: string;
+  name_en?: string;
+  description_fr?: string;
+  description_en?: string;
+  stock_qty?: number;
+  low_stock_threshold?: number;
+  compare_at_price?: number;
+  warranty_info?: string;
+  variants?: Variant[];
+  tags?: string[];
 };
 
 export type Lead = {

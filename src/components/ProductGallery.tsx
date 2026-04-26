@@ -3,18 +3,21 @@
 import { useState } from 'react';
 import Image from 'next/image';
 
+const PLACEHOLDER = '/images/placeholder.svg';
+
 interface ProductGalleryProps {
   images: string[];
   productName: string;
 }
 
 export default function ProductGallery({ images, productName }: ProductGalleryProps) {
-  const displayImages = images.length > 0 ? images : ['/images/placeholder.svg'];
+  const displayImages = images?.length > 0 ? images : [PLACEHOLDER];
   const [mainImgSrc, setMainImgSrc] = useState(displayImages[0]);
+  const [thumbErrors, setThumbErrors] = useState<Record<number, boolean>>({});
 
   return (
     <div className="space-y-6">
-      <div className="aspect-square relative bg-zinc-100 dark:bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-200 dark:border-zinc-800">
+      <div className="relative aspect-square overflow-hidden rounded-3xl border border-brand-grey/20 bg-brand-grey/10">
         <Image
           src={mainImgSrc}
           alt={productName}
@@ -22,30 +25,37 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
           sizes="(max-width: 1024px) 100vw, 50vw"
           className="object-cover"
           priority
+          onError={() => setMainImgSrc(PLACEHOLDER)}
         />
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
-        {displayImages.slice(0, 4).map((img, idx) => (
-          <button
-            key={idx}
-            onClick={() => setMainImgSrc(img)}
-            className={`aspect-square relative bg-zinc-100 dark:bg-zinc-900 rounded-xl overflow-hidden border-2 transition ${
-              mainImgSrc === img
-                ? 'border-zinc-900 dark:border-white'
-                : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600'
-            }`}
-          >
-            <Image
-              src={img}
-              alt={`${productName} view ${idx + 1}`}
-              fill
-              sizes="25vw"
-              className="object-cover"
-            />
-          </button>
-        ))}
-      </div>
+      {displayImages.length > 1 && (
+        <div className="grid grid-cols-4 gap-4" role="group" aria-label={`${productName} image thumbnails`}>
+          {displayImages.slice(0, 4).map((img, idx) => (
+            <button
+              key={idx}
+              onClick={() => setMainImgSrc(thumbErrors[idx] ? PLACEHOLDER : img)}
+              aria-label={`View image ${idx + 1} of ${Math.min(displayImages.length, 4)}`}
+              aria-pressed={mainImgSrc === img}
+              className={`relative aspect-square overflow-hidden rounded-xl border-2 bg-brand-grey/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 ${
+                mainImgSrc === img
+                  ? 'border-brand-blue'
+                  : 'border-brand-grey/20 hover:border-brand-blue/60'
+              }`}
+            >
+              <Image
+                src={thumbErrors[idx] ? PLACEHOLDER : img}
+                alt=""
+                aria-hidden="true"
+                fill
+                sizes="25vw"
+                className="object-cover"
+                onError={() => setThumbErrors(prev => ({ ...prev, [idx]: true }))}
+              />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

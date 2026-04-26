@@ -1,52 +1,49 @@
 export default function HomeLoading() {
   return (
     <main className="min-h-screen">
-      {/* Hero skeleton */}
-      <section className="px-6 py-24 text-center bg-gradient-to-b from-zinc-900 to-black">
-        <div className="h-14 w-96 max-w-full bg-zinc-800 animate-pulse rounded mx-auto mb-4" />
-        <div className="h-14 w-72 max-w-full bg-zinc-800 animate-pulse rounded mx-auto mb-6" />
-        <div className="h-5 w-[520px] max-w-full bg-zinc-800 animate-pulse rounded mx-auto mb-3" />
-        <div className="h-5 w-80 max-w-full bg-zinc-800 animate-pulse rounded mx-auto mb-10" />
+      <section className="bg-brand-dark px-6 py-24 text-center">
+        <div className="mx-auto mb-4 h-14 w-96 max-w-full animate-pulse rounded bg-brand-grey/20" />
+        <div className="mx-auto mb-6 h-14 w-72 max-w-full animate-pulse rounded bg-brand-grey/20" />
+        <div className="mx-auto mb-3 h-5 w-[520px] max-w-full animate-pulse rounded bg-brand-grey/20" />
+        <div className="mx-auto mb-10 h-5 w-80 max-w-full animate-pulse rounded bg-brand-grey/20" />
         <div className="flex justify-center">
-          <div className="h-12 w-40 bg-zinc-800 animate-pulse rounded-full" />
+          <div className="h-12 w-40 animate-pulse rounded-full bg-brand-orange/70" />
         </div>
       </section>
 
-      {/* Features strip skeleton */}
-      <section className="py-20 px-6 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 border-y border-zinc-900">
+      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-12 border-y border-brand-grey/20 px-6 py-20 md:grid-cols-3">
         {[0, 1, 2].map((i) => (
           <div key={i} className="flex flex-col items-center space-y-4">
-            <div className="h-16 w-16 bg-zinc-800 animate-pulse rounded-2xl" />
-            <div className="h-5 w-32 bg-zinc-800 animate-pulse rounded" />
-            <div className="h-4 w-48 bg-zinc-800 animate-pulse rounded" />
+            <div className="h-16 w-16 animate-pulse rounded-2xl bg-brand-blue/20" />
+            <div className="h-5 w-32 animate-pulse rounded bg-brand-grey/30" />
+            <div className="h-4 w-48 animate-pulse rounded bg-brand-grey/20" />
           </div>
         ))}
       </section>
 
-      {/* Product grid skeleton */}
-      <section className="py-24 px-6 max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-16 gap-6">
+      <section className="mx-auto max-w-7xl px-6 py-24">
+        <div className="mb-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="h-10 w-72 bg-zinc-800 animate-pulse rounded mb-3" />
-            <div className="h-5 w-56 bg-zinc-800 animate-pulse rounded" />
+            <div className="mb-3 h-10 w-72 animate-pulse rounded bg-brand-grey/30" />
+            <div className="h-5 w-56 animate-pulse rounded bg-brand-grey/20" />
           </div>
           <div className="flex gap-2">
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="h-10 w-20 bg-zinc-800 animate-pulse rounded-full" />
+              <div key={i} className="h-10 w-20 animate-pulse rounded-full bg-brand-blue/20" />
             ))}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-zinc-950 border border-zinc-900 rounded-3xl overflow-hidden">
-              <div className="aspect-square bg-zinc-800 animate-pulse" />
-              <div className="p-6 space-y-3">
-                <div className="h-6 w-3/4 bg-zinc-800 animate-pulse rounded" />
-                <div className="h-4 w-full bg-zinc-800 animate-pulse rounded" />
-                <div className="flex justify-between items-center pt-3">
-                  <div className="h-6 w-28 bg-zinc-800 animate-pulse rounded" />
-                  <div className="h-9 w-20 bg-zinc-800 animate-pulse rounded-full" />
+            <div key={i} className="overflow-hidden rounded-3xl border border-brand-grey/20 bg-brand-dark">
+              <div className="aspect-square animate-pulse bg-brand-grey/15" />
+              <div className="space-y-3 p-6">
+                <div className="h-6 w-3/4 animate-pulse rounded bg-brand-grey/25" />
+                <div className="h-4 w-full animate-pulse rounded bg-brand-grey/15" />
+                <div className="flex items-center justify-between pt-3">
+                  <div className="h-6 w-28 animate-pulse rounded bg-brand-grey/20" />
+                  <div className="h-9 w-20 animate-pulse rounded-full bg-brand-orange/60" />
                 </div>
               </div>
             </div>

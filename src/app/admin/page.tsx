@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Package, Users, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts';
 import { Product, productService } from '@/lib/supabase';
@@ -41,76 +41,76 @@ export default function AdminDashboard() {
   const featuredCount = products.filter((p) => (p as ProductWithFeatured).featured).length;
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold text-zinc-900 dark:text-white mb-8">{t(labels.dashboard)}</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="mx-auto max-w-6xl">
+      <h1 className="mb-8 text-3xl font-bold text-brand-dark">{t(labels.dashboard)}</h1>
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Link
           href="/admin/products"
-          className="group p-6 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition"
+          className="group rounded-xl border border-brand-grey/20 bg-white p-6 transition hover:border-brand-blue/40"
         >
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{t(labels.totalProducts)}</span>
-            <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-transform group-hover:translate-x-1" />
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-sm font-medium text-brand-grey">{t(labels.totalProducts)}</span>
+            <ArrowRight className="h-4 w-4 text-brand-grey transition-transform group-hover:translate-x-1 group-hover:text-brand-blue" />
           </div>
-          <span className="text-4xl font-bold text-zinc-900 dark:text-white">{products.length}</span>
+          <span className="text-4xl font-bold text-brand-dark">{products.length}</span>
         </Link>
         <Link
           href="/admin/products?featured=true"
-          className="group p-6 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition"
+          className="group rounded-xl border border-brand-grey/20 bg-white p-6 transition hover:border-brand-blue/40"
         >
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{t(labels.featuredProducts)}</span>
-            <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-transform group-hover:translate-x-1" />
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-sm font-medium text-brand-grey">{t(labels.featuredProducts)}</span>
+            <ArrowRight className="h-4 w-4 text-brand-grey transition-transform group-hover:translate-x-1 group-hover:text-brand-blue" />
           </div>
-          <span className="text-4xl font-bold text-zinc-900 dark:text-white">{featuredCount}</span>
+          <span className="text-4xl font-bold text-brand-dark">{featuredCount}</span>
         </Link>
         <Link
           href="/admin/leads"
-          className="group p-6 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition"
+          className="group rounded-xl border border-brand-grey/20 bg-white p-6 transition hover:border-brand-blue/40"
         >
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{t(labels.totalLeads)}</span>
-            <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-transform group-hover:translate-x-1" />
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-sm font-medium text-brand-grey">{t(labels.totalLeads)}</span>
+            <ArrowRight className="h-4 w-4 text-brand-grey transition-transform group-hover:translate-x-1 group-hover:text-brand-blue" />
           </div>
-          <span className="text-4xl font-bold text-zinc-900 dark:text-white">0</span>
+          <span className="text-4xl font-bold text-brand-dark">0</span>
         </Link>
         <Link
           href="/admin/leads?status=pending"
-          className="group p-6 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition"
+          className="group rounded-xl border border-brand-grey/20 bg-white p-6 transition hover:border-brand-blue/40"
         >
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{t(labels.pendingLeads)}</span>
-            <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-transform group-hover:translate-x-1" />
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-sm font-medium text-brand-grey">{t(labels.pendingLeads)}</span>
+            <ArrowRight className="h-4 w-4 text-brand-grey transition-transform group-hover:translate-x-1 group-hover:text-brand-blue" />
           </div>
-          <span className="text-4xl font-bold text-zinc-900 dark:text-white">0</span>
+          <span className="text-4xl font-bold text-brand-dark">0</span>
         </Link>
       </div>
 
-      <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="p-6 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">{t(labels.quickActions)}</h2>
+      <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold text-brand-dark">{t(labels.quickActions)}</h2>
           <div className="flex flex-col gap-3">
             <Link
               href="/admin/products/new"
-              className="flex items-center justify-between p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition"
+              className="flex items-center justify-between rounded-lg bg-brand-grey/10 p-4 transition hover:bg-brand-grey/20"
             >
-              <span className="font-medium text-zinc-700 dark:text-zinc-200">{t(labels.addNewProduct)}</span>
-              <ArrowRight className="w-4 h-4 text-zinc-400" />
+              <span className="font-medium text-brand-dark">{t(labels.addNewProduct)}</span>
+              <ArrowRight className="h-4 w-4 text-brand-blue" />
             </Link>
             <Link
               href="/admin/leads"
-              className="flex items-center justify-between p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition"
+              className="flex items-center justify-between rounded-lg bg-brand-grey/10 p-4 transition hover:bg-brand-grey/20"
             >
-              <span className="font-medium text-zinc-700 dark:text-zinc-200">{t(labels.viewAllLeads)}</span>
-              <ArrowRight className="w-4 h-4 text-zinc-400" />
+              <span className="font-medium text-brand-dark">{t(labels.viewAllLeads)}</span>
+              <ArrowRight className="h-4 w-4 text-brand-blue" />
             </Link>
           </div>
         </div>
 
-        <div className="p-6 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4">{t(labels.recentActivity)}</h2>
-          <p className="text-zinc-500 dark:text-zinc-400">{t(labels.noRecentActivity)}</p>
+        <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold text-brand-dark">{t(labels.recentActivity)}</h2>
+          <p className="text-brand-grey">{t(labels.noRecentActivity)}</p>
         </div>
       </div>
     </div>
