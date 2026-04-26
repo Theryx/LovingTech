@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   Clock3,
   MessageCircle,
-  Search,
   ShieldCheck,
   ShoppingBag,
   Star,
@@ -22,37 +21,78 @@ import { useLanguage } from '@/context/LanguageContext';
 
 const brandLogos = ['Logitech', 'Keychron', 'Anker'];
 
+const CATEGORIES = [
+  {
+    slug: 'keyboard',
+    labelFr: 'Claviers',
+    labelEn: 'Keyboards',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.5} stroke="currentColor" className="h-8 w-8" aria-hidden="true">
+        <rect x="2" y="6" width="20" height="13" rx="2" />
+        <path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M10 14h.01M14 14h.01M18 14h.01M8 17h8" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    slug: 'mouse',
+    labelFr: 'Souris',
+    labelEn: 'Mice',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.5} stroke="currentColor" className="h-8 w-8" aria-hidden="true">
+        <path d="M12 2C8.686 2 6 4.686 6 8v8c0 3.314 2.686 6 6 6s6-2.686 6-6V8c0-3.314-2.686-6-6-6z" />
+        <path d="M12 2v7M6 9h12" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    slug: 'cable',
+    labelFr: 'Câbles',
+    labelEn: 'Cables',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.5} stroke="currentColor" className="h-8 w-8" aria-hidden="true">
+        <path d="M8 3v3M16 3v3M8 6h8M8 18h8M8 18v3M16 18v3M4 9h16v6H4z" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    slug: 'speaker',
+    labelFr: 'Enceintes',
+    labelEn: 'Speakers',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.5} stroke="currentColor" className="h-8 w-8" aria-hidden="true">
+        <rect x="5" y="2" width="14" height="20" rx="2" />
+        <circle cx="12" cy="15" r="3" />
+        <circle cx="12" cy="7" r="1" />
+      </svg>
+    ),
+  },
+  {
+    slug: 'solar_lamp',
+    labelFr: 'Lampes Solaires',
+    labelEn: 'Solar Lamps',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.5} stroke="currentColor" className="h-8 w-8" aria-hidden="true">
+        <circle cx="12" cy="10" r="4" />
+        <path d="M12 2v2M12 18v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 10h2M20 10h2M4.22 15.78l1.42-1.42M18.36 5.64l1.42-1.42M8 20h8" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+];
+
 export default function Home() {
   const { t } = useLanguage();
   const [products, setProducts] = useState<Product[]>(LOCAL_PRODUCTS as Product[]);
-  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    async function loadProducts() {
-      try {
-        const dbProducts = await productService.getAll();
-        if (dbProducts.length > 0) setProducts(dbProducts);
-      } catch (err) {
-        console.error('Failed to load products:', err);
-      }
-    }
-    loadProducts();
+    productService.getAll().then(db => { if (db.length > 0) setProducts(db); }).catch(() => {});
   }, []);
 
   const featuredProducts = products
     .filter((p) => (p as ProductWithFeatured).featured)
-    .sort((a, b) => {
-      const score = { in_stock: 0, pre_order: 1, out_of_stock: 2 };
-      return score[a.stock_status] - score[b.stock_status];
-    });
-
-  const displayProducts = searchQuery
-    ? featuredProducts.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    : featuredProducts.slice(0, 4);
+    .slice(0, 8);
 
   const inStockCount = products.filter(p => p.stock_status === 'in_stock').length;
-  const businessNumber = process.env.NEXT_PUBLIC_WHATSAPP_PHONE_NUMBER || '237655163248';
-  const whatsappHref = `https://wa.me/${businessNumber}?text=${encodeURIComponent('Bonjour Loving Tech! Je voudrais de l\'aide pour choisir un produit.')}`;
+  const whatsappHref = `https://wa.me/237655163248?text=${encodeURIComponent("Bonjour Loving Tech! Je voudrais de l'aide pour choisir un produit.")}`;
 
   const heroBgImage = 'https://resource.logitech.com/w_692,c_lpad,ar_4:3,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/keyboards/signature-slim-solar-plus-k980-for-business/gallery/esp/b2b-k980-graphite-us-gallery1-esp.png?v=1';
 
@@ -79,26 +119,26 @@ export default function Home() {
 
             <h1 className="max-w-2xl text-5xl font-black tracking-tight text-white sm:text-7xl">
               {t({
-                en: 'Authentic productivity and gaming gear, delivered fast.',
+                en: 'Authentic gear for work and play, delivered fast.',
                 fr: 'Des équipements authentiques pour travailler et jouer, livrés rapidement.',
               })}
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-white/70 sm:text-xl">
               {t({
-                en: 'Shop Logitech, Keychron, and Anker accessories with pay-on-delivery confidence, WhatsApp support, and fast local fulfillment.',
-                fr: 'Achetez vos accessoires Logitech, Keychron et Anker avec paiement à la livraison, assistance WhatsApp et livraison locale rapide.',
+                en: 'Buy your tech accessories with cash on delivery and WhatsApp support.',
+                fr: 'Achetez vos accessoires tech avec paiement à la livraison et assistance WhatsApp.',
               })}
             </p>
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <a
-                href="#catalog"
+              <Link
+                href="/products"
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 font-semibold text-brand-dark transition hover:bg-brand-grey focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-dark"
               >
                 {t({ en: 'Browse catalog', fr: 'Parcourir le catalogue' })}
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </a>
+              </Link>
               <a
                 href={whatsappHref}
                 target="_blank"
@@ -110,22 +150,12 @@ export default function Home() {
               </a>
             </div>
 
-            <div className="mt-12 grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur">
-                <p className="text-sm uppercase tracking-[0.2em] text-white/50">{t({ en: 'Available now', fr: 'Disponibles maintenant' })}</p>
-                <p className="mt-3 text-3xl font-bold text-white">{inStockCount}+</p>
-                <p className="mt-2 text-sm text-white/70">{t({ en: 'Ready-to-ship accessories in stock.', fr: 'Accessoires prêts à être expédiés en stock.' })}</p>
-              </div>
-              <div className="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur">
-                <p className="text-sm uppercase tracking-[0.2em] text-white/50">{t({ en: 'Delivery speed', fr: 'Vitesse de livraison' })}</p>
-                <p className="mt-3 text-3xl font-bold text-white">24h</p>
-                <p className="mt-2 text-sm text-white/70">{t({ en: 'Douala first, then major cities nationwide.', fr: 'Douala en priorité, puis les grandes villes du pays.' })}</p>
-              </div>
-              <div className="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur">
-                <p className="text-sm uppercase tracking-[0.2em] text-white/50">{t({ en: 'Ordering confidence', fr: 'Achat sans stress' })}</p>
-                <p className="mt-3 text-3xl font-bold text-white">100%</p>
-                <p className="mt-2 text-sm text-white/70">{t({ en: 'Inspect the product before you pay.', fr: 'Inspectez le produit avant de payer.' })}</p>
-              </div>
+            <div className="mt-12 flex flex-wrap gap-6 text-sm text-white/60">
+              <span><strong className="text-white">{inStockCount}+</strong> {t({ en: 'Products', fr: 'Produits' })}</span>
+              <span>·</span>
+              <span><strong className="text-white">2–3j</strong> {t({ en: 'Delivery', fr: 'Livraison' })}</span>
+              <span>·</span>
+              <span><strong className="text-white">100%</strong> {t({ en: 'Inspection before payment', fr: 'Inspection avant paiement' })}</span>
             </div>
           </div>
         </div>
@@ -150,9 +180,21 @@ export default function Home() {
       {/* Trust pillars */}
       <section className="mx-auto grid max-w-7xl grid-cols-1 gap-12 border-b border-brand-grey/20 px-6 py-20 md:grid-cols-3">
         {[
-          { icon: <ShieldCheck className="h-8 w-8" aria-hidden="true" />, title: t({ en: 'Authenticity first', fr: 'Authenticité garantie' }), body: t({ en: 'Premium brands sourced for buyers who do not want to gamble on fake accessories.', fr: 'Des marques premium pour les acheteurs qui ne veulent pas prendre le risque des contrefaçons.' }) },
-          { icon: <Truck className="h-8 w-8" aria-hidden="true" />, title: t({ en: 'Fast local delivery', fr: 'Livraison locale rapide' }), body: t({ en: '24h in Douala, 48h in Yaoundé, with clear coordination over WhatsApp.', fr: '24h à Douala, 48h à Yaoundé, avec une coordination simple via WhatsApp.' }) },
-          { icon: <ShoppingBag className="h-8 w-8" aria-hidden="true" />, title: t({ en: 'Pay after inspection', fr: 'Paiement après inspection' }), body: t({ en: 'You can verify the product on delivery before completing payment.', fr: 'Vous pouvez vérifier le produit à la livraison avant de finaliser le paiement.' }) },
+          {
+            icon: <ShieldCheck className="h-8 w-8" aria-hidden="true" />,
+            title: t({ en: 'Authenticity guaranteed', fr: 'Authenticité garantie' }),
+            body: t({ en: 'Premium brands, never counterfeits.', fr: 'Des marques premium, jamais de contrefaçons.' }),
+          },
+          {
+            icon: <Truck className="h-8 w-8" aria-hidden="true" />,
+            title: t({ en: 'Nationwide delivery', fr: 'Livraison nationale' }),
+            body: t({ en: 'Anywhere in Cameroon via bus agencies.', fr: 'Partout au Cameroun via agences de bus.' }),
+          },
+          {
+            icon: <ShoppingBag className="h-8 w-8" aria-hidden="true" />,
+            title: t({ en: 'Pay on delivery', fr: 'Paiement à la livraison' }),
+            body: t({ en: 'Inspect before you pay.', fr: 'Inspectez avant de payer.' }),
+          },
         ].map((item, i) => (
           <div key={i} className="rounded-3xl border border-brand-grey/20 bg-white p-8 shadow-sm">
             <div className="mb-5 inline-flex rounded-2xl bg-brand-blue/10 p-4 text-brand-blue">{item.icon}</div>
@@ -162,38 +204,51 @@ export default function Home() {
         ))}
       </section>
 
-      {/* Catalog */}
+      {/* Category grid */}
+      <section className="mx-auto max-w-7xl px-6 py-16 border-b border-brand-grey/20">
+        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand-dark/50 mb-6">
+          {t({ en: 'Browse by category', fr: 'Parcourir par catégorie' })}
+        </p>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          {CATEGORIES.map(cat => (
+            <Link
+              key={cat.slug}
+              href={`/products?category=${cat.slug}`}
+              className="group flex flex-col items-center gap-3 rounded-2xl border border-brand-grey/20 bg-white p-6 text-center transition hover:border-brand-blue hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+            >
+              <span className="text-brand-dark/40 transition group-hover:text-brand-blue">
+                {cat.icon}
+              </span>
+              <span className="text-sm font-semibold text-brand-dark">
+                {t({ en: cat.labelEn, fr: cat.labelFr })}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Featured products */}
       <section className="mx-auto max-w-7xl px-6 py-24">
         <div className="mb-14 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl flex-1">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand-dark/50">
-              {t({ en: 'Featured now', fr: 'En vedette actuellement' })}
+              {t({ en: 'Featured', fr: 'En vedette' })}
             </p>
             <h2 className="mt-3 text-4xl font-bold tracking-tight text-brand-dark">
-              {t({ en: 'Best picks for work, travel, and gaming', fr: 'Les meilleurs choix pour le travail, la mobilité et le gaming' })}
+              {t({ en: 'Best picks for work, mobility and gaming', fr: 'Les meilleurs choix pour le travail, la mobilité et le gaming' })}
             </h2>
-            <div className="mt-8 relative max-w-md">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-dark/30 pointer-events-none" aria-hidden="true" />
-              <input
-                type="text"
-                placeholder={t({ en: 'Search featured products...', fr: 'Rechercher des produits vedettes...' })}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-sm bg-white border border-brand-grey/30 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-blue transition"
-              />
-            </div>
           </div>
           <Link
             href="/products"
             className="inline-flex items-center gap-2 self-start rounded-full border border-brand-grey/30 px-5 py-2.5 text-sm font-medium text-brand-dark transition hover:bg-brand-grey/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2"
           >
-            {t({ en: 'See all products', fr: 'Voir tous les produits' })}
+            {t({ en: 'View all products', fr: 'Voir tous les produits' })}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </div>
 
-        <div id="catalog" className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          {displayProducts.map((product) => (
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+          {featuredProducts.map((product) => (
             <ProductCard key={product.id} product={product as ProductWithFeatured} />
           ))}
         </div>
@@ -207,15 +262,15 @@ export default function Home() {
               {t({ en: 'How it works', fr: 'Comment ça marche' })}
             </p>
             <h2 className="mt-3 text-4xl font-bold tracking-tight text-brand-dark">
-              {t({ en: 'A simpler buying flow for first-time customers', fr: "Un parcours d'achat simple pour les nouveaux clients" })}
+              {t({ en: 'Simple from first click to delivery', fr: "Simple du premier clic à la livraison" })}
             </h2>
           </div>
 
           <div className="mt-14 grid grid-cols-1 gap-8 md:grid-cols-3">
             {[
-              { icon: <Clock3 className="h-8 w-8" aria-hidden="true" />, num: '01', title: t({ en: 'Choose your gear', fr: 'Choisissez votre équipement' }), body: t({ en: 'Browse the catalog or message directly on WhatsApp if you need help comparing options.', fr: "Parcourez le catalogue ou écrivez directement sur WhatsApp si vous avez besoin d'aide pour comparer les options." }) },
-              { icon: <MessageCircle className="h-8 w-8" aria-hidden="true" />, num: '02', title: t({ en: 'Confirm in minutes', fr: 'Confirmez en quelques minutes' }), body: t({ en: 'Send your WhatsApp number and delivery area. We confirm availability and coordinate delivery quickly.', fr: 'Envoyez votre numéro WhatsApp et votre zone de livraison. Nous confirmons la disponibilité et organisons la livraison rapidement.' }) },
-              { icon: <CheckCircle2 className="h-8 w-8" aria-hidden="true" />, num: '03', title: t({ en: 'Inspect before paying', fr: 'Inspectez avant de payer' }), body: t({ en: 'Receive the product, verify it, and complete payment with more confidence.', fr: 'Recevez le produit, vérifiez-le, puis payez en toute confiance.' }) },
+              { icon: <Clock3 className="h-8 w-8" aria-hidden="true" />, num: '01', title: t({ en: 'Choose your gear', fr: 'Choisissez votre équipement' }), body: t({ en: 'Browse the catalog or message us on WhatsApp if you need help.', fr: "Parcourez le catalogue ou écrivez sur WhatsApp si vous avez besoin d'aide." }) },
+              { icon: <MessageCircle className="h-8 w-8" aria-hidden="true" />, num: '02', title: t({ en: 'Confirm in minutes', fr: 'Confirmez en quelques minutes' }), body: t({ en: 'Send your number and delivery area. We confirm and ship fast.', fr: 'Envoyez votre numéro et votre zone. Nous confirmons et expédions rapidement.' }) },
+              { icon: <CheckCircle2 className="h-8 w-8" aria-hidden="true" />, num: '03', title: t({ en: 'Inspect before paying', fr: 'Inspectez avant de payer' }), body: t({ en: 'Receive the product, check it, then pay with full confidence.', fr: 'Recevez le produit, vérifiez-le, puis payez en toute confiance.' }) },
             ].map((item, i) => (
               <div key={i} className="rounded-3xl border border-brand-grey/20 bg-white p-8">
                 <div className="text-brand-blue">{item.icon}</div>
@@ -228,7 +283,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Quote + trust section */}
+      {/* Brand statement */}
       <section className="mx-auto max-w-7xl px-6 py-24">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-[2rem] bg-brand-dark p-10 text-white">
@@ -237,8 +292,8 @@ export default function Home() {
             </div>
             <p className="mt-8 max-w-2xl text-2xl font-semibold leading-10">
               {t({
-                en: '"The biggest friction in local tech commerce is trust. The homepage should remove that friction before the visitor even scrolls."',
-                fr: "« Le plus grand frein du commerce tech local, c'est la confiance. La page d'accueil doit supprimer ce frein avant même le premier scroll. »",
+                en: '"The biggest friction in local tech commerce is trust. We remove that friction before you even scroll."',
+                fr: "« Le plus grand frein du commerce tech local, c'est la confiance. Nous supprimons ce frein avant même le premier scroll. »",
               })}
             </p>
             <p className="mt-6 text-sm uppercase tracking-[0.24em] text-white/50">Loving Tech</p>
@@ -246,13 +301,13 @@ export default function Home() {
 
           <div className="rounded-[2rem] border border-brand-grey/20 p-10">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand-dark/50">
-              {t({ en: 'Why this page converts better', fr: 'Pourquoi cette page convertit mieux' })}
+              {t({ en: 'Why customers trust us', fr: 'Pourquoi les clients nous font confiance' })}
             </p>
             <div className="mt-8 space-y-5">
               {[
-                t({ en: 'The value proposition is specific: brands, geography, trust, and speed.', fr: 'La proposition de valeur est précise : marques, zone, confiance et rapidité.' }),
-                t({ en: 'The page offers two clear actions: browse or start on WhatsApp.', fr: 'La page propose deux actions claires : parcourir ou démarrer sur WhatsApp.' }),
-                t({ en: 'Objections are handled early with delivery, authenticity, and pay-on-delivery reassurance.', fr: "Les objections sont traitées tôt avec la livraison, l'authenticité et le paiement à la livraison." }),
+                t({ en: 'Premium brands sourced directly — never counterfeit.', fr: 'Marques premium sourcées directement — jamais de contrefaçons.' }),
+                t({ en: 'Cash on delivery nationwide — no risk for the buyer.', fr: 'Paiement à la livraison partout — aucun risque pour l\'acheteur.' }),
+                t({ en: 'WhatsApp support before, during, and after your order.', fr: 'Assistance WhatsApp avant, pendant et après votre commande.' }),
               ].map((text, i) => (
                 <div key={i} className="flex gap-4">
                   <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-brand-blue" aria-hidden="true" />
@@ -265,31 +320,62 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-brand-grey/20 px-6 py-20">
-        <nav aria-label="Footer" className="mx-auto flex max-w-7xl flex-col gap-8 md:flex-row md:items-center md:justify-between">
-          <div>
-            <div className="flex items-center gap-3 text-2xl font-bold italic tracking-tighter text-brand-dark">
-              <img src="/logo.png" alt="" aria-hidden="true" className="h-8 w-8 object-contain" />
-              LOVING TECH
+      <footer className="border-t border-brand-grey/20 bg-white px-6 pb-8 pt-16">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col gap-10 md:flex-row md:justify-between">
+            {/* Brand */}
+            <div className="max-w-xs">
+              <div className="flex items-center gap-3 text-2xl font-bold italic tracking-tighter text-brand-dark">
+                <img src="/logo.png" alt="" aria-hidden="true" className="h-8 w-8 object-contain" />
+                LOVING TECH
+              </div>
+              <p className="mt-3 text-sm text-brand-dark/50">
+                {t({
+                  en: 'Premium accessories for professionals, creators and gamers in Cameroon.',
+                  fr: 'Des accessoires premium pour les professionnels, créateurs et gamers au Cameroun.',
+                })}
+              </p>
+              <p className="mt-2 text-xs font-medium uppercase tracking-widest text-brand-dark/30">
+                Elevate Your Performance
+              </p>
             </div>
-            <p className="mt-3 max-w-md text-sm text-brand-dark/50">
-              {t({
-                en: 'Premium accessories for professionals, creators, and gamers across Cameroon.',
-                fr: 'Des accessoires premium pour les professionnels, les créateurs et les gamers partout au Cameroun.',
-              })}
-            </p>
+
+            {/* Nav links */}
+            <div>
+              <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-dark/40">
+                {t({ en: 'Navigation', fr: 'Navigation' })}
+              </p>
+              <nav className="flex flex-col gap-2 text-sm text-brand-dark/60" aria-label="Footer navigation">
+                <Link href="/products" className="transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded">
+                  {t({ en: 'Products', fr: 'Produits' })}
+                </Link>
+                <Link href="/return-policy" className="transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded">
+                  {t({ en: 'Return Policy', fr: 'Politique de retour' })}
+                </Link>
+                <Link href="/terms" className="transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded">
+                  {t({ en: 'Terms', fr: 'Conditions' })}
+                </Link>
+              </nav>
+            </div>
+
+            {/* Social */}
+            <div>
+              <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-brand-dark/40">
+                {t({ en: 'Follow us', fr: 'Suivez-nous' })}
+              </p>
+              <div className="flex flex-col gap-2 text-sm text-brand-dark/60">
+                <a href="https://facebook.com/LovingTech" target="_blank" rel="noreferrer" className="transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded">Facebook</a>
+                <a href="https://instagram.com/lovingtechcmr" target="_blank" rel="noreferrer" className="transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded">Instagram · @lovingtechcmr</a>
+                <a href="https://tiktok.com/@lovingtech.shop" target="_blank" rel="noreferrer" className="transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded">TikTok · @lovingtech.shop</a>
+                <a href="https://wa.me/237655163248" target="_blank" rel="noreferrer" className="transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded">WhatsApp · +237 655 163 248</a>
+              </div>
+            </div>
           </div>
 
-          <div className="flex gap-8 text-sm text-brand-dark/50">
-            <a href="#" className="transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded">Instagram</a>
-            <a href={whatsappHref} target="_blank" rel="noreferrer" className="transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded">WhatsApp</a>
-            <a href="#" className="transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded">{t({ en: 'Terms', fr: 'Conditions' })}</a>
+          <div className="mt-12 border-t border-brand-grey/20 pt-6 text-center text-sm text-brand-dark/40">
+            © 2026 Loving Tech Cameroun. {t({ en: 'All rights reserved.', fr: 'Tous droits réservés.' })}
           </div>
-
-          <p className="text-sm text-brand-dark/50">
-            © 2026 Loving Tech Cameroon. {t({ en: 'All rights reserved.', fr: 'Tous droits réservés.' })}
-          </p>
-        </nav>
+        </div>
       </footer>
     </main>
   );
