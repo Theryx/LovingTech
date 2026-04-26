@@ -11,8 +11,10 @@ import {
   ShoppingBag,
   Truck,
 } from 'lucide-react';
+
 import ProductCard from '@/components/ProductCard';
 import Navbar from '@/components/Navbar';
+import HeroCarousel from '@/components/HeroCarousel';
 import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts';
 import { Product, productService } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
@@ -90,74 +92,11 @@ export default function Home() {
     .slice(0, 8);
 
   const inStockCount = products.filter(p => p.stock_status === 'in_stock').length;
-  const whatsappHref = `https://wa.me/237655163248?text=${encodeURIComponent("Bonjour Loving Tech! Je voudrais de l'aide pour choisir un produit.")}`;
-
-  const heroBgImage = 'https://resource.logitech.com/w_692,c_lpad,ar_4:3,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/keyboards/signature-slim-solar-plus-k980-for-business/gallery/esp/b2b-k980-graphite-us-gallery1-esp.png?v=1';
-
   return (
     <main className="min-h-screen bg-white text-brand-dark">
       <Navbar />
 
-      {/* Hero */}
-      <section
-        className="relative overflow-hidden bg-brand-dark px-6 pb-24 pt-32"
-        style={{ backgroundImage: `url(${heroBgImage})`, backgroundPosition: 'right center', backgroundRepeat: 'no-repeat', backgroundSize: 'contain' }}
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.14),_transparent_34%),linear-gradient(120deg,_rgba(17,17,17,0.92),_rgba(17,17,17,0.82)_48%,_rgba(17,17,17,0.96))]" />
-        <div className="relative z-10 mx-auto max-w-7xl">
-          <div className="max-w-3xl">
-            <div className="mb-6 flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.24em] text-white/70">
-              <span className="rounded-full border border-white/15 bg-white/10 px-4 py-2 backdrop-blur">
-                {t({ en: 'Authentic gear only', fr: 'Équipements 100% authentiques' })}
-              </span>
-              <span className="rounded-full border border-white/15 bg-white/10 px-4 py-2 backdrop-blur">
-                {t({ en: 'Delivery in Cameroon', fr: 'Livraison au Cameroun' })}
-              </span>
-            </div>
-
-            <h1 className="max-w-2xl text-5xl font-black tracking-tight text-white sm:text-7xl">
-              {t({
-                en: 'Authentic gear for work and play, delivered fast.',
-                fr: 'Des équipements authentiques pour travailler et jouer, livrés rapidement.',
-              })}
-            </h1>
-
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-white/70 sm:text-xl">
-              {t({
-                en: 'Buy your tech accessories with cash on delivery and WhatsApp support.',
-                fr: 'Achetez vos accessoires tech avec paiement à la livraison et assistance WhatsApp.',
-              })}
-            </p>
-
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <Link
-                href="/products"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 font-semibold text-brand-dark transition hover:bg-brand-grey focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-dark"
-              >
-                {t({ en: 'Browse catalog', fr: 'Parcourir le catalogue' })}
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/10 px-7 py-3.5 font-semibold text-white backdrop-blur transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-dark"
-              >
-                <MessageCircle className="h-4 w-4" aria-hidden="true" />
-                {t({ en: 'Order on WhatsApp', fr: 'Commander sur WhatsApp' })}
-              </a>
-            </div>
-
-            <div className="mt-12 flex flex-wrap gap-6 text-sm text-white/60">
-              <span><strong className="text-white">{inStockCount}+</strong> {t({ en: 'Products', fr: 'Produits' })}</span>
-              <span>·</span>
-              <span><strong className="text-white">2–3j</strong> {t({ en: 'Delivery', fr: 'Livraison' })}</span>
-              <span>·</span>
-              <span><strong className="text-white">100%</strong> {t({ en: 'Inspection before payment', fr: 'Inspection avant paiement' })}</span>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroCarousel inStockCount={inStockCount} />
 
       {/* Brand bar */}
       <section className="border-b border-brand-grey/20 bg-white px-6 py-6">
