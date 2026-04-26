@@ -8,7 +8,17 @@
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
       "Bash(git config *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(git stash *)",
+      "Bash(git checkout *)",
+      "Bash(git cherry-pick *)",
+      "Bash(taskkill *)",
+      "PowerShell(Stop-Process *)",
+      "PowerShell(Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"cd 'D:\\\\LovingTech'; npm run dev\")",
+      "PowerShell(Start-Sleep -Seconds 5; try { $r = Invoke-WebRequest -Uri \"http://localhost:3000\" -TimeoutSec 5 -UseBasicParsing; \"Status: $\\($r.StatusCode\\)\" } catch { \"Not ready yet: $_\" })",
+      "PowerShell(Start-Sleep -Seconds 8; try { $r = Invoke-WebRequest -Uri \"http://localhost:3000\" -TimeoutSec 8 -UseBasicParsing; \"Status: $\\($r.StatusCode\\)\" } catch { \"Not ready yet\" })",
+      "PowerShell(Start-Sleep -Seconds 8; try { $r = Invoke-WebRequest -Uri \"http://localhost:3000\" -TimeoutSec 8 -UseBasicParsing; \"Home: $\\($r.StatusCode\\)\" } catch { \"Home failed: $_\" })",
+      "PowerShell(Start-Sleep -Seconds 8; try { $r = Invoke-WebRequest -Uri \"http://localhost:3000\" -TimeoutSec 10 -UseBasicParsing; \"Home: $\\($r.StatusCode\\)\" } catch { \"Home failed\" })"
     ]
   }
 }
