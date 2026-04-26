@@ -147,6 +147,131 @@ export const orderService = {
   },
 };
 
+export type ReviewStatus = 'pending' | 'approved' | 'rejected';
+
+export type Review = {
+  id?: string;
+  product_id: string;
+  order_ref: string;
+  rating: number;
+  comment?: string;
+  reviewer_name: string;
+  status?: ReviewStatus;
+  created_at?: string;
+};
+
+export type PromoCode = {
+  id?: string;
+  code: string;
+  type: 'percent' | 'fixed';
+  value: number;
+  min_order_amount?: number;
+  max_uses?: number | null;
+  uses_count?: number;
+  expires_at?: string | null;
+  is_active?: boolean;
+  created_at?: string;
+};
+
+export const reviewService = {
+  async getByProduct(productId: string): Promise<Review[]> {
+    const { data, error } = await supabase
+      .from('reviews')
+      .select('*')
+      .eq('product_id', productId)
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false });
+    if (error) return [];
+    return data || [];
+  },
+
+  async getAll(): Promise<Review[]> {
+    const { data, error } = await supabase
+      .from('reviews')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async create(review: Omit<Review, 'id' | 'status' | 'created_at'>): Promise<Review> {
+    const { data, error } = await supabase
+      .from('reviews')
+      .insert([{ ...review, status: 'pending' }])
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async updateStatus(id: string, status: ReviewStatus): Promise<void> {
+    const { error } = await supabase
+      .from('reviews')
+      .update({ status })
+      .eq('id', id);
+    if (error) throw error;
+  },
+
+  async getPendingCount(): Promise<number> {
+    const { count, error } = await supabase
+      .from('reviews')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending');
+    if (error) return 0;
+    return count || 0;
+  },
+};
+
+export const promoService = {
+  async getAll(): Promise<PromoCode[]> {
+    const { data, error } = await supabase
+      .from('promo_codes')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async create(promo: Omit<PromoCode, 'id' | 'uses_count' | 'created_at'>): Promise<PromoCode> {
+    const { data, error } = await supabase
+      .from('promo_codes')
+      .insert([{ ...promo, code: promo.code.toUpperCase(), uses_count: 0 }])
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async update(id: string, updates: Partial<PromoCode>): Promise<void> {
+    const { error } = await supabase
+      .from('promo_codes')
+      .update(updates)
+      .eq('id', id);
+    if (error) throw error;
+  },
+
+  async delete(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('promo_codes')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+  },
+
+  async incrementUses(code: string): Promise<void> {
+    const { data } = await supabase
+      .from('promo_codes')
+      .select('uses_count')
+      .ilike('code', code)
+      .single();
+    if (!data) return;
+    await supabase
+      .from('promo_codes')
+      .update({ uses_count: (data.uses_count || 0) + 1 })
+      .ilike('code', code);
+  },
+};
+
 export const productService = {
   async getAll(): Promise<Product[]> {
     const { data, error } = await supabase

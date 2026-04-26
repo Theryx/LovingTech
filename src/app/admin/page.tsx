@@ -5,16 +5,18 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts';
-import { Product, productService, orderService } from '@/lib/supabase';
+import { Product, productService, orderService, reviewService } from '@/lib/supabase';
 
 export default function AdminDashboard() {
   const { t } = useLanguage();
   const [products, setProducts] = useState<Product[]>(LOCAL_PRODUCTS as Product[]);
   const [stats, setStats] = useState({ todayCount: 0, todayRevenue: 0, pendingCount: 0 });
+  const [pendingReviews, setPendingReviews] = useState(0);
 
   useEffect(() => {
     productService.getAll().then(data => { if (data.length > 0) setProducts(data); }).catch(() => {});
     orderService.getTodayStats().then(s => setStats({ todayCount: s.count, todayRevenue: s.revenue, pendingCount: s.pending })).catch(() => {});
+    reviewService.getPendingCount().then(setPendingReviews).catch(() => {});
   }, []);
 
   const featuredCount = products.filter((p) => (p as ProductWithFeatured).featured).length;
@@ -85,6 +87,16 @@ export default function AdminDashboard() {
             >
               <span className="font-medium text-brand-dark">{t({ en: 'View all orders', fr: 'Voir toutes les commandes' })}</span>
               <ArrowRight className="h-4 w-4 text-brand-blue" />
+            </Link>
+            <Link
+              href="/admin/reviews?status=pending"
+              className={`flex items-center justify-between rounded-lg p-4 transition ${pendingReviews > 0 ? 'bg-amber-50 hover:bg-amber-100' : 'bg-brand-grey/10 hover:bg-brand-grey/20'}`}
+            >
+              <span className={`font-medium ${pendingReviews > 0 ? 'text-amber-800' : 'text-brand-dark'}`}>
+                {t({ en: 'Reviews to approve', fr: 'Avis à approuver' })}
+                {pendingReviews > 0 && <span className="ml-2 rounded-full bg-amber-500 px-2 py-0.5 text-xs text-white">{pendingReviews}</span>}
+              </span>
+              <ArrowRight className={`h-4 w-4 ${pendingReviews > 0 ? 'text-amber-600' : 'text-brand-blue'}`} />
             </Link>
             {stats.pendingCount > 0 && (
               <Link

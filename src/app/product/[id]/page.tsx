@@ -3,9 +3,12 @@ import Link from 'next/link';
 import { ArrowLeft, ShieldCheck, Truck, ShoppingBag } from 'lucide-react';
 import { LOCAL_PRODUCTS } from '@/lib/localProducts';
 import { productService } from '@/lib/supabase';
+import { getRelatedProducts } from '@/lib/relatedProducts';
 import Navbar from '@/components/Navbar';
 import ProductGallery from '@/components/ProductGallery';
 import ProductDetailActions from '@/components/ProductDetailActions';
+import ProductCard from '@/components/ProductCard';
+import ReviewSection from '@/components/ReviewSection';
 
 const CONDITION_BADGE: Record<string, { bg: string; text: string; labelFr: string; labelEn: string }> = {
   new:          { bg: '#D1FAE5', text: '#065F46', labelFr: 'Neuf',          labelEn: 'New' },
@@ -20,14 +23,19 @@ export default async function ProductPage({ params }: { params: { id: string } }
     try {
       const db = await productService.getById(params.id);
       if (db) product = db;
-    } catch (err) {
-      console.error('Failed to fetch product from database:', err);
+    } catch {
+      // fall through to notFound
     }
   }
 
   if (!product) notFound();
 
   const conditionStyle = product.condition ? CONDITION_BADGE[product.condition] : null;
+
+  const isDbProduct = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(product.id);
+  const related = isDbProduct
+    ? await getRelatedProducts(product.id, product.category || '', product.tags || [])
+    : [];
 
   return (
     <main className="min-h-screen bg-white text-brand-dark">
@@ -91,7 +99,6 @@ export default async function ProductPage({ params }: { params: { id: string } }
           </div>
 
           <div className="space-y-8 mb-12">
-            {/* Bilingual description */}
             <div>
               <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-brand-grey">
                 Description
@@ -113,7 +120,6 @@ export default async function ProductPage({ params }: { params: { id: string } }
               )}
             </div>
 
-            {/* Specs */}
             {product.specs && Object.keys(product.specs).length > 0 && (
               <div>
                 <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-brand-grey">
@@ -130,7 +136,6 @@ export default async function ProductPage({ params }: { params: { id: string } }
               </div>
             )}
 
-            {/* Warranty */}
             {product.warranty_info && (
               <div>
                 <h3 className="mb-2 text-xs font-bold uppercase tracking-widest text-brand-grey">
@@ -159,6 +164,27 @@ export default async function ProductPage({ params }: { params: { id: string } }
           </div>
         </div>
       </section>
+
+      {/* Reviews */}
+      {isDbProduct && (
+        <section className="max-w-7xl mx-auto px-6 pb-16 border-t border-brand-grey/20 pt-12">
+          <ReviewSection productId={product.id} />
+        </section>
+      )}
+
+      {/* Related products */}
+      {related.length > 0 && (
+        <section className="max-w-7xl mx-auto px-6 pb-24 border-t border-brand-grey/20 pt-12">
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand-dark/50 mb-2">
+            Vous aimerez aussi / You might also like
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-8">
+            {related.map(p => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }

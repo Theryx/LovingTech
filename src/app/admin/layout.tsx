@@ -2,19 +2,23 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Package, ShoppingBag, LayoutDashboard, ArrowLeft, Globe } from 'lucide-react';
+import { Package, ShoppingBag, LayoutDashboard, ArrowLeft, Globe, Star, Tag } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 const adminNav = [
   { href: '/admin',          labelKey: 'dashboard', icon: LayoutDashboard },
   { href: '/admin/products', labelKey: 'products',  icon: Package },
   { href: '/admin/orders',   labelKey: 'orders',    icon: ShoppingBag },
+  { href: '/admin/reviews',  labelKey: 'reviews',   icon: Star },
+  { href: '/admin/promos',   labelKey: 'promos',    icon: Tag },
 ] as const;
 
 const labels = {
   dashboard:   { en: 'Dashboard', fr: 'Tableau de bord' },
   products:    { en: 'Products',  fr: 'Produits' },
   orders:      { en: 'Orders',    fr: 'Commandes' },
+  reviews:     { en: 'Reviews',   fr: 'Avis' },
+  promos:      { en: 'Promos',    fr: 'Promos' },
   backToStore: { en: 'Back to Store', fr: 'Retour à la boutique' },
 } as const;
 
@@ -42,7 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             ADMIN
           </Link>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 overflow-x-auto">
           {adminNav.map((item) => {
             const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
             const Icon = item.icon;
@@ -51,7 +55,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 key={item.href}
                 href={item.href}
                 aria-current={isActive ? 'page' : undefined}
-                className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue whitespace-nowrap ${
                   isActive ? 'bg-brand-blue text-white' : 'text-brand-dark/60 hover:bg-brand-grey/10 hover:text-brand-blue'
                 }`}
               >

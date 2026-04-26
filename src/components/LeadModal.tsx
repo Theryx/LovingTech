@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Phone, MapPin, User, ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react';
-import { Product, orderService } from '@/lib/supabase';
+import { X, Phone, MapPin, User, ArrowRight, ArrowLeft, CheckCircle2, Tag } from 'lucide-react';
+import { Product, orderService, promoService } from '@/lib/supabase';
 import { generateOrderRef } from '@/lib/generateOrderRef';
+import { validatePromo } from '@/lib/validatePromo';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface LeadModalProps {
@@ -42,16 +43,41 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
   const [quartier, setQuartier] = useState('');
   const [addressDetails, setAddressDetails] = useState('');
 
+  // Promo code state
+  const [promoInput, setPromoInput] = useState('');
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoMessage, setPromoMessage] = useState('');
+  const [promoError, setPromoError] = useState('');
+  const [promoLoading, setPromoLoading] = useState(false);
+
   const subtotal = product.price_xaf * 1;
   const deliveryFee = calcDeliveryFee(city, subtotal);
-  const total = subtotal + deliveryFee;
+  const total = subtotal + deliveryFee - promoDiscount;
 
   useEffect(() => {
     if (isOpen) {
       setStep(1);
+      setPromoInput(''); setPromoDiscount(0); setPromoCode(''); setPromoMessage(''); setPromoError('');
       closeButtonRef.current?.focus();
     }
   }, [isOpen]);
+
+  const applyPromo = async () => {
+    if (!promoInput.trim()) return;
+    setPromoLoading(true);
+    setPromoMessage(''); setPromoError('');
+    const result = await validatePromo(promoInput.trim(), subtotal, deliveryFee);
+    if (result.valid) {
+      setPromoDiscount(result.discount);
+      setPromoCode(promoInput.trim().toUpperCase());
+      setPromoMessage(result.message);
+    } else {
+      setPromoDiscount(0); setPromoCode('');
+      setPromoError(result.error);
+    }
+    setPromoLoading(false);
+  };
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && isOpen) onClose(); };
@@ -80,13 +106,16 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
         customer_name: name,
         customer_phone: `+237${phone.replace(/^(\+237|237)/, '')}`,
         city,
-        bus_agency: agency,
+        bus_agency: agency || undefined,
         quartier,
-        address_details: addressDetails,
+        address_details: addressDetails || undefined,
         delivery_fee: deliveryFee,
+        promo_code: promoCode || undefined,
+        promo_discount: promoDiscount || undefined,
         status: 'pending',
         status_history: [{ status: 'pending', at: new Date().toISOString() }],
       });
+      if (promoCode) promoService.incrementUses(promoCode).catch(() => {});
 
       const msg = encodeURIComponent(
         `Bonjour Loving Tech! 👋\n\n` +
@@ -102,6 +131,7 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
         (addressDetails ? `Détails: ${addressDetails}\n` : '') +
         `\n💰 Sous-total: ${subtotal.toLocaleString('fr-FR')} FCFA\n` +
         `🚚 Livraison: ${deliveryFee === 0 ? 'GRATUITE' : `${deliveryFee.toLocaleString('fr-FR')} FCFA`}\n` +
+        (promoDiscount > 0 ? `🎟️ Promo (${promoCode}): -${promoDiscount.toLocaleString('fr-FR')} FCFA\n` : '') +
         `✅ Total: ${total.toLocaleString('fr-FR')} FCFA\n\n` +
         `Merci!`
       );
@@ -271,6 +301,30 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
                       </div>
                     )}
                   </div>
+                  {/* Promo code */}
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-grey" aria-hidden="true" />
+                      <input
+                        type="text"
+                        value={promoInput}
+                        onChange={e => setPromoInput(e.target.value.toUpperCase())}
+                        placeholder={t({ en: 'Promo code', fr: 'Code promo' })}
+                        className="w-full rounded-xl border border-brand-grey/30 py-2.5 pl-10 pr-3 text-sm text-brand-dark placeholder:text-brand-dark/30 focus:outline-none focus:ring-2 focus:ring-brand-blue transition"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={applyPromo}
+                      disabled={promoLoading || !promoInput.trim()}
+                      className="rounded-xl border border-brand-blue px-4 py-2.5 text-sm font-medium text-brand-blue transition hover:bg-brand-blue/5 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+                    >
+                      {promoLoading ? '…' : t({ en: 'Apply', fr: 'Appliquer' })}
+                    </button>
+                  </div>
+                  {promoMessage && <p className="text-xs text-green-700">{promoMessage}</p>}
+                  {promoError && <p className="text-xs text-red-600">{promoError}</p>}
+
                   <div className="rounded-xl bg-brand-grey/10 p-4 space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-brand-dark/60">{t({ en: 'Subtotal', fr: 'Sous-total' })}</span>
@@ -282,6 +336,12 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
                         {deliveryFee === 0 ? t({ en: 'FREE', fr: 'GRATUITE' }) : `${deliveryFee.toLocaleString('fr-FR')} FCFA`}
                       </span>
                     </div>
+                    {promoDiscount > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-brand-dark/60">Promo ({promoCode})</span>
+                        <span className="text-green-700 font-medium">-{promoDiscount.toLocaleString('fr-FR')} FCFA</span>
+                      </div>
+                    )}
                     <div className="flex justify-between border-t border-brand-grey/20 pt-2 font-bold">
                       <span className="text-brand-dark">Total</span>
                       <span className="text-brand-blue text-base">{total.toLocaleString('fr-FR')} FCFA</span>
