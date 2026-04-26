@@ -310,28 +310,22 @@ export const productService = {
 
   async update(id: string, updates: Partial<Product>): Promise<Product> {
     const { updated_at, ...validUpdates } = updates as any;
-    
-    const { data, error } = await supabase
+
+    const { data, error, count } = await supabase
       .from('products')
       .update(validUpdates)
       .eq('id', id)
       .select()
       .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') {
-      throw error;
+    if (error) throw error;
+
+    if (!data) {
+      // 0 rows updated — likely RLS blocking the write
+      throw new Error(`Update blocked: no rows modified for product "${id}". Check Supabase RLS policies.`);
     }
 
-    if (data) {
-      return data;
-    }
-
-    const existingProduct = await this.getById(id);
-    if (!existingProduct) {
-      throw new Error(`Product "${id}" was not found, or the update was not permitted.`);
-    }
-
-    return existingProduct;
+    return data;
   },
 
   async delete(id: string): Promise<void> {
