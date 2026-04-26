@@ -2,25 +2,19 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Package, Users, LayoutDashboard, ArrowLeft, Globe } from 'lucide-react';
+import { Package, ShoppingBag, LayoutDashboard, ArrowLeft, Globe } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
-type AdminNavItem = {
-  href: string;
-  labelKey: 'dashboard' | 'products' | 'leads';
-  icon: typeof LayoutDashboard;
-};
-
-const adminNav: AdminNavItem[] = [
-  { href: '/admin', labelKey: 'dashboard', icon: LayoutDashboard },
-  { href: '/admin/products', labelKey: 'products', icon: Package },
-  { href: '/admin/leads', labelKey: 'leads', icon: Users },
-];
+const adminNav = [
+  { href: '/admin',          labelKey: 'dashboard', icon: LayoutDashboard },
+  { href: '/admin/products', labelKey: 'products',  icon: Package },
+  { href: '/admin/orders',   labelKey: 'orders',    icon: ShoppingBag },
+] as const;
 
 const labels = {
-  dashboard: { en: 'Dashboard', fr: 'Tableau de bord' },
-  products: { en: 'Products', fr: 'Produits' },
-  leads: { en: 'Leads', fr: 'Prospects' },
+  dashboard:   { en: 'Dashboard', fr: 'Tableau de bord' },
+  products:    { en: 'Products',  fr: 'Produits' },
+  orders:      { en: 'Orders',    fr: 'Commandes' },
   backToStore: { en: 'Back to Store', fr: 'Retour à la boutique' },
 } as const;
 
@@ -52,16 +46,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {adminNav.map((item) => {
             const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
             const Icon = item.icon;
-
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 aria-current={isActive ? 'page' : undefined}
                 className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
-                  isActive
-                    ? 'bg-brand-blue text-white'
-                    : 'text-brand-dark/60 hover:bg-brand-grey/10 hover:text-brand-blue'
+                  isActive ? 'bg-brand-blue text-white' : 'text-brand-dark/60 hover:bg-brand-grey/10 hover:text-brand-blue'
                 }`}
               >
                 <Icon className="h-4 w-4" aria-hidden="true" />

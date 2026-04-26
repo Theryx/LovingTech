@@ -45,13 +45,106 @@ export type Product = {
   tags?: string[];
 };
 
-export type Lead = {
+export type OrderStatus = 'pending' | 'confirmed' | 'dispatched' | 'delivered' | 'cancelled';
+
+export type Order = {
   id?: string;
-  product_id: string;
-  whatsapp_number: string;
-  address: string;
-  status?: 'pending' | 'contacted' | 'completed';
+  order_ref: string;
+  product_id?: string;
+  product_name: string;
+  variant_chosen?: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  customer_name: string;
+  customer_phone: string;
+  customer_email?: string;
+  city: string;
+  bus_agency?: string;
+  quartier: string;
+  address_details?: string;
+  delivery_fee: number;
+  promo_code?: string;
+  promo_discount?: number;
+  status?: OrderStatus;
+  admin_notes?: string;
+  status_history?: { status: OrderStatus; at: string; note?: string }[];
   created_at?: string;
+  updated_at?: string;
+};
+
+export const orderService = {
+  async getAll(): Promise<Order[]> {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async getByRef(orderRef: string): Promise<Order | null> {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('order_ref', orderRef)
+      .single();
+    if (error) return null;
+    return data;
+  },
+
+  async getById(id: string): Promise<Order | null> {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (error) return null;
+    return data;
+  },
+
+  async create(order: Omit<Order, 'id' | 'created_at' | 'updated_at'>): Promise<Order> {
+    const { data, error } = await supabase
+      .from('orders')
+      .insert([order])
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async updateStatus(id: string, status: OrderStatus, note?: string): Promise<void> {
+    const order = await this.getById(id);
+    if (!order) throw new Error('Order not found');
+    const history = order.status_history || [];
+    history.push({ status, at: new Date().toISOString(), note });
+    const { error } = await supabase
+      .from('orders')
+      .update({ status, status_history: history, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    if (error) throw error;
+  },
+
+  async updateNotes(id: string, admin_notes: string): Promise<void> {
+    const { error } = await supabase
+      .from('orders')
+      .update({ admin_notes, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    if (error) throw error;
+  },
+
+  async getTodayStats(): Promise<{ count: number; revenue: number; pending: number }> {
+    const today = new Date().toISOString().slice(0, 10);
+    const { data, error } = await supabase
+      .from('orders')
+      .select('total_price, status, created_at')
+      .gte('created_at', `${today}T00:00:00Z`);
+    if (error) return { count: 0, revenue: 0, pending: 0 };
+    const count = data.length;
+    const revenue = data.reduce((s, o) => s + (o.total_price || 0), 0);
+    const pending = data.filter(o => o.status === 'pending').length;
+    return { count, revenue, pending };
+  },
 };
 
 export const productService = {
