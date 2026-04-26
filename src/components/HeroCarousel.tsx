@@ -9,7 +9,7 @@ import { useLanguage } from '@/context/LanguageContext';
 const SLIDES = [
   {
     id: 1,
-    bg: 'https://resource.logitech.com/w_692,c_lpad,ar_4:3,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/keyboards/signature-slim-solar-plus-k980-for-business/gallery/esp/b2b-k980-graphite-us-gallery1-esp.png?v=1',
+    bg: '/images/carousel_1.png',
     badgeFr: 'Claviers & Souris',
     badgeEn: 'Keyboards & Mice',
     titleFr: 'Des équipements authentiques pour travailler et jouer.',
@@ -101,9 +101,10 @@ export default function HeroCarousel({ inStockCount }: { inStockCount: number })
           className="absolute inset-0"
           style={{
             backgroundImage: `url(${slide.bg})`,
-            backgroundPosition: 'right center',
+            backgroundPosition: 'center center',
             backgroundRepeat: 'no-repeat',
-            backgroundSize: 'contain',
+            backgroundSize: slide.id === 1 ? 'cover' : 'contain',
+            backgroundPositionX: slide.id === 1 ? 'center' : 'right',
           }}
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.14),_transparent_34%),linear-gradient(120deg,_rgba(17,17,17,0.94),_rgba(17,17,17,0.84)_48%,_rgba(17,17,17,0.97))]" />
