@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Search } from 'lucide-react';
@@ -41,7 +41,7 @@ function sortProducts(products: Product[], sort: SortKey): Product[] {
   return arr; // newest = DB order
 }
 
-export default function ProductsPage() {
+function ProductsContent() {
   const { language, t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -204,5 +204,13 @@ export default function ProductsPage() {
         © 2026 Loving Tech Cameroun. {t({ en: 'All rights reserved.', fr: 'Tous droits réservés.' })}
       </footer>
     </main>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <ProductsContent />
+    </Suspense>
   );
 }

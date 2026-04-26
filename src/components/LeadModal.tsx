@@ -29,7 +29,7 @@ function calcDeliveryFee(city: string, subtotal: number): number {
 }
 
 export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -348,7 +348,11 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
                     </div>
                   </div>
                   <p className="text-xs text-brand-dark/40 text-center">
-                    {t({ en: 'By ordering you accept our terms and return policy.', fr: 'En commandant, vous acceptez nos conditions et notre politique de retour.' })}
+                    {language === 'fr' ? (
+                      <>En commandant, vous acceptez nos <a href="/conditions" target="_blank" className="underline hover:text-brand-blue">Conditions</a> et notre <a href="/politique-de-retour" target="_blank" className="underline hover:text-brand-blue">Politique de retour</a>.</>
+                    ) : (
+                      <>By ordering you accept our <a href="/terms" target="_blank" className="underline hover:text-brand-blue">Terms</a> and <a href="/return-policy" target="_blank" className="underline hover:text-brand-blue">Return Policy</a>.</>
+                    )}
                   </p>
                 </div>
               )}
