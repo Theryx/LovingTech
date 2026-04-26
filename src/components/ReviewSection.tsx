@@ -62,8 +62,9 @@ export default function ReviewSection({ productId }: ReviewSectionProps) {
     try {
       await reviewService.create({ product_id: productId, order_ref: orderRef.trim().toUpperCase(), rating, reviewer_name: name.trim(), comment: comment.trim() || undefined });
       setSubmitted(true);
-    } catch {
-      setFormError("Une erreur s'est produite. Veuillez réessayer. / Something went wrong. Please try again.");
+    } catch (err: any) {
+      const msg = err?.message || err?.details || JSON.stringify(err);
+      setFormError(`Erreur: ${msg}`);
     } finally {
       setSubmitting(false);
     }
