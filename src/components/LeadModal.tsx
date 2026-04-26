@@ -14,19 +14,16 @@ interface LeadModalProps {
   onClose: () => void;
 }
 
-const DELIVERY_FEE_DOUALA = 2000;
-const DELIVERY_FEE_OTHER = 3000;
-const FREE_DELIVERY_THRESHOLD = 50000;
+const FREE_DELIVERY_THRESHOLD_DEFAULT = 50000;
 
-const CITIES = [
-  'Douala', 'Yaoundé', 'Bafoussam', 'Bamenda', 'Garoua',
-  'Maroua', 'Ngaoundéré', 'Bertoua', 'Ebolowa', 'Kribi',
-];
-
-function calcDeliveryFee(city: string, subtotal: number): number {
-  if (subtotal >= FREE_DELIVERY_THRESHOLD) return 0;
-  return city === 'Douala' ? DELIVERY_FEE_DOUALA : DELIVERY_FEE_OTHER;
-}
+type ZoneOption = {
+  id: string;
+  city_name_fr: string;
+  city_name_en: string;
+  delivery_fee: number;
+  estimated_days: string;
+  agencies: string[];
+};
 
 export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) {
   const { t, language } = useLanguage();
@@ -38,8 +35,11 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   // Step 2 — Delivery
-  const [city, setCity] = useState('Douala');
+  const [zones, setZones] = useState<ZoneOption[]>([]);
+  const [freeThreshold, setFreeThreshold] = useState(FREE_DELIVERY_THRESHOLD_DEFAULT);
+  const [city, setCity] = useState('');
   const [agency, setAgency] = useState('');
+  const [customAgency, setCustomAgency] = useState('');
   const [quartier, setQuartier] = useState('');
   const [addressDetails, setAddressDetails] = useState('');
 
@@ -52,8 +52,30 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
   const [promoLoading, setPromoLoading] = useState(false);
 
   const subtotal = product.price_xaf * 1;
-  const deliveryFee = calcDeliveryFee(city, subtotal);
+  const selectedZone = zones.find(z => z.city_name_fr === city || z.city_name_en === city) || null;
+  const zoneFee = selectedZone?.delivery_fee ?? (city === 'Douala' ? 2000 : 3000);
+  const deliveryFee = subtotal >= freeThreshold ? 0 : zoneFee;
+  const effectiveAgency = agency === '__custom__' ? customAgency : agency;
   const total = subtotal + deliveryFee - promoDiscount;
+
+  useEffect(() => {
+    fetch('/api/delivery-zones')
+      .then(r => r.json())
+      .then((data: ZoneOption[]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setZones(data);
+          setCity(data[0].city_name_fr);
+        }
+      })
+      .catch(() => {
+        // fallback to hardcoded Douala
+        setCity('Douala');
+      });
+    fetch('/api/delivery-settings')
+      .then(r => r.json())
+      .then(d => { if (d?.free_delivery_threshold) setFreeThreshold(d.free_delivery_threshold); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -86,11 +108,13 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
   }, [isOpen, onClose]);
 
   const isDouala = city === 'Douala';
+  const zoneAgencies = selectedZone?.agencies || [];
+  const agencyValue = agency === '__custom__' ? customAgency : agency;
 
   const step1Valid = name.trim().length >= 2 && phone.trim().length >= 8;
   const step2Valid = isDouala
-    ? city && quartier.trim().length >= 2
-    : city && agency.trim().length >= 2;
+    ? city.length > 0 && quartier.trim().length >= 2
+    : city.length > 0 && agencyValue.trim().length >= 2;
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -106,7 +130,7 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
         customer_name: name,
         customer_phone: `+237${phone.replace(/^(\+237|237)/, '')}`,
         city,
-        bus_agency: agency || undefined,
+        bus_agency: effectiveAgency || undefined,
         quartier,
         address_details: addressDetails || undefined,
         delivery_fee: deliveryFee,
@@ -126,7 +150,7 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
         `📱 WhatsApp: +237${phone.replace(/^(\+237|237)/, '')}\n\n` +
         `📦 Livraison:\n` +
         `Ville: ${city}\n` +
-        (agency ? `Agence: ${agency}\n` : '') +
+        (effectiveAgency ? `Agence: ${effectiveAgency}\n` : '') +
         `Quartier: ${quartier}\n` +
         (addressDetails ? `Détails: ${addressDetails}\n` : '') +
         `\n💰 Sous-total: ${subtotal.toLocaleString('fr-FR')} FCFA\n` +
@@ -237,11 +261,17 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
                     <label htmlFor="order-city" className="block text-sm font-medium text-brand-dark/60 mb-1.5">
                       {t({ en: 'City', fr: 'Ville' })} *
                     </label>
-                    <select id="order-city" value={city} onChange={e => { setCity(e.target.value); setAgency(''); setQuartier(''); }} className={`${inputNoPrefixCls} cursor-pointer`}>
-                      {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    <select id="order-city" value={city} onChange={e => { setCity(e.target.value); setAgency(''); setCustomAgency(''); setQuartier(''); }} className={`${inputNoPrefixCls} cursor-pointer`}>
+                      {zones.length > 0
+                        ? zones.map(z => <option key={z.id} value={z.city_name_fr}>{z.city_name_fr}</option>)
+                        : ['Douala', 'Yaoundé', 'Bafoussam', 'Bamenda', 'Garoua', 'Maroua', 'Ngaoundéré', 'Bertoua', 'Ebolowa', 'Kribi'].map(c => <option key={c} value={c}>{c}</option>)
+                      }
                     </select>
-                    <p className="text-xs mt-1.5">
-                      {subtotal >= FREE_DELIVERY_THRESHOLD
+                    {selectedZone && (
+                      <p className="text-xs mt-1 text-brand-dark/40">{selectedZone.estimated_days}</p>
+                    )}
+                    <p className="text-xs mt-1">
+                      {deliveryFee === 0
                         ? <span className="text-green-700 font-medium">✅ {t({ en: 'Free delivery!', fr: 'Livraison gratuite!' })}</span>
                         : <span className="text-brand-dark/50">{t({ en: 'Delivery fee', fr: 'Frais de livraison' })}: <strong>{deliveryFee.toLocaleString('fr-FR')} FCFA</strong></span>
                       }
@@ -259,10 +289,34 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
                       <label htmlFor="order-agency" className="block text-sm font-medium text-brand-dark/60 mb-1.5">
                         {t({ en: 'Bus Agency', fr: 'Agence de bus' })} *
                       </label>
-                      <div className="relative">
-                        <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-grey" aria-hidden="true" />
-                        <input id="order-agency" type="text" value={agency} onChange={e => setAgency(e.target.value)} className={inputCls} placeholder={t({ en: 'e.g. Vatican Express, Buca Voyages', fr: 'ex. Vatican Express, Buca Voyages' })} />
-                      </div>
+                      {zoneAgencies.length > 0 ? (
+                        <>
+                          <select
+                            id="order-agency"
+                            value={agency}
+                            onChange={e => { setAgency(e.target.value); setCustomAgency(''); }}
+                            className={`${inputNoPrefixCls} cursor-pointer`}
+                          >
+                            <option value="">{t({ en: '— Select an agency —', fr: '— Choisir une agence —' })}</option>
+                            {zoneAgencies.map(ag => <option key={ag} value={ag}>{ag}</option>)}
+                            <option value="__custom__">{t({ en: 'Other agency…', fr: 'Autre agence…' })}</option>
+                          </select>
+                          {agency === '__custom__' && (
+                            <input
+                              type="text"
+                              value={customAgency}
+                              onChange={e => setCustomAgency(e.target.value)}
+                              className={`${inputNoPrefixCls} mt-2`}
+                              placeholder={t({ en: 'Agency name', fr: "Nom de l'agence" })}
+                            />
+                          )}
+                        </>
+                      ) : (
+                        <div className="relative">
+                          <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-grey" aria-hidden="true" />
+                          <input id="order-agency" type="text" value={agency} onChange={e => setAgency(e.target.value)} className={inputCls} placeholder={t({ en: 'e.g. Vatican Express, Buca Voyages', fr: 'ex. Vatican Express, Buca Voyages' })} />
+                        </div>
+                      )}
                     </div>
                   )}
                   <div>
@@ -294,10 +348,10 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
                       <span className="text-brand-dark/60">{t({ en: 'City', fr: 'Ville' })}</span>
                       <span className="font-medium text-brand-dark">{city}{isDouala && quartier ? `, ${quartier}` : ''}</span>
                     </div>
-                    {!isDouala && agency && (
+                    {!isDouala && effectiveAgency && (
                       <div className="flex justify-between">
                         <span className="text-brand-dark/60">{t({ en: 'Agency', fr: 'Agence' })}</span>
-                        <span className="font-medium text-brand-dark">{agency}</span>
+                        <span className="font-medium text-brand-dark">{effectiveAgency}</span>
                       </div>
                     )}
                   </div>

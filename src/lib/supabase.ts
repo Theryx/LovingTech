@@ -272,6 +272,84 @@ export const promoService = {
   },
 };
 
+export type DeliveryZone = {
+  id?: string;
+  city_name_fr: string;
+  city_name_en: string;
+  delivery_fee: number;
+  estimated_days: string;
+  is_available?: boolean;
+  agencies?: string[];
+  sort_order?: number;
+  created_at?: string;
+};
+
+export type DeliverySettings = {
+  id?: string;
+  free_delivery_threshold: number;
+  updated_at?: string;
+};
+
+export const deliveryZoneService = {
+  async getAll(): Promise<DeliveryZone[]> {
+    const { data, error } = await supabase
+      .from('delivery_zones')
+      .select('*')
+      .order('sort_order', { ascending: true })
+      .order('city_name_fr', { ascending: true });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async create(zone: Omit<DeliveryZone, 'id' | 'created_at'>): Promise<DeliveryZone> {
+    const { data, error } = await supabase
+      .from('delivery_zones')
+      .insert([zone])
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async update(id: string, updates: Partial<DeliveryZone>): Promise<void> {
+    const { error } = await supabase
+      .from('delivery_zones')
+      .update(updates)
+      .eq('id', id);
+    if (error) throw error;
+  },
+
+  async delete(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('delivery_zones')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+  },
+
+  async getSettings(): Promise<DeliverySettings | null> {
+    const { data } = await supabase
+      .from('delivery_settings')
+      .select('*')
+      .single();
+    return data || null;
+  },
+
+  async updateSettings(threshold: number): Promise<void> {
+    const settings = await this.getSettings();
+    if (settings?.id) {
+      await supabase
+        .from('delivery_settings')
+        .update({ free_delivery_threshold: threshold, updated_at: new Date().toISOString() })
+        .eq('id', settings.id);
+    } else {
+      await supabase
+        .from('delivery_settings')
+        .insert([{ free_delivery_threshold: threshold }]);
+    }
+  },
+};
+
 export const productService = {
   async getAll(): Promise<Product[]> {
     const { data, error } = await supabase

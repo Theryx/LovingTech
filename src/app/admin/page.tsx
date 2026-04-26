@@ -98,6 +98,13 @@ export default function AdminDashboard() {
               </span>
               <ArrowRight className={`h-4 w-4 ${pendingReviews > 0 ? 'text-amber-600' : 'text-brand-blue'}`} />
             </Link>
+            <Link
+              href="/admin/delivery"
+              className="flex items-center justify-between rounded-lg bg-brand-grey/10 p-4 transition hover:bg-brand-grey/20"
+            >
+              <span className="font-medium text-brand-dark">{t({ en: 'Manage delivery zones', fr: 'Gérer les zones de livraison' })}</span>
+              <ArrowRight className="h-4 w-4 text-brand-blue" />
+            </Link>
             {stats.pendingCount > 0 && (
               <Link
                 href="/admin/orders?status=pending"

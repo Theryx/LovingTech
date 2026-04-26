@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Package, ShoppingBag, LayoutDashboard, ArrowLeft, Globe, Star, Tag } from 'lucide-react';
+import { Package, ShoppingBag, LayoutDashboard, ArrowLeft, Globe, Star, Tag, Truck } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 const adminNav = [
@@ -10,7 +10,8 @@ const adminNav = [
   { href: '/admin/products', labelKey: 'products',  icon: Package },
   { href: '/admin/orders',   labelKey: 'orders',    icon: ShoppingBag },
   { href: '/admin/reviews',  labelKey: 'reviews',   icon: Star },
-  { href: '/admin/promos',   labelKey: 'promos',    icon: Tag },
+  { href: '/admin/promos',    labelKey: 'promos',    icon: Tag },
+  { href: '/admin/delivery',  labelKey: 'delivery',  icon: Truck },
 ] as const;
 
 const labels = {
@@ -19,6 +20,7 @@ const labels = {
   orders:      { en: 'Orders',    fr: 'Commandes' },
   reviews:     { en: 'Reviews',   fr: 'Avis' },
   promos:      { en: 'Promos',    fr: 'Promos' },
+  delivery:    { en: 'Delivery',  fr: 'Livraison' },
   backToStore: { en: 'Back to Store', fr: 'Retour à la boutique' },
 } as const;
 

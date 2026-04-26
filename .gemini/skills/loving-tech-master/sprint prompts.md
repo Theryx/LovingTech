@@ -566,22 +566,20 @@ Redesign the homepage and upgrade the product listing page.
 
 ### Homepage — Full Section Spec
 
-Keep the existing dark hero and overall layout direction. Refine and extend as follows:
+Creatively propose a new homepage layout direction. Refine and extend as follows:
 
-**Section 1 — Navigation (keep, fix colors)**
-- Logo + "LOVING TECH" wordmark
+**Section 1 — Navigation**
+- Logo
 - FR/EN language toggle (brand-blue active state)
-- Dark mode toggle
 - WhatsApp CTA button (brand-orange): "Commander / Order"
 
-**Section 2 — Hero (keep layout, update content)**
-- Background: brand-dark (#111111)
+**Section 2 — Hero (update to a carousel, update content)**
 - Pill badges row: "ÉQUIPEMENTS 100% AUTHENTIQUES" · "LIVRAISON AU CAMEROUN"
-- FR headline: "Des équipements authentiques pour travailler et jouer, livrés rapidement."
-- EN headline: "Authentic gear for work and play, delivered fast."
+- FR headline: Propose a new headline
+- EN headline: Propose a new headline
 - FR subline: "Achetez vos accessoires tech avec paiement à la livraison et assistance WhatsApp."
 - EN subline: "Buy your tech accessories with cash on delivery and WhatsApp support."
-- CTAs: "Parcourir le catalogue →" (white bg, dark text) + "Commander sur WhatsApp" (ghost, white border)
+- CTAs: "Parcourir le catalogue →" + "Commander sur WhatsApp"
 - Stats row: "10+ Produits · 2–3j Livraison · 100% Inspection avant paiement"
 
 **Section 3 — Trust Badges (3 cards, light grey bg)**
