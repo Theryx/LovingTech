@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Package, ShoppingBag, LayoutDashboard, ArrowLeft, Globe, Star, Tag, Truck } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Package, ShoppingBag, LayoutDashboard, ArrowLeft, Globe, Star, Tag, Truck, LogOut } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 const adminNav = [
@@ -27,6 +28,13 @@ const labels = {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { language, toggleLanguage, t } = useLanguage();
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function logout() {
+    await fetch('/api/admin-login', { method: 'DELETE' });
+    router.push('/admin/login');
+    router.refresh();
+  }
 
   return (
     <div className="min-h-screen bg-white text-brand-dark">
@@ -73,6 +81,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           >
             <Globe className="h-4 w-4" aria-hidden="true" />
             <span className="uppercase">{language}</span>
+          </button>
+          <button
+            onClick={logout}
+            aria-label="Déconnexion / Logout"
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-brand-dark/60 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+          >
+            <LogOut className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
       </nav>
