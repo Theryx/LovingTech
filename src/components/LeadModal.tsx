@@ -107,7 +107,7 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
     return () => document.removeEventListener('keydown', handleKey);
   }, [isOpen, onClose]);
 
-  const isDouala = city === 'Douala';
+  const isDouala = city?.trim().toLowerCase() === 'douala';
   const zoneAgencies = selectedZone?.agencies || [];
   const agencyValue = agency === '__custom__' ? customAgency : agency;
 
