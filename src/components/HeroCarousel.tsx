@@ -12,8 +12,8 @@ const SLIDES = [
     bg: '/images/carousel_1.png',
     badgeFr: 'Claviers & Souris',
     badgeEn: 'Keyboards & Mice',
-    titleFr: 'Des équipements authentiques pour travailler et jouer.',
-    titleEn: 'Authentic gear for work and play.',
+    titleFr: 'Équipements authentiques pour professionel et Gamer.',
+    titleEn: 'Authentic gear for professional and Gamer.',
     subtitleFr: 'Logitech, Keychron, Anker — livrés partout au Cameroun.',
     subtitleEn: 'Logitech, Keychron, Anker — delivered anywhere in Cameroon.',
     ctaHref: '/products?category=keyboard',
@@ -39,10 +39,10 @@ const SLIDES = [
     bg: 'https://resource.logitech.com/w_692,c_lpad,ar_4:3,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/speakers/z407-bluetooth-speaker/gallery/z407-gallery-1.png',
     badgeFr: 'Livraison nationale',
     badgeEn: 'Nationwide delivery',
-    titleFr: 'Recevez partout au Cameroun à des frais de livraison abordables.',
-    titleEn: 'Receive anywhere in Cameroon at affordable delivery fees.',
-    subtitleFr: 'Livraison rapide dans toutes les villes via agences de bus.',
-    subtitleEn: 'Fast delivery to all cities via bus agencies.',
+    titleFr: 'Nous Livrons partout au Cameroun',
+    titleEn: 'We deliver everywhere in Cameroon',
+    subtitleFr: 'Livraison rapide dans toutes les villes',
+    subtitleEn: 'Fast delivery to all cities',
     ctaHref: '/products',
     ctaFr: 'Voir tous les produits',
     ctaEn: 'View all products',
@@ -114,7 +114,7 @@ export default function HeroCarousel({ inStockCount }: { inStockCount: number })
           <div className={`absolute inset-0 ${slide.id <= 2
             ? 'bg-[linear-gradient(120deg,_rgba(17,17,17,0.75),_rgba(17,17,17,0.45)_50%,_rgba(17,17,17,0.65))]'
             : 'bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.14),_transparent_34%),linear-gradient(120deg,_rgba(17,17,17,0.94),_rgba(17,17,17,0.84)_48%,_rgba(17,17,17,0.97))]'
-          }`} />
+            }`} />
         </motion.div>
       </AnimatePresence>
 
@@ -198,9 +198,8 @@ export default function HeroCarousel({ inStockCount }: { inStockCount: number })
                 role="tab"
                 aria-selected={i === current}
                 onClick={() => go(i, i > current ? 1 : -1)}
-                className={`h-1.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
-                  i === current ? 'w-8 bg-white' : 'w-4 bg-white/30 hover:bg-white/60'
-                }`}
+                className={`h-1.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${i === current ? 'w-8 bg-white' : 'w-4 bg-white/30 hover:bg-white/60'
+                  }`}
                 aria-label={`Slide ${i + 1}`}
               />
             ))}
