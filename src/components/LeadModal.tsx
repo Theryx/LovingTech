@@ -59,8 +59,12 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
     return () => document.removeEventListener('keydown', handleKey);
   }, [isOpen, onClose]);
 
+  const isDouala = city === 'Douala';
+
   const step1Valid = name.trim().length >= 2 && phone.trim().length >= 8;
-  const step2Valid = city && quartier.trim().length >= 2;
+  const step2Valid = isDouala
+    ? city && quartier.trim().length >= 2
+    : city && agency.trim().length >= 2;
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -203,7 +207,7 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
                     <label htmlFor="order-city" className="block text-sm font-medium text-brand-dark/60 mb-1.5">
                       {t({ en: 'City', fr: 'Ville' })} *
                     </label>
-                    <select id="order-city" value={city} onChange={e => setCity(e.target.value)} className={`${inputNoPrefixCls} cursor-pointer`}>
+                    <select id="order-city" value={city} onChange={e => { setCity(e.target.value); setAgency(''); setQuartier(''); }} className={`${inputNoPrefixCls} cursor-pointer`}>
                       {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                     <p className="text-xs mt-1.5">
@@ -213,21 +217,24 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
                       }
                     </p>
                   </div>
-                  <div>
-                    <label htmlFor="order-agency" className="block text-sm font-medium text-brand-dark/60 mb-1.5">
-                      {t({ en: 'Bus Agency', fr: 'Agence de bus' })}
-                    </label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-grey" aria-hidden="true" />
-                      <input id="order-agency" type="text" value={agency} onChange={e => setAgency(e.target.value)} className={inputCls} placeholder={t({ en: 'e.g. Vatican Express, Buca Voyages', fr: 'ex. Vatican Express, Buca Voyages' })} />
+                  {isDouala ? (
+                    <div>
+                      <label htmlFor="order-quartier" className="block text-sm font-medium text-brand-dark/60 mb-1.5">
+                        {t({ en: 'Neighbourhood', fr: 'Quartier' })} *
+                      </label>
+                      <input id="order-quartier" type="text" value={quartier} onChange={e => setQuartier(e.target.value)} className={inputNoPrefixCls} placeholder={t({ en: 'e.g. Bonamoussadi', fr: 'ex. Bonamoussadi' })} />
                     </div>
-                  </div>
-                  <div>
-                    <label htmlFor="order-quartier" className="block text-sm font-medium text-brand-dark/60 mb-1.5">
-                      {t({ en: 'Neighbourhood', fr: 'Quartier' })} *
-                    </label>
-                    <input id="order-quartier" type="text" value={quartier} onChange={e => setQuartier(e.target.value)} className={inputNoPrefixCls} placeholder={t({ en: 'e.g. Bonamoussadi', fr: 'ex. Bonamoussadi' })} />
-                  </div>
+                  ) : (
+                    <div>
+                      <label htmlFor="order-agency" className="block text-sm font-medium text-brand-dark/60 mb-1.5">
+                        {t({ en: 'Bus Agency', fr: 'Agence de bus' })} *
+                      </label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-grey" aria-hidden="true" />
+                        <input id="order-agency" type="text" value={agency} onChange={e => setAgency(e.target.value)} className={inputCls} placeholder={t({ en: 'e.g. Vatican Express, Buca Voyages', fr: 'ex. Vatican Express, Buca Voyages' })} />
+                      </div>
+                    </div>
+                  )}
                   <div>
                     <label htmlFor="order-details" className="block text-sm font-medium text-brand-dark/60 mb-1.5">
                       {t({ en: 'Delivery Instructions', fr: 'Instructions de livraison' })} ({t({ en: 'optional', fr: 'optionnel' })})
@@ -255,9 +262,9 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
                     </div>
                     <div className="flex justify-between">
                       <span className="text-brand-dark/60">{t({ en: 'City', fr: 'Ville' })}</span>
-                      <span className="font-medium text-brand-dark">{city}{quartier ? `, ${quartier}` : ''}</span>
+                      <span className="font-medium text-brand-dark">{city}{isDouala && quartier ? `, ${quartier}` : ''}</span>
                     </div>
-                    {agency && (
+                    {!isDouala && agency && (
                       <div className="flex justify-between">
                         <span className="text-brand-dark/60">{t({ en: 'Agency', fr: 'Agence' })}</span>
                         <span className="font-medium text-brand-dark">{agency}</span>
