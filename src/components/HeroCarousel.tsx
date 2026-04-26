@@ -22,7 +22,7 @@ const SLIDES = [
   },
   {
     id: 2,
-    bg: 'https://resource.logitech.com/w_692,c_lpad,ar_4:3,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/mice/mx-master-3s-for-business/gallery/b2b-mx-master-3s-top-graphite-gallery.png?v=1',
+    bg: '/images/carousel_2.png',
     badgeFr: 'Paiement à la livraison',
     badgeEn: 'Pay on delivery',
     titleFr: 'Inspectez avant de payer. Aucun risque.',
@@ -99,7 +99,7 @@ export default function HeroCarousel({ inStockCount }: { inStockCount: number })
           exit="exit"
           transition={{ duration: 0.5, ease: 'easeInOut' }}
           className="absolute inset-0"
-          style={slide.id === 1 ? {
+          style={slide.id <= 2 ? {
             backgroundImage: `url(${slide.bg})`,
             backgroundPosition: 'center center',
             backgroundRepeat: 'no-repeat',
@@ -111,7 +111,7 @@ export default function HeroCarousel({ inStockCount }: { inStockCount: number })
             backgroundSize: 'contain',
           }}
         >
-          <div className={`absolute inset-0 ${slide.id === 1
+          <div className={`absolute inset-0 ${slide.id <= 2
             ? 'bg-[linear-gradient(120deg,_rgba(17,17,17,0.75),_rgba(17,17,17,0.45)_50%,_rgba(17,17,17,0.65))]'
             : 'bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.14),_transparent_34%),linear-gradient(120deg,_rgba(17,17,17,0.94),_rgba(17,17,17,0.84)_48%,_rgba(17,17,17,0.97))]'
           }`} />
