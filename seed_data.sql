@@ -19,11 +19,11 @@ VALUES
   'in_stock'
 ),
 (
-  'Anker 735 Charger (GaNPrime 65W)', 
-  'Power 3 devices at once with this compact and powerful GaN charger.', 
+  'Anker 735 Charger (65W, 3 Ports, GaN)', 
+  'Power 3 devices at once with this compact GaNPrime charger. Features 2 USB-C ports, 1 USB-A port, ActiveShield 2.0, PowerIQ 4.0, and travel-friendly design.', 
   35000, 
   'Anker', 
-  '{"Wattage": "65W", "Ports": "2x USB-C, 1x USB-A", "Tech": "GaNPrime"}', 
+  '{"Wattage": "65W Max", "Ports": "2x USB-C, 1x USB-A", "Tech": "GaNPrime", "PowerIQ": "4.0", "Safety": "ActiveShield 2.0", "Input": "100V - 240V", "Weight": "132g", "Dimensions": "38.26 x 29.12 x 66.10 mm"}', 
   '{"https://images.unsplash.com/photo-1619139304037-41a690740994"}', 
   'in_stock'
 );
