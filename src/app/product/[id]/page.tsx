@@ -31,16 +31,22 @@ const CONDITION_BADGE: Record<string, { bg: string; text: string; labelFr: strin
   second_hand:  { bg: '#FEF3C7', text: '#92400E', labelFr: 'Occasion',      labelEn: 'Second-hand' },
 };
 
-export default async function ProductPage({ params }: { params: { id: string } }) {
-  let product = LOCAL_PRODUCTS.find(p => p.id === params.id) as any;
+export const dynamic = 'force-dynamic';
 
+export default async function ProductPage({ params }: { params: { id: string } }) {
+  let product: any = null;
+
+  // Try DB first
+  try {
+    const db = await productService.getById(params.id);
+    if (db) product = db;
+  } catch (err) {
+    console.error('DB fetch error on product page:', err);
+  }
+
+  // Fallback to local
   if (!product) {
-    try {
-      const db = await productService.getById(params.id);
-      if (db) product = db;
-    } catch {
-      // fall through to notFound
-    }
+    product = LOCAL_PRODUCTS.find(p => p.id === params.id);
   }
 
   if (!product) notFound();

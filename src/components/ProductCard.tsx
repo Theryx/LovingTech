@@ -31,6 +31,10 @@ export default function ProductCard({ product }: ProductCardProps) {
         badge={
           isOutOfStock ? (
             <Badge variant="out_of_stock" label={language === 'fr' ? 'Rupture de stock' : 'Out of Stock'} />
+          ) : product.condition === 'second_hand' ? (
+            <Badge variant="second_hand" label={language === 'fr' ? 'Occasion' : 'Second-hand'} />
+          ) : product.condition === 'refurbished' ? (
+            <Badge variant="refurbished" label={language === 'fr' ? 'Reconditionné' : 'Refurbished'} />
           ) : (
             <Badge variant="new" label={language === 'fr' ? 'Neuf' : 'New'} />
           )
