@@ -36,7 +36,7 @@ const SLIDES = [
   },
   {
     id: 3,
-    bg: 'https://resource.logitech.com/w_692,c_lpad,ar_4:3,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/speakers/z407-bluetooth-speaker/gallery/z407-gallery-1.png',
+    bg: '/images/carousel_3.png',
     badgeFr: 'Livraison nationale',
     badgeEn: 'Nationwide delivery',
     titleFr: 'Nous Livrons partout au Cameroun',
@@ -99,22 +99,14 @@ export default function HeroCarousel({ inStockCount }: { inStockCount: number })
           exit="exit"
           transition={{ duration: 0.5, ease: 'easeInOut' }}
           className="absolute inset-0"
-          style={slide.id <= 2 ? {
+          style={{
             backgroundImage: `url(${slide.bg})`,
             backgroundPosition: 'center center',
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'cover',
-          } : {
-            backgroundImage: `url(${slide.bg})`,
-            backgroundPosition: 'right center',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: 'contain',
           }}
         >
-          <div className={`absolute inset-0 ${slide.id <= 2
-            ? 'bg-[linear-gradient(120deg,_rgba(17,17,17,0.75),_rgba(17,17,17,0.45)_50%,_rgba(17,17,17,0.65))]'
-            : 'bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.14),_transparent_34%),linear-gradient(120deg,_rgba(17,17,17,0.94),_rgba(17,17,17,0.84)_48%,_rgba(17,17,17,0.97))]'
-            }`} />
+          <div className="absolute inset-0 bg-[linear-gradient(120deg,_rgba(17,17,17,0.75),_rgba(17,17,17,0.45)_50%,_rgba(17,17,17,0.65))]" />
         </motion.div>
       </AnimatePresence>
 
