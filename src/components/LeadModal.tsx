@@ -26,6 +26,8 @@ type ZoneOption = {
   agencies: string[];
 };
 
+const normalizeCity = (value: string) => value.trim().toLowerCase();
+
 export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) {
   const { t, language } = useLanguage();
   const { error: notifyError } = useNotifications();
@@ -36,10 +38,11 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
   // Step 1 — Contact
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [quantity, setQuantity] = useState(1);
   // Step 2 — Delivery
   const [zones, setZones] = useState<ZoneOption[]>([]);
   const [freeThreshold, setFreeThreshold] = useState(FREE_DELIVERY_THRESHOLD_DEFAULT);
-  const [city, setCity] = useState('');
+  const [city, setCity] = useState('Douala');
   const [agency, setAgency] = useState('');
   const [customAgency, setCustomAgency] = useState('');
   const [quartier, setQuartier] = useState('');
@@ -53,9 +56,10 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
   const [promoError, setPromoError] = useState('');
   const [promoLoading, setPromoLoading] = useState(false);
 
-  const subtotal = product.price_xaf * 1;
-  const selectedZone = zones.find(z => z.city_name_fr === city || z.city_name_en === city) || null;
-  const zoneFee = selectedZone?.delivery_fee ?? (city === 'Douala' ? 2000 : 3000);
+  const normalizedCity = normalizeCity(city);
+  const subtotal = product.price_xaf * quantity;
+  const selectedZone = zones.find(z => normalizeCity(z.city_name_fr) === normalizedCity || normalizeCity(z.city_name_en) === normalizedCity) || null;
+  const zoneFee = selectedZone?.delivery_fee ?? (normalizedCity === 'douala' ? 2000 : 3000);
   const deliveryFee = subtotal >= freeThreshold ? 0 : zoneFee;
   const effectiveAgency = agency === '__custom__' ? customAgency : agency;
   const total = subtotal + deliveryFee - promoDiscount;
@@ -82,6 +86,7 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
   useEffect(() => {
     if (isOpen) {
       setStep(1);
+      setQuantity(1);
       setPromoInput(''); setPromoDiscount(0); setPromoCode(''); setPromoMessage(''); setPromoError('');
       closeButtonRef.current?.focus();
     }
@@ -109,7 +114,7 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
     return () => document.removeEventListener('keydown', handleKey);
   }, [isOpen, onClose]);
 
-  const isDouala = city?.trim().toLowerCase() === 'douala';
+  const isDouala = normalizedCity === 'douala';
   const zoneAgencies = selectedZone?.agencies || [];
   const agencyValue = agency === '__custom__' ? customAgency : agency;
 
@@ -126,7 +131,7 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
         order_ref: orderRef,
         product_id: product.id,
         product_name: product.name,
-        quantity: 1,
+        quantity,
         unit_price: product.price_xaf,
         total_price: total,
         customer_name: name,
@@ -162,7 +167,26 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
         `Merci!`
       );
 
-      window.open(`https://wa.me/237655163248?text=${msg}`, '_blank');
+      const whatsappMessage = encodeURIComponent(
+        `Bonjour Loving Tech!\n\n` +
+        `Nouvelle commande - ${orderRef}\n` +
+        `Produit: ${product.name}\n` +
+        `Quantite: ${quantity}\n\n` +
+        `Client: ${name}\n` +
+        `WhatsApp: +237${phone.replace(/^(\+237|237)/, '')}\n\n` +
+        `Livraison:\n` +
+        `Ville: ${city}\n` +
+        (!isDouala && effectiveAgency ? `Agence: ${effectiveAgency}\n` : '') +
+        (isDouala ? `Quartier: ${quartier}\n` : '') +
+        (addressDetails ? `Details: ${addressDetails}\n` : '') +
+        `\nSous-total: ${subtotal.toLocaleString('fr-FR')} FCFA\n` +
+        `Livraison: ${deliveryFee === 0 ? 'GRATUITE' : `${deliveryFee.toLocaleString('fr-FR')} FCFA`}\n` +
+        (promoDiscount > 0 ? `Promo (${promoCode}): -${promoDiscount.toLocaleString('fr-FR')} FCFA\n` : '') +
+        `Total: ${total.toLocaleString('fr-FR')} FCFA\n\n` +
+        `Merci!`
+      );
+
+      window.open(`https://wa.me/237655163248?text=${whatsappMessage}`, '_blank');
       onClose();
     } catch (err) {
       console.error('Order creation failed:', err);
@@ -253,6 +277,20 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
                     </div>
                     <p className="text-xs text-brand-dark/40 mt-1">+237 {t({ en: 'prefix added automatically', fr: 'préfixe ajouté automatiquement' })}</p>
                   </div>
+                  <div>
+                    <label htmlFor="order-quantity" className="block text-sm font-medium text-brand-dark/60 mb-1.5">
+                      {t({ en: 'Quantity', fr: 'Quantité' })} *
+                    </label>
+                    <input
+                      id="order-quantity"
+                      type="number"
+                      min={1}
+                      max={99}
+                      value={quantity}
+                      onChange={e => setQuantity(Math.max(1, Math.min(99, Number(e.target.value) || 1)))}
+                      className={inputNoPrefixCls}
+                    />
+                  </div>
                 </>
               )}
 
@@ -337,6 +375,10 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
                     <div className="flex justify-between">
                       <span className="text-brand-dark/60">{t({ en: 'Product', fr: 'Produit' })}</span>
                       <span className="font-medium text-brand-dark text-right max-w-[60%] truncate">{product.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-brand-dark/60">{t({ en: 'Quantity', fr: 'Quantité' })}</span>
+                      <span className="font-medium text-brand-dark">{quantity}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-brand-dark/60">{t({ en: 'Customer', fr: 'Client' })}</span>
