@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -75,22 +75,40 @@ export default function AdminProductsPage() {
       notifyError('Cannot delete local mock products. Please connect a database.');
       return;
     }
-    const confirmed = await confirm({
-      title: 'Delete this product?',
-      message: 'This action removes the product from your catalog.',
-      confirmLabel: 'Delete',
-      cancelLabel: 'Cancel',
-      tone: 'danger',
-    });
-    if (!confirmed) return;
+
+    const password = window.prompt('Please enter the admin password to confirm deletion:');
+    if (password === null) return; // User cancelled
+
+    // Verify password first
     try {
+      const verifyRes = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+
+      if (!verifyRes.ok) {
+        notifyError('Incorrect password. Deletion cancelled.');
+        return;
+      }
+
+      const confirmed = await confirm({
+        title: 'Are you absolutely sure?',
+        message: 'This product and its details will be permanently removed.',
+        confirmLabel: 'Yes, Delete',
+        cancelLabel: 'Cancel',
+        tone: 'danger',
+      });
+      if (!confirmed) return;
+
       await productService.delete(id);
       setProducts(products.filter((p) => p.id !== id));
       success('Product deleted successfully.');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to delete:', err);
-      setError('Failed to delete product');
-      notifyError('Failed to delete product.');
+      const msg = err.message || 'Failed to delete product';
+      setError(msg);
+      notifyError(msg);
     }
   };
 

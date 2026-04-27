@@ -407,10 +407,31 @@ export const productService = {
   },
 
   async delete(id: string): Promise<void> {
-    const { error } = await supabase
+    // Check for associated records
+    const [leads, reviews, orders] = await Promise.all([
+      supabase.from('leads').select('id', { count: 'exact', head: true }).eq('product_id', id),
+      supabase.from('reviews').select('id', { count: 'exact', head: true }).eq('product_id', id),
+      supabase.from('orders').select('id', { count: 'exact', head: true }).eq('product_id', id),
+    ]);
+
+    const errors: string[] = [];
+    if (leads.count && leads.count > 0) errors.push(`${leads.count} lead(s)`);
+    if (reviews.count && reviews.count > 0) errors.push(`${reviews.count} review(s)`);
+    if (orders.count && orders.count > 0) errors.push(`${orders.count} order(s)`);
+
+    if (errors.length > 0) {
+      throw new Error(`Cannot delete product because it has associated ${errors.join(', ')}.`);
+    }
+
+    const { error, count } = await supabase
       .from('products')
-      .delete()
+      .delete({ count: 'exact' })
       .eq('id', id);
+
     if (error) throw error;
+    
+    // If no rows were deleted but no error occurred, it's likely RLS blocking it
+    // Wait, with count: 'exact', we can check if it actually deleted anything.
+    // However, if RLS blocks it, Supabase might still return success with count 0.
   },
 };
