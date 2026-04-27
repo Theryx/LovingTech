@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { Review, reviewService } from '@/lib/supabase';
 
 interface ReviewSectionProps {
   productId: string;
