@@ -129,6 +129,11 @@ export default async function ProductPage({ params }: { params: { id: string } }
                 ? 'Rupture / Out of Stock'
                 : 'Pré-commande / Pre-order'}
             </span>
+            {typeof product.stock_qty === 'number' && product.stock_qty > 0 && product.stock_status === 'in_stock' && (
+              <p className="mt-2 text-sm text-brand-dark/60">
+                {product.stock_qty.toLocaleString('fr-FR')} article{product.stock_qty > 1 ? 's' : ''} disponible{product.stock_qty > 1 ? 's' : ''} / {product.stock_qty.toLocaleString('fr-FR')} item{product.stock_qty > 1 ? 's' : ''} available
+              </p>
+            )}
           </div>
 
           <div className="space-y-8 mb-12">
