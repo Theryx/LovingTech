@@ -1,13 +1,12 @@
-import type { Metadata } from 'next';
+'use client';
+
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-
-export const metadata: Metadata = {
-  title: 'Politique de retour / Return Policy — Loving Tech',
-  description: 'Conditions de retour et de remboursement pour vos achats Loving Tech au Cameroun.',
-};
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function ReturnPolicyPage() {
+  const { t } = useLanguage();
+
   return (
     <main className="min-h-screen bg-white text-brand-dark">
       <Navbar />
@@ -16,8 +15,9 @@ export default function ReturnPolicyPage() {
           ← Loving Tech
         </Link>
 
-        <h1 className="text-4xl font-bold mb-2">Politique de retour</h1>
-        <p className="text-2xl font-bold text-brand-dark/50 mb-10">Return Policy</p>
+        <h1 className="text-4xl font-bold mb-10">
+          {t({ en: 'Return Policy', fr: 'Politique de retour' })}
+        </h1>
 
         {/* Table */}
         <section className="mb-10">
@@ -25,30 +25,30 @@ export default function ReturnPolicyPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-brand-grey/20 bg-brand-grey/10">
-                  <th className="px-4 py-3 text-left font-semibold text-brand-dark">État / Condition</th>
-                  <th className="px-4 py-3 text-left font-semibold text-brand-dark">Délai / Window</th>
-                  <th className="px-4 py-3 text-left font-semibold text-brand-dark">Motifs acceptés / Accepted reasons</th>
-                  <th className="px-4 py-3 text-left font-semibold text-brand-dark">Non accepté / Not accepted</th>
+                  <th className="px-4 py-3 text-left font-semibold text-brand-dark">{t({ en: 'Condition', fr: 'État' })}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-brand-dark">{t({ en: 'Window', fr: 'Délai' })}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-brand-dark">{t({ en: 'Accepted reasons', fr: 'Motifs acceptés' })}</th>
+                  <th className="px-4 py-3 text-left font-semibold text-brand-dark">{t({ en: 'Not accepted', fr: 'Non accepté' })}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b border-brand-grey/10">
-                  <td className="px-4 py-3 font-medium">Neuf / New</td>
-                  <td className="px-4 py-3">7 jours / 7 days</td>
-                  <td className="px-4 py-3">Défectueux à l'arrivée, mauvais article, emballage endommagé / Defective on arrival, wrong item, damaged packaging</td>
-                  <td className="px-4 py-3 text-brand-dark/60">Changement d'avis, ouvert et fonctionnel / Change of mind, opened and functional</td>
+                  <td className="px-4 py-3 font-medium">{t({ en: 'New', fr: 'Neuf' })}</td>
+                  <td className="px-4 py-3">{t({ en: '7 days', fr: '7 jours' })}</td>
+                  <td className="px-4 py-3">{t({ en: 'Defective on arrival, wrong item, damaged packaging', fr: "Défectueux à l'arrivée, mauvais article, emballage endommagé" })}</td>
+                  <td className="px-4 py-3 text-brand-dark/60">{t({ en: 'Change of mind, opened and functional', fr: "Changement d'avis, ouvert et fonctionnel" })}</td>
                 </tr>
                 <tr className="border-b border-brand-grey/10">
-                  <td className="px-4 py-3 font-medium">Reconditionné / Refurbished</td>
-                  <td className="px-4 py-3">5 jours / 5 days</td>
-                  <td className="px-4 py-3">Défectueux, défaut non divulgué, mauvais article / Defective, undisclosed fault, wrong item</td>
-                  <td className="px-4 py-3 text-brand-dark/60">Dommages physiques causés par le client / Customer-caused physical damage</td>
+                  <td className="px-4 py-3 font-medium">{t({ en: 'Refurbished', fr: 'Reconditionné' })}</td>
+                  <td className="px-4 py-3">{t({ en: '5 days', fr: '5 jours' })}</td>
+                  <td className="px-4 py-3">{t({ en: 'Defective, undisclosed fault, wrong item', fr: 'Défectueux, défaut non divulgué, mauvais article' })}</td>
+                  <td className="px-4 py-3 text-brand-dark/60">{t({ en: 'Customer-caused physical damage', fr: 'Dommages physiques causés par le client' })}</td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-3 font-medium">Occasion / Second-hand</td>
-                  <td className="px-4 py-3 text-red-600 font-medium">Aucun retour / No returns</td>
-                  <td className="px-4 py-3 text-brand-dark/40">N/A — vendu en l'état / sold as-is</td>
-                  <td className="px-4 py-3 text-brand-dark/60">Toutes les réclamations / All claims</td>
+                  <td className="px-4 py-3 font-medium">{t({ en: 'Second-hand', fr: 'Occasion' })}</td>
+                  <td className="px-4 py-3 text-red-600 font-medium">{t({ en: 'No returns', fr: 'Aucun retour' })}</td>
+                  <td className="px-4 py-3 text-brand-dark/40">{t({ en: 'sold as-is', fr: "vendu en l'état" })}</td>
+                  <td className="px-4 py-3 text-brand-dark/60">{t({ en: 'All claims', fr: 'Toutes les réclamations' })}</td>
                 </tr>
               </tbody>
             </table>
@@ -57,15 +57,14 @@ export default function ReturnPolicyPage() {
 
         {/* Process */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold mb-1">Procédure de retour</h2>
-          <p className="text-brand-dark/50 mb-4">Return process</p>
+          <h2 className="text-xl font-bold mb-4">{t({ en: 'Return process', fr: 'Procédure de retour' })}</h2>
           <ol className="space-y-3 text-sm text-brand-dark/70">
             {[
-              'Contactez-nous via WhatsApp +237 655 163 248 dans le délai de retour / Contact us via WhatsApp +237 655 163 248 within the return window.',
-              'Fournissez: numéro de commande + photo ou vidéo du défaut / Provide: order number + photo or video of the defect.',
-              "L'administration examine la demande sous 48h / Admin reviews within 48 hours.",
-              'Si accepté: remplacement ou crédit valable 90 jours / If accepted: replacement or store credit valid 90 days.',
-              'Si refusé: explication écrite via WhatsApp / If rejected: written explanation via WhatsApp.',
+              t({ en: 'Contact us via WhatsApp +237 655 163 248 within the return window.', fr: 'Contactez-nous via WhatsApp +237 655 163 248 dans le délai de retour.' }),
+              t({ en: 'Provide: order number + photo or video of the defect.', fr: 'Fournissez: numéro de commande + photo ou vidéo du défaut.' }),
+              t({ en: 'Admin reviews within 48 hours.', fr: "L'administration examine la demande sous 48h." }),
+              t({ en: 'If accepted: replacement or store credit valid 90 days.', fr: 'Si accepté: remplacement ou crédit valable 90 jours.' }),
+              t({ en: 'If rejected: written explanation via WhatsApp.', fr: 'Si refusé: explication écrite via WhatsApp.' }),
             ].map((step, i) => (
               <li key={i} className="flex gap-3">
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-blue text-xs font-bold text-white">{i + 1}</span>
@@ -77,14 +76,13 @@ export default function ReturnPolicyPage() {
 
         {/* Void conditions */}
         <section className="mb-10">
-          <h2 className="text-xl font-bold mb-1">Conditions d&apos;annulation</h2>
-          <p className="text-brand-dark/50 mb-4">Void conditions</p>
+          <h2 className="text-xl font-bold mb-4">{t({ en: 'Void conditions', fr: "Conditions d'annulation" })}</h2>
           <ul className="space-y-2 text-sm text-brand-dark/70">
             {[
-              "Après le délai de retour / After the return window",
-              "Dommages physiques causés après la livraison / Physical damage caused after delivery",
-              "Emballage d'origine manquant (produits neufs) / Missing original packaging (New products)",
-              "Articles d'occasion — aucune exception / Second-hand items — no exceptions",
+              t({ en: 'After the return window', fr: 'Après le délai de retour' }),
+              t({ en: 'Physical damage caused after delivery', fr: 'Dommages physiques causés après la livraison' }),
+              t({ en: 'Missing original packaging (New products)', fr: "Emballage d'origine manquant (produits neufs)" }),
+              t({ en: 'Second-hand items — no exceptions', fr: "Articles d'occasion — aucune exception" }),
             ].map((item, i) => (
               <li key={i} className="flex gap-2">
                 <span className="text-brand-orange mt-0.5">✕</span>
@@ -97,12 +95,12 @@ export default function ReturnPolicyPage() {
         <div className="rounded-xl border border-brand-grey/20 bg-white p-5 text-sm text-brand-dark/60">
           <p className="font-semibold text-brand-dark mb-1">Contact</p>
           <p>WhatsApp: <a href="https://wa.me/237655163248" className="text-brand-blue hover:underline">+237 655 163 248</a></p>
-          <p className="mt-1 text-xs text-brand-dark/40">Réponse sous 48h les jours ouvrables / Response within 48h on business days</p>
+          <p className="mt-1 text-xs text-brand-dark/40">{t({ en: 'Response within 48h on business days', fr: 'Réponse sous 48h les jours ouvrables' })}</p>
         </div>
       </article>
 
       <footer className="border-t border-brand-grey/20 px-6 py-8 text-center text-sm text-brand-dark/40">
-        © 2026 Loving Tech Cameroun. Tous droits réservés.
+        © 2026 Loving Tech Cameroun. {t({ en: 'All rights reserved.', fr: 'Tous droits réservés.' })}
       </footer>
     </main>
   );

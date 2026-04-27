@@ -360,6 +360,17 @@ export const productService = {
     return data || [];
   },
 
+  async getByName(name: string): Promise<Product | null> {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('name', name)
+      .limit(1)
+      .single();
+    if (error) return null;
+    return data;
+  },
+
   async getById(id: string): Promise<Product | null> {
     const { data, error } = await supabase
       .from('products')

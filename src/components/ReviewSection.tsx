@@ -2,16 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
-import { Review, reviewService } from '@/lib/supabase';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ReviewSectionProps {
   productId: string;
 }
 
 function StarRating({ value, onChange }: { value: number; onChange?: (v: number) => void }) {
+  const { t } = useLanguage();
   const [hovered, setHovered] = useState(0);
   return (
-    <div className="flex gap-1" role="group" aria-label="Note / Rating">
+    <div className="flex gap-1" role="group" aria-label={t({ en: 'Rating', fr: 'Note' })}>
       {[1, 2, 3, 4, 5].map(star => (
         <button
           key={star}
@@ -19,7 +20,7 @@ function StarRating({ value, onChange }: { value: number; onChange?: (v: number)
           onClick={() => onChange?.(star)}
           onMouseEnter={() => onChange && setHovered(star)}
           onMouseLeave={() => onChange && setHovered(0)}
-          aria-label={`${star} étoile${star > 1 ? 's' : ''}`}
+          aria-label={t({ en: `${star} star${star > 1 ? 's' : ''}`, fr: `${star} étoile${star > 1 ? 's' : ''}` })}
           className={`transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded ${onChange ? 'cursor-pointer' : 'cursor-default'}`}
         >
           <Star
@@ -33,6 +34,7 @@ function StarRating({ value, onChange }: { value: number; onChange?: (v: number)
 }
 
 export default function ReviewSection({ productId }: ReviewSectionProps) {
+  const { t } = useLanguage();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -55,16 +57,31 @@ export default function ReviewSection({ productId }: ReviewSectionProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
-    if (rating === 0) { setFormError('Veuillez sélectionner une note / Please select a rating.'); return; }
-    if (name.trim().length < 2) { setFormError('Nom requis / Name required.'); return; }
-    if (!orderRef.trim()) { setFormError('Référence de commande requise / Order reference required.'); return; }
+    if (rating === 0) {
+      setFormError(t({ en: 'Please select a rating.', fr: 'Veuillez sélectionner une note.' }));
+      return;
+    }
+    if (name.trim().length < 2) {
+      setFormError(t({ en: 'Name required.', fr: 'Nom requis.' }));
+      return;
+    }
+    if (!orderRef.trim()) {
+      setFormError(t({ en: 'Order reference required.', fr: 'Référence de commande requise.' }));
+      return;
+    }
     setSubmitting(true);
     try {
-      await reviewService.create({ product_id: productId, order_ref: orderRef.trim().toUpperCase(), rating, reviewer_name: name.trim(), comment: comment.trim() || undefined });
+      await reviewService.create({
+        product_id: productId,
+        order_ref: orderRef.trim().toUpperCase(),
+        rating,
+        reviewer_name: name.trim(),
+        comment: comment.trim() || undefined
+      });
       setSubmitted(true);
     } catch (err: any) {
       const msg = err?.message || err?.details || JSON.stringify(err);
-      setFormError(`Erreur: ${msg}`);
+      setFormError(`${t({ en: 'Error', fr: 'Erreur' })}: ${msg}`);
     } finally {
       setSubmitting(false);
     }
@@ -73,13 +90,13 @@ export default function ReviewSection({ productId }: ReviewSectionProps) {
   const inputCls = 'w-full rounded-xl border border-brand-grey/30 px-4 py-2.5 text-sm text-brand-dark placeholder:text-brand-dark/30 focus:outline-none focus:ring-2 focus:ring-brand-blue transition';
 
   return (
-    <section aria-label="Avis / Reviews">
+    <section aria-label={t({ en: 'Reviews', fr: 'Avis' })}>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-lg font-bold text-brand-dark">
-            Avis / Reviews
+            {t({ en: 'Reviews', fr: 'Avis' })}
             <span className="ml-2 text-sm font-normal text-brand-dark/40">
-              ({reviews.length} {reviews.length === 1 ? 'avis' : 'avis'})
+              ({reviews.length} {t({ en: 'reviews', fr: 'avis' })})
             </span>
           </h2>
           {avg > 0 && (
@@ -94,7 +111,7 @@ export default function ReviewSection({ productId }: ReviewSectionProps) {
             onClick={() => setShowForm(true)}
             className="rounded-xl border border-brand-blue px-4 py-2 text-sm font-medium text-brand-blue transition hover:bg-brand-blue/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
           >
-            Laisser un avis / Leave a review
+            {t({ en: 'Leave a review', fr: 'Laisser un avis' })}
           </button>
         )}
       </div>
@@ -104,35 +121,35 @@ export default function ReviewSection({ productId }: ReviewSectionProps) {
         <form onSubmit={handleSubmit} className="mb-8 rounded-2xl border border-brand-grey/20 bg-white p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium text-brand-dark/60 mb-1.5">
-              Référence de commande / Order reference *
+              {t({ en: 'Order reference', fr: 'Référence de commande' })} *
             </label>
             <input type="text" value={orderRef} onChange={e => setOrderRef(e.target.value)} placeholder="LT-20260101-1234" className={inputCls} />
           </div>
           <div>
             <label className="block text-sm font-medium text-brand-dark/60 mb-1.5">
-              Votre nom / Your name *
+              {t({ en: 'Your name', fr: 'Votre nom' })} *
             </label>
             <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Jean Dupont" className={inputCls} />
           </div>
           <div>
             <label className="block text-sm font-medium text-brand-dark/60 mb-1.5">
-              Note / Rating *
+              {t({ en: 'Rating', fr: 'Note' })} *
             </label>
             <StarRating value={rating} onChange={setRating} />
           </div>
           <div>
             <label className="block text-sm font-medium text-brand-dark/60 mb-1.5">
-              Commentaire / Comment (optionnel)
+              {t({ en: 'Comment (optional)', fr: 'Commentaire (optionnel)' })}
             </label>
-            <textarea value={comment} onChange={e => setComment(e.target.value)} rows={3} className={`${inputCls} resize-none`} placeholder="Votre avis sur ce produit…" />
+            <textarea value={comment} onChange={e => setComment(e.target.value)} rows={3} className={`${inputCls} resize-none`} placeholder={t({ en: 'Your opinion on this product...', fr: 'Votre avis sur ce produit...' })} />
           </div>
           {formError && <p className="text-sm text-red-600">{formError}</p>}
           <div className="flex gap-3">
             <button type="submit" disabled={submitting} className="rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2">
-              {submitting ? 'Envoi…' : 'Envoyer / Submit'}
+              {submitting ? t({ en: 'Sending...', fr: 'Envoi...' }) : t({ en: 'Submit', fr: 'Envoyer' })}
             </button>
             <button type="button" onClick={() => setShowForm(false)} className="rounded-xl border border-brand-grey/30 px-5 py-2.5 text-sm font-medium text-brand-dark transition hover:bg-brand-grey/10">
-              Annuler / Cancel
+              {t({ en: 'Cancel', fr: 'Annuler' })}
             </button>
           </div>
         </form>
@@ -140,14 +157,14 @@ export default function ReviewSection({ productId }: ReviewSectionProps) {
 
       {submitted && (
         <div className="mb-8 rounded-2xl border border-green-200 bg-green-50 p-5 text-sm text-green-800">
-          ✅ Votre avis est en attente de validation. / Your review is awaiting approval.
+          ✅ {t({ en: 'Your review is awaiting approval.', fr: 'Votre avis est en attente de validation.' })}
         </div>
       )}
 
       {/* Reviews list */}
       {reviews.length === 0 ? (
         <p className="text-sm text-brand-dark/40">
-          Soyez le premier à laisser un avis! / Be the first to leave a review!
+          {t({ en: 'Be the first to leave a review!', fr: 'Soyez le premier à laisser un avis!' })}
         </p>
       ) : (
         <div className="space-y-5">
@@ -159,7 +176,7 @@ export default function ReviewSection({ productId }: ReviewSectionProps) {
                   <StarRating value={r.rating} />
                 </div>
                 <span className="text-xs text-brand-dark/40 shrink-0">
-                  {r.created_at ? new Date(r.created_at).toLocaleDateString('fr-FR') : ''}
+                  {r.created_at ? new Date(r.created_at).toLocaleDateString(t({ en: 'en-US', fr: 'fr-FR' })) : ''}
                 </span>
               </div>
               {r.comment && <p className="mt-3 text-sm text-brand-dark/70">{r.comment}</p>}
