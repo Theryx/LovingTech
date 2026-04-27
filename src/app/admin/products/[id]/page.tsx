@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, Plus, X, AlertTriangle } from 'lucide-react';
+import { useNotifications } from '@/components/NotificationProvider';
 import { Product, ProductCondition, ProductCategory, Variant, productService } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
 import ImageUploader from '@/components/ImageUploader';
@@ -43,6 +44,7 @@ export default function AdminProductEditorPage() {
   const router = useRouter();
   const params = useParams();
   const { t } = useLanguage();
+  const { error: notifyError, success } = useNotifications();
   const productId = params.id as string;
 
   const [product, setProduct] = useState<Product>(emptyProduct);
@@ -156,7 +158,7 @@ export default function AdminProductEditorPage() {
 
   const handleSave = async () => {
     if (product.condition === 'second_hand' && (product.images || []).length < 2) {
-      alert('Second-hand products require at least 2 photos of the actual item.');
+      notifyError('Second-hand products require at least 2 photos of the actual item.');
       return;
     }
     setSaving(true);
@@ -168,10 +170,11 @@ export default function AdminProductEditorPage() {
         await productService.update(product.id, data as any);
       }
       setSaved(true);
+      success(t({ en: 'Product saved successfully.', fr: 'Produit enregistré avec succès.' }));
       setTimeout(() => router.push('/admin/products'), 1000);
     } catch (error: any) {
       console.error('Failed to save:', error);
-      alert(`Failed to save: ${error.message || 'Unknown error'}`);
+      notifyError(`Failed to save: ${error.message || 'Unknown error'}`);
     } finally {
       setSaving(false);
     }

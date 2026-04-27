@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import SplashScreen from "@/components/SplashScreen";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
+import { NotificationProvider } from "@/components/NotificationProvider";
 import { LanguageProvider } from "@/context/LanguageContext";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -32,11 +33,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <LanguageProvider>
-          <SplashScreen />
-          {children}
-          <FloatingWhatsApp />
-        </LanguageProvider>
+        <NotificationProvider>
+          <LanguageProvider>
+            <SplashScreen />
+            {children}
+            <FloatingWhatsApp />
+          </LanguageProvider>
+        </NotificationProvider>
       </body>
     </html>
   );

@@ -6,6 +6,7 @@ import { X, Phone, MapPin, User, ArrowRight, ArrowLeft, CheckCircle2, Tag } from
 import { Product, orderService, promoService } from '@/lib/supabase';
 import { generateOrderRef } from '@/lib/generateOrderRef';
 import { validatePromo } from '@/lib/validatePromo';
+import { useNotifications } from '@/components/NotificationProvider';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface LeadModalProps {
@@ -27,6 +28,7 @@ type ZoneOption = {
 
 export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) {
   const { t, language } = useLanguage();
+  const { error: notifyError } = useNotifications();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -164,7 +166,7 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
       onClose();
     } catch (err) {
       console.error('Order creation failed:', err);
-      alert(t({ en: 'Something went wrong. Please try again.', fr: "Une erreur s'est produite. Veuillez réessayer." }));
+      notifyError(t({ en: 'Something went wrong. Please try again.', fr: "Une erreur s'est produite. Veuillez réessayer." }));
     } finally {
       setIsSubmitting(false);
     }

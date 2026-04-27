@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, X, Check, MapPin } from 'lucide-react';
+import { useNotifications } from '@/components/NotificationProvider';
 import { useLanguage } from '@/context/LanguageContext';
 import { DeliveryZone, DeliverySettings, deliveryZoneService } from '@/lib/supabase';
 
@@ -19,6 +20,7 @@ const emptyZone = (): Omit<DeliveryZone, 'id' | 'created_at'> => ({
 
 export default function AdminDelivery() {
   const { t } = useLanguage();
+  const { error: notifyError, success } = useNotifications();
   const [zones, setZones] = useState<DeliveryZone[]>([]);
   const [settings, setSettings] = useState<DeliverySettings | null>(null);
   const [threshold, setThreshold] = useState('50000');
@@ -49,6 +51,7 @@ export default function AdminDelivery() {
       if (settingsData) setThreshold(String(settingsData.free_delivery_threshold));
     } catch (e) {
       console.error(e);
+      notifyError(t({ en: 'Failed to load delivery settings.', fr: 'Échec du chargement des paramètres de livraison.' }));
     }
     setLoading(false);
   }
@@ -97,8 +100,12 @@ export default function AdminDelivery() {
       }
       setShowForm(false);
       await load();
+      success(t({
+        en: editingId ? 'Delivery zone updated.' : 'Delivery zone created.',
+        fr: editingId ? 'Zone de livraison mise à jour.' : 'Zone de livraison créée.',
+      }));
     } catch (e: any) {
-      alert(e.message || 'Error saving zone');
+      notifyError(e.message || t({ en: 'Error saving zone.', fr: "Erreur lors de l'enregistrement de la zone." }));
     }
     setSaving(false);
   }
@@ -108,23 +115,37 @@ export default function AdminDelivery() {
       await deliveryZoneService.delete(id);
       setDeleteConfirm(null);
       await load();
+      success(t({ en: 'Delivery zone deleted.', fr: 'Zone de livraison supprimée.' }));
     } catch (e: any) {
-      alert(e.message || 'Error deleting zone');
+      notifyError(e.message || t({ en: 'Error deleting zone.', fr: 'Erreur lors de la suppression de la zone.' }));
     }
   }
 
   async function toggleAvailable(zone: DeliveryZone) {
     if (!zone.id) return;
-    await deliveryZoneService.update(zone.id, { is_available: !zone.is_available });
-    await load();
+    try {
+      await deliveryZoneService.update(zone.id, { is_available: !zone.is_available });
+      await load();
+      success(t({
+        en: zone.is_available ? 'City disabled for delivery.' : 'City enabled for delivery.',
+        fr: zone.is_available ? 'Ville désactivée pour la livraison.' : 'Ville activée pour la livraison.',
+      }));
+    } catch (e: any) {
+      notifyError(e.message || t({ en: 'Failed to update availability.', fr: 'Échec de mise à jour de la disponibilité.' }));
+    }
   }
 
   async function saveThreshold() {
     const val = parseInt(threshold, 10);
     if (isNaN(val) || val < 0) return;
-    await deliveryZoneService.updateSettings(val);
-    setThresholdSaved(true);
-    setTimeout(() => setThresholdSaved(false), 2000);
+    try {
+      await deliveryZoneService.updateSettings(val);
+      setThresholdSaved(true);
+      success(t({ en: 'Free delivery threshold saved.', fr: 'Seuil de livraison gratuite enregistré.' }));
+      setTimeout(() => setThresholdSaved(false), 2000);
+    } catch (e: any) {
+      notifyError(e.message || t({ en: 'Failed to save threshold.', fr: "Échec de l'enregistrement du seuil." }));
+    }
   }
 
   const inputCls = 'w-full rounded-xl border border-brand-grey/30 px-3 py-2 text-sm text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-blue';

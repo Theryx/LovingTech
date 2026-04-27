@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
+import { useNotifications } from '@/components/NotificationProvider';
 import { PromoCode, promoService } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -17,6 +18,7 @@ const EMPTY_FORM: Omit<PromoCode, 'id' | 'uses_count' | 'created_at'> = {
 
 export default function AdminPromosPage() {
   const { t } = useLanguage();
+  const { confirm, error: notifyError, success } = useNotifications();
   const [promos, setPromos] = useState<PromoCode[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -48,22 +50,44 @@ export default function AdminPromosPage() {
       setPromos(prev => [created, ...prev]);
       setShowForm(false);
       setForm({ ...EMPTY_FORM });
+      success(t({ en: 'Promo code created.', fr: 'Code promo créé.' }));
     } catch (err: any) {
       setFormError(err.message || "Erreur lors de la création / Error creating code");
+      notifyError(err.message || t({ en: 'Failed to create promo code.', fr: 'Échec de création du code promo.' }));
     } finally {
       setSaving(false);
     }
   };
 
   const toggleActive = async (promo: PromoCode) => {
-    await promoService.update(promo.id!, { is_active: !promo.is_active });
-    setPromos(prev => prev.map(p => p.id === promo.id ? { ...p, is_active: !p.is_active } : p));
+    try {
+      await promoService.update(promo.id!, { is_active: !promo.is_active });
+      setPromos(prev => prev.map(p => p.id === promo.id ? { ...p, is_active: !p.is_active } : p));
+      success(t({
+        en: promo.is_active ? 'Promo code disabled.' : 'Promo code activated.',
+        fr: promo.is_active ? 'Code promo désactivé.' : 'Code promo activé.',
+      }));
+    } catch (err: any) {
+      notifyError(err?.message || t({ en: 'Failed to update promo code.', fr: 'Échec de mise à jour du code promo.' }));
+    }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t({ en: 'Delete this promo code?', fr: 'Supprimer ce code promo?' }))) return;
-    await promoService.delete(id);
-    setPromos(prev => prev.filter(p => p.id !== id));
+    const confirmed = await confirm({
+      title: t({ en: 'Delete this promo code?', fr: 'Supprimer ce code promo ?' }),
+      message: t({ en: 'This action cannot be undone.', fr: 'Cette action est définitive.' }),
+      confirmLabel: t({ en: 'Delete', fr: 'Supprimer' }),
+      cancelLabel: t({ en: 'Cancel', fr: 'Annuler' }),
+      tone: 'danger',
+    });
+    if (!confirmed) return;
+    try {
+      await promoService.delete(id);
+      setPromos(prev => prev.filter(p => p.id !== id));
+      success(t({ en: 'Promo code deleted.', fr: 'Code promo supprimé.' }));
+    } catch (err: any) {
+      notifyError(err?.message || t({ en: 'Failed to delete promo code.', fr: 'Échec de suppression du code promo.' }));
+    }
   };
 
   const inputCls = 'w-full rounded-xl border border-brand-grey/30 px-4 py-2.5 text-sm text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-blue transition';

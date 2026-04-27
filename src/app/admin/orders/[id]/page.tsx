@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, MessageCircle } from 'lucide-react';
+import { useNotifications } from '@/components/NotificationProvider';
 import { Order, OrderStatus, orderService } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -33,6 +34,7 @@ const STATUS_COLOR: Record<OrderStatus, string> = {
 export default function AdminOrderDetailPage() {
   const params = useParams();
   const { t } = useLanguage();
+  const { confirm, error: notifyError, success } = useNotifications();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState('');
@@ -51,18 +53,36 @@ export default function AdminOrderDetailPage() {
     if (!order) return;
     const action = STATUS_FLOW.find(s => s.status === status);
     const label = t({ en: action?.labelEn || status, fr: action?.labelFr || status });
-    if (!confirm(`${label} cette commande?`)) return;
+    const confirmed = await confirm({
+      title: t({ en: `${label} this order?`, fr: `${label} cette commande ?` }),
+      confirmLabel: label,
+      cancelLabel: t({ en: 'Cancel', fr: 'Annuler' }),
+      tone: status === 'cancelled' ? 'danger' : 'default',
+    });
+    if (!confirmed) return;
     setUpdating(true);
-    await orderService.updateStatus(order.id!, status);
-    await load();
-    setUpdating(false);
+    try {
+      await orderService.updateStatus(order.id!, status);
+      await load();
+      success(t({ en: 'Order status updated.', fr: 'Statut de la commande mis à jour.' }));
+    } catch (err: any) {
+      notifyError(err?.message || t({ en: 'Failed to update order status.', fr: 'Échec de mise à jour du statut.' }));
+    } finally {
+      setUpdating(false);
+    }
   };
 
   const handleSaveNotes = async () => {
     if (!order) return;
     setSavingNotes(true);
-    await orderService.updateNotes(order.id!, notes);
-    setSavingNotes(false);
+    try {
+      await orderService.updateNotes(order.id!, notes);
+      success(t({ en: 'Notes saved.', fr: 'Notes enregistrées.' }));
+    } catch (err: any) {
+      notifyError(err?.message || t({ en: 'Failed to save notes.', fr: "Échec de l'enregistrement des notes." }));
+    } finally {
+      setSavingNotes(false);
+    }
   };
 
   if (loading) return <div className="py-20 text-center text-brand-dark/40">Chargement…</div>;

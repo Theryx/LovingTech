@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Search, Filter, Star, Pencil, Trash2, AlertCircle, Loader2, Database } from 'lucide-react';
+import { useNotifications } from '@/components/NotificationProvider';
 import { Product, productService } from '@/lib/supabase';
 
 const CONDITION_STYLE: Record<string, { bg: string; text: string; label: string }> = {
@@ -35,6 +36,7 @@ const labels = {
 
 export default function AdminProductsPage() {
   const { t } = useLanguage();
+  const { confirm, error: notifyError, success } = useNotifications();
   const [search, setSearch] = useState('');
   const [filterBrand, setFilterBrand] = useState<string>('');
   const [products, setProducts] = useState<Product[]>([]);
@@ -70,16 +72,25 @@ export default function AdminProductsPage() {
 
   const handleDelete = async (id: string) => {
     if (isLocal) {
-      alert('Cannot delete local mock products. Please connect a database.');
+      notifyError('Cannot delete local mock products. Please connect a database.');
       return;
     }
-    if (!confirm('Are you sure you want to delete this product?')) return;
+    const confirmed = await confirm({
+      title: 'Delete this product?',
+      message: 'This action removes the product from your catalog.',
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+      tone: 'danger',
+    });
+    if (!confirmed) return;
     try {
       await productService.delete(id);
       setProducts(products.filter((p) => p.id !== id));
+      success('Product deleted successfully.');
     } catch (err) {
       console.error('Failed to delete:', err);
       setError('Failed to delete product');
+      notifyError('Failed to delete product.');
     }
   };
 
