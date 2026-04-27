@@ -14,16 +14,20 @@ interface ProductDetailActionsProps {
 export default function ProductDetailActions({ product }: ProductDetailActionsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { t } = useLanguage();
+  const isOutOfStock = product.stock_status === 'out_of_stock';
 
   return (
     <>
       <Button
         onClick={() => setIsModalOpen(true)}
         variant="whatsapp"
+        disabled={isOutOfStock}
         className="rounded-2xl py-5 text-lg font-bold active:scale-[0.98]"
       >
         <ShoppingCart className="w-6 h-6" />
-        {t({ en: 'Order via WhatsApp', fr: 'Commander via WhatsApp' })}
+        {isOutOfStock 
+          ? t({ en: 'Out of Stock', fr: 'Rupture de stock' })
+          : t({ en: 'Order via WhatsApp', fr: 'Commander via WhatsApp' })}
       </Button>
 
       <LeadModal
