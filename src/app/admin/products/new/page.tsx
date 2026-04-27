@@ -25,7 +25,7 @@ const emptyProduct: Omit<Product, 'created_at'> = {
   specs: {},
   images: [],
   stock_status: 'in_stock',
-  stock_qty: 0,
+  stock_qty: 1,
   low_stock_threshold: 3,
   condition: 'new',
   category: 'keyboard',
@@ -120,7 +120,15 @@ export default function NewProductPage() {
     set({ variants: (product.variants || []).filter((_, i) => i !== vi) });
   };
 
-  const handleSave = async () => {
+const handleSave = async () => {
+    if (product.price_xaf <= 0) {
+      notifyError(t({ en: 'Price is required.', fr: 'Le prix est obligatoire.' }));
+      return;
+    }
+    if (!product.name_fr && !product.name_en && !product.name) {
+      notifyError(t({ en: 'At least one product name is required (FR, EN, or Display Name).', fr: 'Au moins un nom de produit est requis (FR, EN ou Nom affiché).' }));
+      return;
+    }
     if (product.condition === 'second_hand' && (product.images || []).length < 2) {
       notifyError('Second-hand products require at least 2 photos of the actual item.');
       return;
