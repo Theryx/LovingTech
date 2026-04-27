@@ -6,7 +6,13 @@ import { getRelatedProducts } from '@/lib/relatedProducts';
 import ProductPageClient from './ProductPageClient';
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const product = await productService.getById(params.id);
+  let product = await productService.getById(params.id);
+
+  if (!product && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.id)) {
+    const local = LOCAL_PRODUCTS.find(p => p.id === params.id);
+    if (local) product = await productService.getByName(local.name);
+  }
+
   if (!product) return {};
   const title = `${product.name_fr || product.name} — ${product.price_xaf.toLocaleString('fr-FR')} FCFA | Loving Tech`;
   const description = (product.description_fr || product.description || '').slice(0, 155);

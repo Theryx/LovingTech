@@ -1,14 +1,18 @@
 'use client';
 
+import { useLanguage } from '@/context/LanguageContext';
+
 const WHATSAPP_URL = 'https://wa.me/237655163248';
 
 export default function FloatingWhatsApp() {
+  const { t } = useLanguage();
+
   return (
     <a
       href={WHATSAPP_URL}
       target="_blank"
       rel="noreferrer"
-      aria-label="Commander via WhatsApp / Order via WhatsApp"
+      aria-label={t({ en: 'Order via WhatsApp', fr: 'Commander via WhatsApp' })}
       className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-brand-orange shadow-lg transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-2"
     >
       {/* WhatsApp icon */}
