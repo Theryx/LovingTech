@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Phone, MapPin, User, ArrowRight, ArrowLeft, CheckCircle2, Tag } from 'lucide-react';
-import { Product, orderService, promoService } from '@/lib/supabase';
+import { Product, promoService } from '@/lib/supabase';
 import { generateOrderRef } from '@/lib/generateOrderRef';
 import { validatePromo } from '@/lib/validatePromo';
 import { useNotifications } from '@/components/NotificationProvider';
@@ -127,25 +127,30 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
     setIsSubmitting(true);
     const orderRef = generateOrderRef();
     try {
-      await orderService.create({
-        order_ref: orderRef,
-        product_id: product.id,
-        product_name: product.name,
-        quantity,
-        unit_price: product.price_xaf,
-        total_price: total,
-        customer_name: name,
-        customer_phone: `+237${phone.replace(/^(\+237|237)/, '')}`,
-        city,
-        bus_agency: effectiveAgency || undefined,
-        quartier,
-        address_details: addressDetails || undefined,
-        delivery_fee: deliveryFee,
-        promo_code: promoCode || undefined,
-        promo_discount: promoDiscount || undefined,
-        status: 'pending',
-        status_history: [{ status: 'pending', at: new Date().toISOString() }],
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          order_ref: orderRef,
+          product_id: product.id,
+          product_name: product.name,
+          quantity,
+          unit_price: product.price_xaf,
+          total_price: total,
+          customer_name: name,
+          customer_phone: `+237${phone.replace(/^(\+237|237)/, '')}`,
+          city,
+          bus_agency: effectiveAgency || undefined,
+          quartier,
+          address_details: addressDetails || undefined,
+          delivery_fee: deliveryFee,
+          promo_code: promoCode || undefined,
+          promo_discount: promoDiscount || undefined,
+          status: 'pending',
+          status_history: [{ status: 'pending', at: new Date().toISOString() }],
+        }),
       });
+      if (!res.ok) throw new Error(await res.text());
       if (promoCode) promoService.incrementUses(promoCode).catch(() => {});
 
       const msg = encodeURIComponent(
