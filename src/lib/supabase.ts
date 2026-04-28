@@ -365,10 +365,9 @@ export const productService = {
       .from('products')
       .select('*')
       .eq('name', name)
-      .limit(1)
-      .single();
-    if (error) return null;
-    return data;
+      .limit(1);
+    if (error || !data?.length) return null;
+    return data[0];
   },
 
   async getById(id: string): Promise<Product | null> {

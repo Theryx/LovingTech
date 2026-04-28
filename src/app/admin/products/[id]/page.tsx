@@ -173,7 +173,13 @@ const handleSave = async () => {
     try {
       const data = { ...product, specs: product.specs || {}, images: product.images || [] };
       if (isLocalProduct) {
-        await productService.create(data as any);
+        // Check if a DB copy already exists by name; update it instead of creating a duplicate
+        const existing = await productService.getByName(product.name);
+        if (existing) {
+          await productService.update(existing.id, data as any);
+        } else {
+          await productService.create(data as any);
+        }
       } else {
         await productService.update(product.id, data as any);
       }
