@@ -39,7 +39,7 @@ export type Product = {
   description_en?: string;
   stock_qty?: number;
   low_stock_threshold?: number;
-  compare_at_price?: number;
+  compare_at_price?: number | null;
   warranty_info?: string;
   variants?: Variant[];
   tags?: string[];
