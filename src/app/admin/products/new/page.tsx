@@ -254,7 +254,7 @@ const handleSave = async () => {
               </div>
               <div>
                 <label className={labelCls}>{t({ en: 'Compare-at Price (XAF)', fr: 'Prix barré (XAF)' })}</label>
-                <input type="number" value={product.compare_at_price || ''} onChange={(e) => set({ compare_at_price: e.target.value ? Number(e.target.value) : undefined })} className={inputCls} placeholder={t({ en: 'Optional', fr: 'Optionnel' })} />
+                <input type="number" value={product.compare_at_price || ''} onChange={(e) => set({ compare_at_price: e.target.value ? Number(e.target.value) : null })} className={inputCls} placeholder={t({ en: 'Optional', fr: 'Optionnel' })} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">

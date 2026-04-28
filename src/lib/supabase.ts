@@ -365,6 +365,7 @@ export const productService = {
       .from('products')
       .select('*')
       .eq('name', name)
+      .order('updated_at', { ascending: false })
       .limit(1);
     if (error || !data?.length) return null;
     return data[0];
@@ -397,9 +398,13 @@ export const productService = {
   },
 
   async update(id: string, updates: Partial<Product>): Promise<Product> {
-    const { updated_at, ...validUpdates } = updates as any;
+    const { updated_at, ...rest } = updates as any;
+    // Strip undefined so Supabase doesn't ignore them, but keep null to allow clearing optional fields
+    const validUpdates = Object.fromEntries(
+      Object.entries(rest).filter(([, v]) => v !== undefined)
+    );
 
-    const { data, error, count } = await supabase
+    const { data, error } = await supabase
       .from('products')
       .update(validUpdates)
       .eq('id', id)
@@ -409,7 +414,6 @@ export const productService = {
     if (error) throw error;
 
     if (!data) {
-      // 0 rows updated — likely RLS blocking the write
       throw new Error(`Update blocked: no rows modified for product "${id}". Check Supabase RLS policies.`);
     }
 

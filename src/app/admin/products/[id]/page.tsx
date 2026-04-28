@@ -33,8 +33,9 @@ const emptyProduct: Product = {
   description_en: '',
   warranty_info: WARRANTY_DEFAULTS.new,
   variants: [],
-stock_qty: 1,
+  stock_qty: 1,
   low_stock_threshold: 3,
+  compare_at_price: undefined,
 };
 
 const inputCls = 'w-full rounded-lg border border-brand-grey/30 bg-white px-4 py-2 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-blue';
@@ -288,7 +289,7 @@ const handleSave = async () => {
               </div>
               <div>
                 <label className={labelCls}>{t({ en: 'Compare-at Price (XAF)', fr: 'Prix barré (XAF)' })}</label>
-                <input type="number" value={product.compare_at_price || ''} onChange={(e) => set({ compare_at_price: e.target.value ? Number(e.target.value) : undefined })} className={inputCls} placeholder={t({ en: 'Optional', fr: 'Optionnel' })} />
+                <input type="number" value={product.compare_at_price || ''} onChange={(e) => set({ compare_at_price: e.target.value ? Number(e.target.value) : null })} className={inputCls} placeholder={t({ en: 'Optional', fr: 'Optionnel' })} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
