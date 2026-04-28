@@ -25,7 +25,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         image={product.images?.[0] || '/images/placeholder.svg'}
         name={product.name}
         price={product.price_xaf}
-        compareAtPrice={product.compare_at_price}
+        compareAtPrice={product.compare_at_price ?? undefined}
         brandLabel={product.brand}
         isOutOfStock={isOutOfStock}
         badge={
