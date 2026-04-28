@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -71,19 +71,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Send email notification (non-blocking — don't fail the order if email fails)
-    const emailUser = process.env.EMAIL_USER;
-    const emailPass = process.env.EMAIL_APP_PASSWORD;
+    // Send email notification via Resend (non-blocking)
+    const resendKey = process.env.RESEND_API_KEY;
     const emailTo = process.env.EMAIL_NOTIFY || 'ndouken@gmail.com';
 
-    if (emailUser && emailPass) {
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: { user: emailUser, pass: emailPass },
-      });
-
-      transporter.sendMail({
-        from: `"Loving Tech" <${emailUser}>`,
+    if (resendKey) {
+      const resend = new Resend(resendKey);
+      resend.emails.send({
+        from: 'Loving Tech <onboarding@resend.dev>',
         to: emailTo,
         subject: `🛍️ Nouvelle commande — ${order.order_ref}`,
         html: buildEmailHtml(order),
