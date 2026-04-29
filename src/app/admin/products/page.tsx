@@ -1,18 +1,29 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Plus, Search, Filter, Star, Pencil, Trash2, AlertCircle, Loader2, Database, Lock } from 'lucide-react';
-import { useNotifications } from '@/components/NotificationProvider';
-import { Product } from '@/lib/supabase';
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import {
+  Plus,
+  Search,
+  Filter,
+  Star,
+  Pencil,
+  Trash2,
+  AlertCircle,
+  Loader2,
+  Database,
+  Lock,
+} from 'lucide-react'
+import { useNotifications } from '@/components/NotificationProvider'
+import { Product } from '@/lib/supabase'
 
 const CONDITION_STYLE: Record<string, { bg: string; text: string; label: string }> = {
-  new:         { bg: '#D1FAE5', text: '#065F46', label: 'New / Neuf' },
+  new: { bg: '#D1FAE5', text: '#065F46', label: 'New / Neuf' },
   refurbished: { bg: '#DBEAFE', text: '#1E3A8A', label: 'Refurbished' },
   second_hand: { bg: '#FEF3C7', text: '#92400E', label: 'Occasion' },
-};
-import { useLanguage } from '@/context/LanguageContext';
-import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts';
+}
+import { useLanguage } from '@/context/LanguageContext'
+import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts'
 
 const labels = {
   products: { en: 'Products', fr: 'Produits' },
@@ -29,124 +40,141 @@ const labels = {
   outOfStock: { en: 'Out of Stock', fr: 'Rupture de stock' },
   preOrder: { en: 'Pre-order', fr: 'Pré-commande' },
   noProducts: { en: 'No products found', fr: 'Aucun produit trouvé' },
-  loadingError: { en: 'Failed to connect to database. Showing local products instead.', fr: 'Impossible de se connecter à la base de données. Affichage des produits locaux.' },
+  loadingError: {
+    en: 'Failed to connect to database. Showing local products instead.',
+    fr: 'Impossible de se connecter à la base de données. Affichage des produits locaux.',
+  },
+  retry: { en: 'Retry', fr: 'Réessayer' },
   usingLocal: { en: 'Using Local Data', fr: 'Données locales' },
   usingDb: { en: 'Live Database', fr: 'Base de données' },
-  enterPassword: { en: 'Enter admin password to confirm deletion', fr: 'Entrez le mot de passe admin pour confirmer la suppression' },
+  enterPassword: {
+    en: 'Enter admin password to confirm deletion',
+    fr: 'Entrez le mot de passe admin pour confirmer la suppression',
+  },
   verifying: { en: 'Verifying…', fr: 'Vérification…' },
   deleteSuccess: { en: 'Product deleted successfully.', fr: 'Produit supprimé avec succès.' },
-  incorrectPassword: { en: 'Incorrect password. Deletion cancelled.', fr: 'Mot de passe incorrect. Suppression annulée.' },
-};
+  incorrectPassword: {
+    en: 'Incorrect password. Deletion cancelled.',
+    fr: 'Mot de passe incorrect. Suppression annulée.',
+  },
+}
 
 export default function AdminProductsPage() {
-  const { t } = useLanguage();
-  const { confirm, error: notifyError, success } = useNotifications();
-  const [search, setSearch] = useState('');
-  const [filterBrand, setFilterBrand] = useState<string>('');
-  const [products, setProducts] = useState<Product[]>([]);
-  const [error, setError] = useState<string>('');
-  const [loading, setLoading] = useState(true);
-  const [isLocal, setIsLocal] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const [deletePassword, setDeletePassword] = useState('');
-  const [deleteStep, setDeleteStep] = useState<'password' | 'confirm'>('password');
-  const [verifying, setVerifying] = useState(false);
+  const { t } = useLanguage()
+  const { confirm, error: notifyError, success } = useNotifications()
+  const [search, setSearch] = useState('')
+  const [filterBrand, setFilterBrand] = useState<string>('')
+  const [products, setProducts] = useState<Product[]>([])
+  const [error, setError] = useState<string>('')
+  const [loading, setLoading] = useState(true)
+  const [isLocal, setIsLocal] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
+  const [deletePassword, setDeletePassword] = useState('')
+  const [deleteStep, setDeleteStep] = useState<'password' | 'confirm'>('password')
+  const [verifying, setVerifying] = useState(false)
 
   useEffect(() => {
-    async function loadProducts() {
-      setLoading(true);
-      setError('');
-      try {
-        const res = await fetch('/api/products');
-        if (!res.ok) throw new Error('Failed to load');
-        const dbProducts = await res.json();
-        if (dbProducts && dbProducts.length > 0) {
-          setProducts(dbProducts as Product[]);
-          setIsLocal(false);
-        } else {
-          console.warn('Database is empty, using local products');
-          setProducts(LOCAL_PRODUCTS as unknown as Product[]);
-          setIsLocal(true);
-        }
-      } catch (err) {
-        console.error('Failed to load from DB:', err);
-        setError(t(labels.loadingError));
-        setProducts(LOCAL_PRODUCTS as unknown as Product[]);
-        setIsLocal(true);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadProducts();
-  }, []);
+    loadProducts()
+  }, [])
 
+  async function loadProducts() {
+    setLoading(true)
+    setError('')
+    try {
+      const res = await fetch('/api/products')
+      if (!res.ok) {
+        let apiError = ''
+        try {
+          const body = await res.json()
+          apiError = body.error || ''
+        } catch {}
+        throw new Error(apiError || `HTTP ${res.status}: Could not reach database`)
+      }
+      const dbProducts = await res.json()
+      if (dbProducts && dbProducts.length > 0) {
+        setProducts(dbProducts as Product[])
+        setIsLocal(false)
+      } else {
+        console.warn('Database is empty, using local products')
+        setProducts(LOCAL_PRODUCTS as unknown as Product[])
+        setIsLocal(true)
+      }
+    } catch (err: any) {
+      console.error('Failed to load from DB:', err.message || err)
+      setError(err.message || t(labels.loadingError))
+      setProducts(LOCAL_PRODUCTS as unknown as Product[])
+      setIsLocal(true)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const initiateDelete = (id: string) => {
     if (isLocal) {
-      notifyError('Cannot delete local mock products. Please connect a database.');
-      return;
+      notifyError('Cannot delete local mock products. Please connect a database.')
+      return
     }
-    setDeleteTarget(id);
-    setDeletePassword('');
-    setDeleteStep('password');
-  };
+    setDeleteTarget(id)
+    setDeletePassword('')
+    setDeleteStep('password')
+  }
 
   const handleDeleteVerify = async () => {
-    if (!deleteTarget) return;
-    setVerifying(true);
+    if (!deleteTarget) return
+    setVerifying(true)
     try {
       const verifyRes = await fetch('/api/admin-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: deletePassword }),
-      });
+      })
 
       if (!verifyRes.ok) {
-        notifyError(t(labels.incorrectPassword));
-        setDeleteTarget(null);
-        setVerifying(false);
-        return;
+        notifyError(t(labels.incorrectPassword))
+        setDeleteTarget(null)
+        setVerifying(false)
+        return
       }
 
-      setDeleteStep('confirm');
-      setVerifying(false);
+      setDeleteStep('confirm')
+      setVerifying(false)
     } catch {
-      notifyError(t(labels.incorrectPassword));
-      setDeleteTarget(null);
-      setVerifying(false);
+      notifyError(t(labels.incorrectPassword))
+      setDeleteTarget(null)
+      setVerifying(false)
     }
-  };
+  }
 
   const handleDeleteConfirm = async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget) return
     try {
-      await fetch(`/api/products/${deleteTarget}`, { method: 'DELETE' });
-      setProducts(products.filter((p) => p.id !== deleteTarget));
-      success(t(labels.deleteSuccess));
+      await fetch(`/api/products/${deleteTarget}`, { method: 'DELETE' })
+      setProducts(products.filter(p => p.id !== deleteTarget))
+      success(t(labels.deleteSuccess))
     } catch (err: any) {
-      console.error('Failed to delete:', err);
-      const msg = err.message || 'Failed to delete product';
-      setError(msg);
-      notifyError(msg);
+      console.error('Failed to delete:', err)
+      const msg = err.message || 'Failed to delete product'
+      setError(msg)
+      notifyError(msg)
     } finally {
-      setDeleteTarget(null);
-      setDeletePassword('');
+      setDeleteTarget(null)
+      setDeletePassword('')
     }
-  };
+  }
 
-  const filteredProducts = products.filter((p) => {
-    const nameMatch = p.name?.toLowerCase().includes(search.toLowerCase()) || false;
-    const descMatch = p.description?.toLowerCase().includes(search.toLowerCase()) || false;
-    const matchesSearch = nameMatch || descMatch;
-    const matchesBrand = !filterBrand || p.brand === filterBrand;
-    return matchesSearch && matchesBrand;
-  });
+  const filteredProducts = products.filter(p => {
+    const nameMatch = p.name?.toLowerCase().includes(search.toLowerCase()) || false
+    const descMatch = p.description?.toLowerCase().includes(search.toLowerCase()) || false
+    const matchesSearch = nameMatch || descMatch
+    const matchesBrand = !filterBrand || p.brand === filterBrand
+    return matchesSearch && matchesBrand
+  })
 
-  const brands = Array.from(new Set(products.map((p) => p.brand).filter(Boolean)));
+  const brands = Array.from(new Set(products.map(p => p.brand).filter(Boolean)))
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-CM', { style: 'currency', currency: 'XAF' }).format(price);
-  };
+    return new Intl.NumberFormat('fr-CM', { style: 'currency', currency: 'XAF' }).format(price)
+  }
 
   if (loading) {
     return (
@@ -154,7 +182,7 @@ export default function AdminProductsPage() {
         <Loader2 className="h-8 w-8 animate-spin text-brand-blue" />
         <p className="font-medium text-brand-grey">Loading products...</p>
       </div>
-    );
+    )
   }
 
   return (
@@ -163,11 +191,13 @@ export default function AdminProductsPage() {
         <div>
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-3xl font-bold text-brand-dark">{t(labels.products)}</h1>
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              isLocal 
-                ? 'bg-brand-orange/15 text-brand-orange'
-                : 'bg-brand-blue/15 text-brand-blue'
-            }`}>
+            <span
+              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                isLocal
+                  ? 'bg-brand-orange/15 text-brand-orange'
+                  : 'bg-brand-blue/15 text-brand-blue'
+              }`}
+            >
               {isLocal ? <AlertCircle className="w-3 h-3" /> : <Database className="w-3 h-3" />}
               {isLocal ? t(labels.usingLocal) : t(labels.usingDb)}
             </span>
@@ -186,7 +216,21 @@ export default function AdminProductsPage() {
       {error && (
         <div className="mb-6 flex items-start gap-3 rounded-xl border border-brand-orange/20 bg-brand-orange/10 p-4 text-brand-orange">
           <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-          <p className="text-sm">{error}</p>
+          <div className="flex-1">
+            <p className="text-sm">{error}</p>
+            <p className="text-xs mt-1 text-brand-orange/60">
+              {t({
+                en: 'Showing cached local products. Check your connection.',
+                fr: 'Affichage des produits locaux en cache. Vérifiez votre connexion.',
+              })}
+            </p>
+          </div>
+          <button
+            onClick={() => loadProducts()}
+            className="ml-auto shrink-0 rounded-lg border border-brand-orange/30 px-3 py-1.5 text-xs font-medium text-brand-orange hover:bg-brand-orange/10 transition"
+          >
+            {t(labels.retry)}
+          </button>
         </div>
       )}
 
@@ -197,18 +241,18 @@ export default function AdminProductsPage() {
             type="text"
             placeholder={t(labels.searchProducts)}
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={e => setSearch(e.target.value)}
             className="w-full rounded-lg border border-brand-grey/30 bg-white py-2 pl-10 pr-4 text-brand-dark placeholder:text-brand-dark/30 focus:outline-none focus:ring-2 focus:ring-brand-blue"
           />
         </div>
         <div className="relative w-full sm:w-auto">
           <select
             value={filterBrand}
-            onChange={(e) => setFilterBrand(e.target.value)}
+            onChange={e => setFilterBrand(e.target.value)}
             className="w-full appearance-none rounded-lg border border-brand-grey/30 bg-white py-2 pl-10 pr-8 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-blue cursor-pointer"
           >
             <option value="">{t(labels.allBrands)}</option>
-            {brands.map((brand) => (
+            {brands.map(brand => (
               <option key={brand} value={brand}>
                 {brand}
               </option>
@@ -222,17 +266,29 @@ export default function AdminProductsPage() {
         <table className="w-full min-w-[800px]">
           <thead>
             <tr className="border-b border-brand-grey/20">
-              <th className="px-6 py-4 text-left text-sm font-medium text-brand-grey">{t(labels.product)}</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-brand-grey">{t(labels.brand)}</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-brand-grey">{t(labels.price)}</th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-brand-grey">
+                {t(labels.product)}
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-brand-grey">
+                {t(labels.brand)}
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-brand-grey">
+                {t(labels.price)}
+              </th>
               <th className="px-6 py-4 text-left text-sm font-medium text-brand-grey">Condition</th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-brand-grey">{t(labels.stock)}</th>
-              <th className="px-6 py-4 text-center text-sm font-medium text-brand-grey">{t(labels.featured)}</th>
-              <th className="px-6 py-4 text-right text-sm font-medium text-brand-grey">{t(labels.actions)}</th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-brand-grey">
+                {t(labels.stock)}
+              </th>
+              <th className="px-6 py-4 text-center text-sm font-medium text-brand-grey">
+                {t(labels.featured)}
+              </th>
+              <th className="px-6 py-4 text-right text-sm font-medium text-brand-grey">
+                {t(labels.actions)}
+              </th>
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.map((product) => (
+            {filteredProducts.map(product => (
               <tr
                 key={product.id}
                 className="border-b border-brand-grey/10 transition hover:bg-brand-grey/5"
@@ -241,11 +297,15 @@ export default function AdminProductsPage() {
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-brand-grey/15">
                       <img
-                        src={product.images && product.images[0] ? product.images[0] : '/images/placeholder.svg'}
+                        src={
+                          product.images && product.images[0]
+                            ? product.images[0]
+                            : '/images/placeholder.svg'
+                        }
                         alt={product.name}
                         className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/images/placeholder.svg';
+                        onError={e => {
+                          ;(e.target as HTMLImageElement).src = '/images/placeholder.svg'
                         }}
                       />
                     </div>
@@ -258,7 +318,10 @@ export default function AdminProductsPage() {
                   {product.condition && CONDITION_STYLE[product.condition] ? (
                     <span
                       className="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
-                      style={{ backgroundColor: CONDITION_STYLE[product.condition].bg, color: CONDITION_STYLE[product.condition].text }}
+                      style={{
+                        backgroundColor: CONDITION_STYLE[product.condition].bg,
+                        color: CONDITION_STYLE[product.condition].text,
+                      }}
                     >
                       {CONDITION_STYLE[product.condition].label}
                     </span>
@@ -272,11 +335,15 @@ export default function AdminProductsPage() {
                       product.stock_status === 'in_stock'
                         ? 'bg-brand-blue/15 text-brand-blue'
                         : product.stock_status === 'out_of_stock'
-                        ? 'bg-brand-dark text-white'
-                        : 'bg-brand-orange/15 text-brand-orange'
+                          ? 'bg-brand-dark text-white'
+                          : 'bg-brand-orange/15 text-brand-orange'
                     }`}
                   >
-                    {product.stock_status === 'in_stock' ? t(labels.inStock) : product.stock_status === 'out_of_stock' ? t(labels.outOfStock) : t(labels.preOrder)}
+                    {product.stock_status === 'in_stock'
+                      ? t(labels.inStock)
+                      : product.stock_status === 'out_of_stock'
+                        ? t(labels.outOfStock)
+                        : t(labels.preOrder)}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-center">
@@ -295,7 +362,7 @@ export default function AdminProductsPage() {
                       <Pencil className="w-4 h-4" />
                     </Link>
                     {!isLocal && (
-                      <button 
+                      <button
                         onClick={() => initiateDelete(product.id)}
                         className="p-2 text-brand-grey transition hover:text-brand-orange"
                       >
@@ -329,8 +396,10 @@ export default function AdminProductsPage() {
                 <input
                   type="password"
                   value={deletePassword}
-                  onChange={(e) => setDeletePassword(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleDeleteVerify(); }}
+                  onChange={e => setDeletePassword(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') handleDeleteVerify()
+                  }}
                   autoFocus
                   placeholder="••••••••"
                   className="w-full rounded-xl border border-brand-grey/30 px-4 py-3 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-blue mb-4"
@@ -354,7 +423,10 @@ export default function AdminProductsPage() {
             ) : (
               <>
                 <p className="mb-4 text-sm text-brand-dark/60 text-center">
-                  {t({ en: 'This product and its details will be permanently removed.', fr: 'Ce produit et ses détails seront définitivement supprimés.' })}
+                  {t({
+                    en: 'This product and its details will be permanently removed.',
+                    fr: 'Ce produit et ses détails seront définitivement supprimés.',
+                  })}
                 </p>
                 <div className="flex gap-3">
                   <button
@@ -376,5 +448,5 @@ export default function AdminProductsPage() {
         </div>
       )}
     </div>
-  );
+  )
 }
