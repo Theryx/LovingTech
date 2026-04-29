@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseServer } from '@/lib/supabase/server'
 import { supabase } from '@/lib/supabase/client'
 import { isAdmin } from '@/lib/api-auth'
 

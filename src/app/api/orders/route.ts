@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
-import { z } from 'zod';
-import { supabaseServer } from '@/lib/supabase/server';
-import { isAdmin } from '@/lib/api-auth';
+import { NextRequest, NextResponse } from 'next/server'
+import nodemailer from 'nodemailer'
+import { z } from 'zod'
+import { supabase } from '@/lib/supabase/client'
+import { isAdmin } from '@/lib/api-auth'
 
 const createOrderSchema = z.object({
   order_ref: z.string().min(1),
@@ -22,16 +22,23 @@ const createOrderSchema = z.object({
   delivery_fee: z.number().int().min(0),
   promo_code: z.string().optional().nullable(),
   promo_discount: z.number().int().min(0).optional().nullable(),
-  status: z.enum(['pending', 'confirmed', 'dispatched', 'delivered', 'cancelled']).optional().default('pending'),
-  status_history: z.array(z.object({
-    status: z.string(),
-    at: z.string(),
-    note: z.string().optional(),
-  })).optional(),
-});
+  status: z
+    .enum(['pending', 'confirmed', 'dispatched', 'delivered', 'cancelled'])
+    .optional()
+    .default('pending'),
+  status_history: z
+    .array(
+      z.object({
+        status: z.string(),
+        at: z.string(),
+        note: z.string().optional(),
+      })
+    )
+    .optional(),
+})
 
 function buildEmailHtml(order: Record<string, any>): string {
-  const fmt = (n: number) => n.toLocaleString('fr-FR');
+  const fmt = (n: number) => n.toLocaleString('fr-FR')
   const rows = [
     ['Référence', order.order_ref],
     ['Produit', order.product_name + (order.variant_chosen ? ` — ${order.variant_chosen}` : '')],
@@ -46,15 +53,17 @@ function buildEmailHtml(order: Record<string, any>): string {
     ['Livraison', order.delivery_fee === 0 ? 'GRATUITE' : `${fmt(order.delivery_fee)} FCFA`],
     order.promo_code ? ['Promo', `${order.promo_code} — -${fmt(order.promo_discount)} FCFA`] : null,
     ['TOTAL', `${fmt(order.total_price)} FCFA`],
-  ].filter(Boolean) as [string, any][];
+  ].filter(Boolean) as [string, any][]
 
   const tableRows = rows
-    .map(([label, value]) => `
+    .map(
+      ([label, value]) => `
       <tr>
         <td style="padding:8px 12px;font-weight:600;color:#555;white-space:nowrap;border-bottom:1px solid #f0f0f0">${label}</td>
         <td style="padding:8px 12px;color:#111;border-bottom:1px solid #f0f0f0">${value}</td>
-      </tr>`)
-    .join('');
+      </tr>`
+    )
+    .join('')
 
   return `<!DOCTYPE html>
 <html>
@@ -76,92 +85,90 @@ function buildEmailHtml(order: Record<string, any>): string {
     </div>
   </div>
 </body>
-</html>`;
+</html>`
 }
 
 export async function GET(request: NextRequest) {
   if (!(await isAdmin(request))) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { data, error } = await supabaseServer
+  const { data, error } = await supabase
     .from('orders')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  const orders = data || [];
-  const today = new Date().toISOString().slice(0, 10);
-  const todayOrders = orders.filter((o) => o.created_at?.startsWith(today));
+  const orders = data || []
+  const today = new Date().toISOString().slice(0, 10)
+  const todayOrders = orders.filter(o => o.created_at?.startsWith(today))
   const stats = {
     todayCount: todayOrders.length,
     todayRevenue: todayOrders.reduce((s, o) => s + (o.total_price || 0), 0),
-    pendingCount: orders.filter((o) => o.status === 'pending').length,
-  };
+    pendingCount: orders.filter(o => o.status === 'pending').length,
+  }
 
-  return NextResponse.json({ orders, stats });
+  return NextResponse.json({ orders, stats })
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const parsed = createOrderSchema.parse(body);
+    const body = await req.json()
+    const parsed = createOrderSchema.parse(body)
 
-    const { data: order, error } = await supabaseServer
-      .from('orders')
-      .insert([parsed])
-      .select()
-      .single();
+    const { data: order, error } = await supabase.from('orders').insert([parsed]).select().single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     // Increment promo code usage server-side
     if (parsed.promo_code) {
       try {
-        const { data: promoData } = await supabaseServer
+        const { data: promoData } = await supabase
           .from('promo_codes')
           .select('uses_count')
           .ilike('code', parsed.promo_code)
-          .single();
+          .single()
         if (promoData) {
-          await supabaseServer
+          await supabase
             .from('promo_codes')
             .update({ uses_count: (promoData.uses_count || 0) + 1 })
-            .ilike('code', parsed.promo_code!);
+            .ilike('code', parsed.promo_code!)
         }
       } catch {
         // Non-critical — ignore promo increment failures
       }
     }
 
-    const emailUser = process.env.EMAIL_USER;
-    const emailPass = process.env.EMAIL_APP_PASSWORD;
-    const emailTo = process.env.EMAIL_NOTIFY || 'ndouken@gmail.com';
+    const emailUser = process.env.EMAIL_USER
+    const emailPass = process.env.EMAIL_APP_PASSWORD
+    const emailTo = process.env.EMAIL_NOTIFY || 'ndouken@gmail.com'
 
     if (emailUser && emailPass) {
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: { user: emailUser, pass: emailPass },
-      });
+      })
 
-      transporter.sendMail({
-        from: `"Loving Tech" <${emailUser}>`,
-        to: emailTo,
-        subject: `Nouvelle commande — ${order.order_ref}`,
-        html: buildEmailHtml(order),
-      }).catch((err: Error) => {
-        console.error('Email send failed:', err.message);
-      });
+      transporter
+        .sendMail({
+          from: `"Loving Tech" <${emailUser}>`,
+          to: emailTo,
+          subject: `Nouvelle commande — ${order.order_ref}`,
+          html: buildEmailHtml(order),
+        })
+        .catch((err: Error) => {
+          console.error('Email send failed:', err.message)
+        })
     }
 
-    return NextResponse.json(order, { status: 201 });
+    return NextResponse.json(order, { status: 201 })
   } catch (err: any) {
     if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Validation failed', details: err.issues }, { status: 400 });
+      return NextResponse.json({ error: 'Validation failed', details: err.issues }, { status: 400 })
     }
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { supabaseServer } from '@/lib/supabase/server'
 import { supabase } from '@/lib/supabase/client'
 import { isAdmin } from '@/lib/api-auth'
 
@@ -39,7 +38,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const parsed = createPromoSchema.parse(body)
 
-    const { data, error } = await supabaseServer
+    const { data, error } = await supabase
       .from('promo_codes')
       .insert([{ ...parsed, code: parsed.code.toUpperCase(), uses_count: 0 }])
       .select()

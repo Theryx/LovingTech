@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { supabaseServer } from '@/lib/supabase/server'
 import { supabase } from '@/lib/supabase/client'
 import { isAdmin } from '@/lib/api-auth'
 
@@ -41,11 +40,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const parsed = createZoneSchema.parse(body)
 
-    const { data, error } = await supabaseServer
-      .from('delivery_zones')
-      .insert([parsed])
-      .select()
-      .single()
+    const { data, error } = await supabase.from('delivery_zones').insert([parsed]).select().single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json(data, { status: 201 })

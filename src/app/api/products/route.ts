@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { supabaseServer } from '@/lib/supabase/server'
 import { supabase } from '@/lib/supabase/client'
 import { isAdmin } from '@/lib/api-auth'
 
@@ -65,7 +64,7 @@ export async function POST(request: NextRequest) {
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str)
     const id = crypto.randomUUID()
 
-    const { data, error } = await supabaseServer
+    const { data, error } = await supabase
       .from('products')
       .insert([{ ...parsed, id }])
       .select()

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { supabaseServer } from '@/lib/supabase/server'
 import { supabase } from '@/lib/supabase/client'
 import { isAdmin } from '@/lib/api-auth'
 
@@ -39,7 +38,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     if (parsed.status) {
       updates.status = parsed.status
 
-      const { data: order } = await supabaseServer
+      const { data: order } = await supabase
         .from('orders')
         .select('status_history')
         .eq('id', params.id)
@@ -52,7 +51,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
     updates.updated_at = new Date().toISOString()
 
-    const { data, error } = await supabaseServer
+    const { data, error } = await supabase
       .from('orders')
       .update(updates)
       .eq('id', params.id)
