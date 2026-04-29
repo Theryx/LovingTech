@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { supabaseServer } from '@/lib/supabase/server';
-import { isAdmin } from '@/lib/api-auth';
+import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+import { supabaseServer } from '@/lib/supabase/server'
+import { supabase } from '@/lib/supabase/client'
+import { isAdmin } from '@/lib/api-auth'
 
 const createZoneSchema = z.object({
   city_name_fr: z.string().min(1),
@@ -11,51 +12,47 @@ const createZoneSchema = z.object({
   is_available: z.boolean().optional().default(true),
   agencies: z.array(z.string()).optional().default([]),
   sort_order: z.number().int().optional().default(0),
-});
+})
 
-const updateZoneSchema = createZoneSchema.partial();
+const updateZoneSchema = createZoneSchema.partial()
 
 export async function GET(request: NextRequest) {
-  if (await isAdmin(request)) {
-    const { data, error } = await supabaseServer
-      .from('delivery_zones')
-      .select('*')
-      .order('sort_order', { ascending: true })
-      .order('city_name_fr', { ascending: true });
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(data || []);
-  }
-  const { data, error } = await supabaseServer
+  const query = supabase
     .from('delivery_zones')
     .select('*')
-    .eq('is_available', true)
     .order('sort_order', { ascending: true })
-    .order('city_name_fr', { ascending: true });
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data || []);
+    .order('city_name_fr', { ascending: true })
+
+  if (!(await isAdmin(request))) {
+    query.eq('is_available', true)
+  }
+
+  const { data, error } = await query
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json(data || [])
 }
 
 export async function POST(request: NextRequest) {
   if (!(await isAdmin(request))) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   try {
-    const body = await request.json();
-    const parsed = createZoneSchema.parse(body);
+    const body = await request.json()
+    const parsed = createZoneSchema.parse(body)
 
     const { data, error } = await supabaseServer
       .from('delivery_zones')
       .insert([parsed])
       .select()
-      .single();
+      .single()
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(data, { status: 201 });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(data, { status: 201 })
   } catch (err: any) {
     if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Validation failed', details: err.issues }, { status: 400 });
+      return NextResponse.json({ error: 'Validation failed', details: err.issues }, { status: 400 })
     }
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
