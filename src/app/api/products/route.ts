@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { supabaseServer } from '@/lib/supabase/server';
-import { isAdmin } from '@/lib/api-auth';
+import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+import { supabaseServer } from '@/lib/supabase/server'
+import { supabase } from '@/lib/supabase/client'
+import { isAdmin } from '@/lib/api-auth'
 
 const createProductSchema = z.object({
   name: z.string().min(1),
@@ -22,53 +23,60 @@ const createProductSchema = z.object({
   low_stock_threshold: z.number().int().min(0).nullable().optional(),
   compare_at_price: z.number().int().nullable().optional(),
   warranty_info: z.string().nullable().optional(),
-  variants: z.array(z.object({
-    label: z.string(),
-    options: z.array(z.object({
-      name: z.string(),
-      stock_qty: z.number().int().min(0),
-      price_delta: z.number().int(),
-    })),
-  })).optional(),
+  variants: z
+    .array(
+      z.object({
+        label: z.string(),
+        options: z.array(
+          z.object({
+            name: z.string(),
+            stock_qty: z.number().int().min(0),
+            price_delta: z.number().int(),
+          })
+        ),
+      })
+    )
+    .optional(),
   tags: z.array(z.string()).optional(),
-});
+})
 
-const updateProductSchema = createProductSchema.partial();
+const updateProductSchema = createProductSchema.partial()
 
 export async function GET() {
-  const { data, error } = await supabaseServer
+  const { data, error } = await supabase
     .from('products')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data || []);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json(data || [])
 }
 
 export async function POST(request: NextRequest) {
   if (!(await isAdmin(request))) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   try {
-    const body = await request.json();
-    const parsed = createProductSchema.parse(body);
+    const body = await request.json()
+    const parsed = createProductSchema.parse(body)
 
-    const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
-    const id = crypto.randomUUID();
+    const isUUID = (str: string) =>
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str)
+    const id = crypto.randomUUID()
 
     const { data, error } = await supabaseServer
       .from('products')
       .insert([{ ...parsed, id }])
       .select()
-      .single();
+      .single()
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(data, { status: 201 });
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(data, { status: 201 })
   } catch (err: any) {
     if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Validation failed', details: err.issues }, { status: 400 });
+      return NextResponse.json({ error: 'Validation failed', details: err.issues }, { status: 400 })
     }
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
