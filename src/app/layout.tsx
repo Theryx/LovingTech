@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import "@/lib/env";
 import SplashScreen from "@/components/SplashScreen";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import { NotificationProvider } from "@/components/NotificationProvider";

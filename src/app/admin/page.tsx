@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts';
-import { Product, productService, orderService, reviewService } from '@/lib/supabase';
+import { Product, Order, Review } from '@/lib/supabase';
 
 export default function AdminDashboard() {
   const { t } = useLanguage();
@@ -14,9 +14,11 @@ export default function AdminDashboard() {
   const [pendingReviews, setPendingReviews] = useState(0);
 
   useEffect(() => {
-    productService.getAll().then(data => { if (data.length > 0) setProducts(data); }).catch(err => console.error('Failed to load products for dashboard:', err));
-    orderService.getTodayStats().then(s => setStats({ todayCount: s.count, todayRevenue: s.revenue, pendingCount: s.pending })).catch(err => console.error('Failed to load order stats:', err));
-    reviewService.getPendingCount().then(setPendingReviews).catch(err => console.error('Failed to load pending review count:', err));
+    fetch('/api/products').then(r => { if (r.ok) return r.json(); return []; }).then(data => { if (data?.length > 0) setProducts(data); }).catch(err => console.error('Failed to load products for dashboard:', err));
+    fetch('/api/orders').then(r => { if (!r.ok) return { stats: { todayCount: 0, todayRevenue: 0, pendingCount: 0 } }; return r.json(); }).then((data: any) => {
+      setStats(data.stats || { todayCount: 0, todayRevenue: 0, pendingCount: 0 });
+    }).catch(err => console.error('Failed to load order stats:', err));
+    fetch('/api/reviews').then(r => { if (!r.ok) return []; return r.json(); }).then((data: Review[]) => setPendingReviews(data.filter(r => r.status === 'pending').length)).catch(err => console.error('Failed to load pending review count:', err));
   }, []);
 
   const featuredCount = products.filter((p) => (p as ProductWithFeatured).featured).length;

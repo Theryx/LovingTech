@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save } from 'lucide-react';
 import { useNotifications } from '@/components/NotificationProvider';
-import { Product, ProductCondition, Variant, productService } from '@/lib/supabase';
+import { Product, ProductCondition, Variant } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
 import ProductForm, { WARRANTY_DEFAULTS } from '@/components/ProductForm';
 
@@ -124,12 +124,20 @@ export default function NewProductPage() {
     }
     setSaving(true);
     try {
-      await productService.create({
-        ...product,
-        id: crypto.randomUUID(),
-        specs: product.specs || {},
-        images: product.images || [],
-      } as any);
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...product,
+          id: crypto.randomUUID(),
+          specs: product.specs || {},
+          images: product.images || [],
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to save');
+      }
       setSaved(true);
       success(t({ en: 'Product saved successfully.', fr: 'Produit enregistré avec succès.' }));
       setTimeout(() => router.push('/admin/products'), 1000);

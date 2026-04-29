@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, Download, Eye } from 'lucide-react';
-import { Order, OrderStatus, orderService } from '@/lib/supabase';
+import { Order, OrderStatus } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
 
 const STATUS_STYLE: Record<OrderStatus, { bg: string; text: string; label: string }> = {
@@ -22,7 +22,7 @@ export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState<OrderStatus | ''>('');
 
   useEffect(() => {
-    orderService.getAll().then(data => { setOrders(data); setLoading(false); }).catch(() => setLoading(false));
+    fetch('/api/orders').then(r => { if (!r.ok) { setLoading(false); return []; } return r.json(); }).then(data => { setOrders(data); setLoading(false); }).catch(() => setLoading(false));
   }, []);
 
   const filtered = orders.filter(o => {

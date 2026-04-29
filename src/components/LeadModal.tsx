@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Phone, MapPin, User, ArrowRight, ArrowLeft, CheckCircle2, Tag } from 'lucide-react';
-import { Product, promoService } from '@/lib/supabase';
+import { Product } from '@/lib/supabase';
 import { generateOrderRef } from '@/lib/generateOrderRef';
 import { validatePromo } from '@/lib/validatePromo';
 import { useNotifications } from '@/components/NotificationProvider';
@@ -151,7 +151,6 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
         }),
       });
       if (!res.ok) throw new Error(await res.text());
-      if (promoCode) promoService.incrementUses(promoCode).catch(() => {});
 
       const msg = encodeURIComponent(
         `Bonjour Loving Tech! 👋\n\n` +

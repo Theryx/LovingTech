@@ -1,6 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import { supabase } from '@/lib/supabase';
+import { z } from 'zod';
+import { supabaseServer } from '@/lib/supabase/server';
+import { isAdmin } from '@/lib/api-auth';
+
+const createOrderSchema = z.object({
+  order_ref: z.string().min(1),
+  product_id: z.string().uuid().optional(),
+  product_name: z.string().min(1),
+  variant_chosen: z.string().optional(),
+  quantity: z.number().int().min(1).max(99),
+  unit_price: z.number().int().min(0),
+  total_price: z.number().int().min(0),
+  customer_name: z.string().min(2).max(200),
+  customer_phone: z.string().min(8).max(20),
+  customer_email: z.string().email().optional().or(z.literal('')),
+  city: z.string().min(1).max(100),
+  bus_agency: z.string().optional().nullable(),
+  quartier: z.string().min(2).max(200),
+  address_details: z.string().optional().nullable(),
+  delivery_fee: z.number().int().min(0),
+  promo_code: z.string().optional().nullable(),
+  promo_discount: z.number().int().min(0).optional().nullable(),
+  status: z.enum(['pending', 'confirmed', 'dispatched', 'delivered', 'cancelled']).optional().default('pending'),
+  status_history: z.array(z.object({
+    status: z.string(),
+    at: z.string(),
+    note: z.string().optional(),
+  })).optional(),
+});
 
 function buildEmailHtml(order: Record<string, any>): string {
   const fmt = (n: number) => n.toLocaleString('fr-FR');
@@ -51,18 +79,62 @@ function buildEmailHtml(order: Record<string, any>): string {
 </html>`;
 }
 
+export async function GET(request: NextRequest) {
+  if (!(await isAdmin(request))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { data, error } = await supabaseServer
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  const orders = data || [];
+  const today = new Date().toISOString().slice(0, 10);
+  const todayOrders = orders.filter((o) => o.created_at?.startsWith(today));
+  const stats = {
+    todayCount: todayOrders.length,
+    todayRevenue: todayOrders.reduce((s, o) => s + (o.total_price || 0), 0),
+    pendingCount: orders.filter((o) => o.status === 'pending').length,
+  };
+
+  return NextResponse.json({ orders, stats });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    const parsed = createOrderSchema.parse(body);
 
-    const { data: order, error } = await supabase
+    const { data: order, error } = await supabaseServer
       .from('orders')
-      .insert([body])
+      .insert([parsed])
       .select()
       .single();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Increment promo code usage server-side
+    if (parsed.promo_code) {
+      try {
+        const { data: promoData } = await supabaseServer
+          .from('promo_codes')
+          .select('uses_count')
+          .ilike('code', parsed.promo_code)
+          .single();
+        if (promoData) {
+          await supabaseServer
+            .from('promo_codes')
+            .update({ uses_count: (promoData.uses_count || 0) + 1 })
+            .ilike('code', parsed.promo_code!);
+        }
+      } catch {
+        // Non-critical — ignore promo increment failures
+      }
     }
 
     const emailUser = process.env.EMAIL_USER;
@@ -78,7 +150,7 @@ export async function POST(req: NextRequest) {
       transporter.sendMail({
         from: `"Loving Tech" <${emailUser}>`,
         to: emailTo,
-        subject: `🛍️ Nouvelle commande — ${order.order_ref}`,
+        subject: `Nouvelle commande — ${order.order_ref}`,
         html: buildEmailHtml(order),
       }).catch((err: Error) => {
         console.error('Email send failed:', err.message);
@@ -87,6 +159,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(order, { status: 201 });
   } catch (err: any) {
+    if (err instanceof z.ZodError) {
+      return NextResponse.json({ error: 'Validation failed', details: err.issues }, { status: 400 });
+    }
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Search, Filter, Star, Pencil, Trash2, AlertCircle, Loader2, Database, Lock } from 'lucide-react';
 import { useNotifications } from '@/components/NotificationProvider';
-import { Product, productService } from '@/lib/supabase';
+import { Product } from '@/lib/supabase';
 
 const CONDITION_STYLE: Record<string, { bg: string; text: string; label: string }> = {
   new:         { bg: '#D1FAE5', text: '#065F46', label: 'New / Neuf' },
@@ -57,7 +57,9 @@ export default function AdminProductsPage() {
       setLoading(true);
       setError('');
       try {
-        const dbProducts = await productService.getAll();
+        const res = await fetch('/api/products');
+        if (!res.ok) throw new Error('Failed to load');
+        const dbProducts = await res.json();
         if (dbProducts && dbProducts.length > 0) {
           setProducts(dbProducts as Product[]);
           setIsLocal(false);
@@ -118,7 +120,7 @@ export default function AdminProductsPage() {
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
     try {
-      await productService.delete(deleteTarget);
+      await fetch(`/api/products/${deleteTarget}`, { method: 'DELETE' });
       setProducts(products.filter((p) => p.id !== deleteTarget));
       success(t(labels.deleteSuccess));
     } catch (err: any) {

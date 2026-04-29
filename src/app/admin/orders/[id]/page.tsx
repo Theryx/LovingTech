@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, MessageCircle } from 'lucide-react';
 import { useNotifications } from '@/components/NotificationProvider';
-import { Order, OrderStatus, orderService } from '@/lib/supabase';
+import { Order, OrderStatus } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
 
 const STATUS_FLOW: { status: OrderStatus; labelFr: string; labelEn: string; color: string }[] = [
@@ -42,8 +42,11 @@ export default function AdminOrderDetailPage() {
   const [updating, setUpdating] = useState(false);
 
   const load = useCallback(async () => {
-    const data = await orderService.getById(params.id as string);
-    if (data) { setOrder(data); setNotes(data.admin_notes || ''); }
+    const res = await fetch(`/api/orders/${params.id as string}`);
+    if (res.ok) {
+      const data = await res.json();
+      setOrder(data); setNotes(data.admin_notes || '');
+    }
     setLoading(false);
   }, [params.id]);
 
@@ -62,7 +65,11 @@ export default function AdminOrderDetailPage() {
     if (!confirmed) return;
     setUpdating(true);
     try {
-      await orderService.updateStatus(order.id!, status);
+      await fetch(`/api/orders/${order.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
       await load();
       success(t({ en: 'Order status updated.', fr: 'Statut de la commande mis à jour.' }));
     } catch (err: any) {
@@ -76,7 +83,11 @@ export default function AdminOrderDetailPage() {
     if (!order) return;
     setSavingNotes(true);
     try {
-      await orderService.updateNotes(order.id!, notes);
+      await fetch(`/api/orders/${order.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ admin_notes: notes }),
+      });
       success(t({ en: 'Notes saved.', fr: 'Notes enregistrées.' }));
     } catch (err: any) {
       notifyError(err?.message || t({ en: 'Failed to save notes.', fr: "Échec de l'enregistrement des notes." }));

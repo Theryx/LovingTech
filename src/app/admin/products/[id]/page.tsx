@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save } from 'lucide-react';
 import { useNotifications } from '@/components/NotificationProvider';
-import { Product, ProductCondition, Variant, productService } from '@/lib/supabase';
+import { Product, ProductCondition, Variant } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
 import ProductForm, { WARRANTY_DEFAULTS } from '@/components/ProductForm';
 import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts';
@@ -53,8 +53,11 @@ export default function AdminProductEditorPage() {
       let fromLocal = false;
 
       try {
-        const db = await productService.getById(productId);
-        if (db) found = db;
+        const res = await fetch(`/api/products/${productId}`);
+        if (res.ok) {
+          const db = await res.json();
+          if (db) found = db;
+        }
       } catch (err) {
         console.error('DB fetch failed:', err);
       }
@@ -163,14 +166,21 @@ export default function AdminProductEditorPage() {
     try {
       const data = { ...product, specs: product.specs || {}, images: product.images || [] };
       if (isLocalProduct) {
-        const existing = await productService.getByName(product.name);
-        if (existing) {
-          await productService.update(existing.id, data as any);
-        } else {
-          await productService.create(data as any);
-        }
+        await fetch('/api/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...data, id: crypto.randomUUID() }),
+        });
       } else {
-        await productService.update(product.id, data as any);
+        const res = await fetch(`/api/products/${product.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || 'Failed to update');
+        }
       }
       setSaved(true);
       success(t({ en: 'Product saved successfully.', fr: 'Produit enregistré avec succès.' }));

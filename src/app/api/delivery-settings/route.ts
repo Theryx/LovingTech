@@ -1,21 +1,54 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAuthToken } from '@/lib/auth';
-import { supabase } from '@/lib/supabase';
+import { z } from 'zod';
+import { supabaseServer } from '@/lib/supabase/server';
+import { isAdmin } from '@/lib/api-auth';
 
-async function isAuthorized(request: NextRequest): Promise<boolean> {
-  const token = request.cookies.get('admin_auth')?.value;
-  if (!token) return false;
-  return verifyAuthToken(token);
-}
+const updateSettingsSchema = z.object({
+  free_delivery_threshold: z.number().int().min(0),
+});
 
-export async function GET(request: NextRequest) {
-  if (!(await isAuthorized(request))) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { data } = await supabase
+export async function GET() {
+  const { data } = await supabaseServer
     .from('delivery_settings')
     .select('free_delivery_threshold')
     .single();
   return NextResponse.json(data || { free_delivery_threshold: 50000 });
+}
+
+export async function PUT(request: NextRequest) {
+  if (!(await isAdmin(request))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    const { free_delivery_threshold } = updateSettingsSchema.parse(body);
+
+    const { data: existing } = await supabaseServer
+      .from('delivery_settings')
+      .select('id')
+      .single();
+
+    if (existing?.id) {
+      const { error } = await supabaseServer
+        .from('delivery_settings')
+        .update({ free_delivery_threshold, updated_at: new Date().toISOString() })
+        .eq('id', existing.id);
+
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    } else {
+      const { error } = await supabaseServer
+        .from('delivery_settings')
+        .insert([{ free_delivery_threshold }]);
+
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ free_delivery_threshold });
+  } catch (err: any) {
+    if (err instanceof z.ZodError) {
+      return NextResponse.json({ error: 'Validation failed', details: err.issues }, { status: 400 });
+    }
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }

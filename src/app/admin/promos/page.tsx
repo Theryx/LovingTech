@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
 import { useNotifications } from '@/components/NotificationProvider';
-import { PromoCode, promoService } from '@/lib/supabase';
+import { PromoCode } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
 
 const EMPTY_FORM: Omit<PromoCode, 'id' | 'uses_count' | 'created_at'> = {
@@ -28,7 +28,9 @@ export default function AdminPromosPage() {
 
   const load = async () => {
     try {
-      const data = await promoService.getAll();
+      const res = await fetch('/api/promo-codes');
+      if (!res.ok) throw new Error('Failed to load');
+      const data = await res.json();
       setPromos(data);
     } catch (err) {
       console.error('Failed to load promos:', err);
@@ -46,7 +48,16 @@ export default function AdminPromosPage() {
     if (form.value <= 0) { setFormError('Valeur invalide / Invalid value'); return; }
     setSaving(true);
     try {
-      const created = await promoService.create(form);
+      const res = await fetch('/api/promo-codes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to create');
+      }
+      const created = await res.json();
       setPromos(prev => [created, ...prev]);
       setShowForm(false);
       setForm({ ...EMPTY_FORM });
@@ -61,7 +72,11 @@ export default function AdminPromosPage() {
 
   const toggleActive = async (promo: PromoCode) => {
     try {
-      await promoService.update(promo.id!, { is_active: !promo.is_active });
+      await fetch(`/api/promo-codes/${promo.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_active: !promo.is_active }),
+      });
       setPromos(prev => prev.map(p => p.id === promo.id ? { ...p, is_active: !p.is_active } : p));
       success(t({
         en: promo.is_active ? 'Promo code disabled.' : 'Promo code activated.',
@@ -82,7 +97,7 @@ export default function AdminPromosPage() {
     });
     if (!confirmed) return;
     try {
-      await promoService.delete(id);
+      await fetch(`/api/promo-codes/${id}`, { method: 'DELETE' });
       setPromos(prev => prev.filter(p => p.id !== id));
       success(t({ en: 'Promo code deleted.', fr: 'Code promo supprimé.' }));
     } catch (err: any) {

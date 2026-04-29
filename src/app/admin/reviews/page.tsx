@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Star, CheckCircle, XCircle } from 'lucide-react';
-import { Review, ReviewStatus, reviewService } from '@/lib/supabase';
+import { Review, ReviewStatus } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
 
 const STATUS_STYLE: Record<ReviewStatus, { bg: string; text: string; label: string }> = {
@@ -22,7 +22,9 @@ export default function AdminReviewsPage() {
 
   const load = async () => {
     try {
-      const data = await reviewService.getAll();
+      const res = await fetch('/api/reviews');
+      if (!res.ok) throw new Error('Failed to load');
+      const data = await res.json();
       setReviews(data);
     } catch (err) {
       console.error('Failed to load reviews:', err);
@@ -35,7 +37,11 @@ export default function AdminReviewsPage() {
 
   const handleStatus = async (id: string, status: ReviewStatus) => {
     setUpdating(id);
-    await reviewService.updateStatus(id, status);
+    await fetch(`/api/reviews/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    });
     setReviews(prev => prev.map(r => r.id === id ? { ...r, status } : r));
     setUpdating(null);
   };

@@ -1,9 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from './client';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder';
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export { supabase };
 
 export type ProductCondition = 'new' | 'refurbished' | 'second_hand';
 export type ProductCategory = 'keyboard' | 'mouse' | 'cable' | 'speaker' | 'solar_lamp';

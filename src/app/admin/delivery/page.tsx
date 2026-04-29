@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, X, Check, MapPin } from 'lucide-react';
 import { useNotifications } from '@/components/NotificationProvider';
 import { useLanguage } from '@/context/LanguageContext';
-import { DeliveryZone, DeliverySettings, deliveryZoneService } from '@/lib/supabase';
+import { DeliveryZone, DeliverySettings } from '@/lib/supabase';
 
 const DOUALA_SORT_ORDER = 0;
 
@@ -42,10 +42,13 @@ export default function AdminDelivery() {
   async function load() {
     setLoading(true);
     try {
-      const [zoneData, settingsData] = await Promise.all([
-        deliveryZoneService.getAll(),
-        deliveryZoneService.getSettings(),
+      const [zoneRes, settingsRes] = await Promise.all([
+        fetch('/api/delivery-zones'),
+        fetch('/api/delivery-settings'),
       ]);
+      if (!zoneRes.ok || !settingsRes.ok) throw new Error('Failed to load');
+      const zoneData = await zoneRes.json();
+      const settingsData = await settingsRes.json();
       setZones(zoneData);
       setSettings(settingsData);
       if (settingsData) setThreshold(String(settingsData.free_delivery_threshold));
@@ -94,9 +97,17 @@ export default function AdminDelivery() {
     setSaving(true);
     try {
       if (editingId) {
-        await deliveryZoneService.update(editingId, form);
+        await fetch(`/api/delivery-zones/${editingId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(form),
+        });
       } else {
-        await deliveryZoneService.create(form);
+        await fetch('/api/delivery-zones', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(form),
+        });
       }
       setShowForm(false);
       await load();
@@ -112,7 +123,7 @@ export default function AdminDelivery() {
 
   async function deleteZone(id: string) {
     try {
-      await deliveryZoneService.delete(id);
+      await fetch(`/api/delivery-zones/${id}`, { method: 'DELETE' });
       setDeleteConfirm(null);
       await load();
       success(t({ en: 'Delivery zone deleted.', fr: 'Zone de livraison supprimée.' }));
@@ -124,7 +135,11 @@ export default function AdminDelivery() {
   async function toggleAvailable(zone: DeliveryZone) {
     if (!zone.id) return;
     try {
-      await deliveryZoneService.update(zone.id, { is_available: !zone.is_available });
+      await fetch(`/api/delivery-zones/${zone.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_available: !zone.is_available }),
+      });
       await load();
       success(t({
         en: zone.is_available ? 'City disabled for delivery.' : 'City enabled for delivery.',
@@ -139,7 +154,11 @@ export default function AdminDelivery() {
     const val = parseInt(threshold, 10);
     if (isNaN(val) || val < 0) return;
     try {
-      await deliveryZoneService.updateSettings(val);
+      await fetch('/api/delivery-settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ free_delivery_threshold: val }),
+      });
       setThresholdSaved(true);
       success(t({ en: 'Free delivery threshold saved.', fr: 'Seuil de livraison gratuite enregistré.' }));
       setTimeout(() => setThresholdSaved(false), 2000);
