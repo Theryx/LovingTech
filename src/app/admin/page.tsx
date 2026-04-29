@@ -14,9 +14,9 @@ export default function AdminDashboard() {
   const [pendingReviews, setPendingReviews] = useState(0);
 
   useEffect(() => {
-    productService.getAll().then(data => { if (data.length > 0) setProducts(data); }).catch(() => {});
-    orderService.getTodayStats().then(s => setStats({ todayCount: s.count, todayRevenue: s.revenue, pendingCount: s.pending })).catch(() => {});
-    reviewService.getPendingCount().then(setPendingReviews).catch(() => {});
+    productService.getAll().then(data => { if (data.length > 0) setProducts(data); }).catch(err => console.error('Failed to load products for dashboard:', err));
+    orderService.getTodayStats().then(s => setStats({ todayCount: s.count, todayRevenue: s.revenue, pendingCount: s.pending })).catch(err => console.error('Failed to load order stats:', err));
+    reviewService.getPendingCount().then(setPendingReviews).catch(err => console.error('Failed to load pending review count:', err));
   }, []);
 
   const featuredCount = products.filter((p) => (p as ProductWithFeatured).featured).length;

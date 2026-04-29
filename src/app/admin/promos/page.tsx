@@ -30,8 +30,8 @@ export default function AdminPromosPage() {
     try {
       const data = await promoService.getAll();
       setPromos(data);
-    } catch {
-      // silent
+    } catch (err) {
+      console.error('Failed to load promos:', err);
     } finally {
       setLoading(false);
     }

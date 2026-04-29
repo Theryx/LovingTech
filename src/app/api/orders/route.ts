@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabase } from '@/lib/supabase';
 
 function buildEmailHtml(order: Record<string, any>): string {
   const fmt = (n: number) => n.toLocaleString('fr-FR');
@@ -60,7 +55,6 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // Persist order in Supabase
     const { data: order, error } = await supabase
       .from('orders')
       .insert([body])
@@ -71,7 +65,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Send email notification via Gmail (non-blocking)
     const emailUser = process.env.EMAIL_USER;
     const emailPass = process.env.EMAIL_APP_PASSWORD;
     const emailTo = process.env.EMAIL_NOTIFY || 'ndouken@gmail.com';

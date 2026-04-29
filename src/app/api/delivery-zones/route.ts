@@ -1,7 +1,18 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { verifyAuthToken } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 
-export async function GET() {
+async function isAuthorized(request: NextRequest): Promise<boolean> {
+  const token = request.cookies.get('admin_auth')?.value;
+  if (!token) return false;
+  return verifyAuthToken(token);
+}
+
+export async function GET(request: NextRequest) {
+  if (!(await isAuthorized(request))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { data, error } = await supabase
     .from('delivery_zones')
     .select('id, city_name_fr, city_name_en, delivery_fee, estimated_days, agencies, sort_order')

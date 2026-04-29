@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Filter, Star, Pencil, Trash2, AlertCircle, Loader2, Database } from 'lucide-react';
+import { Plus, Search, Filter, Star, Pencil, Trash2, AlertCircle, Loader2, Database, Lock } from 'lucide-react';
 import { useNotifications } from '@/components/NotificationProvider';
 import { Product, productService } from '@/lib/supabase';
 
@@ -32,6 +32,10 @@ const labels = {
   loadingError: { en: 'Failed to connect to database. Showing local products instead.', fr: 'Impossible de se connecter à la base de données. Affichage des produits locaux.' },
   usingLocal: { en: 'Using Local Data', fr: 'Données locales' },
   usingDb: { en: 'Live Database', fr: 'Base de données' },
+  enterPassword: { en: 'Enter admin password to confirm deletion', fr: 'Entrez le mot de passe admin pour confirmer la suppression' },
+  verifying: { en: 'Verifying…', fr: 'Vérification…' },
+  deleteSuccess: { en: 'Product deleted successfully.', fr: 'Produit supprimé avec succès.' },
+  incorrectPassword: { en: 'Incorrect password. Deletion cancelled.', fr: 'Mot de passe incorrect. Suppression annulée.' },
 };
 
 export default function AdminProductsPage() {
@@ -43,6 +47,10 @@ export default function AdminProductsPage() {
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [isLocal, setIsLocal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteStep, setDeleteStep] = useState<'password' | 'confirm'>('password');
+  const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
     async function loadProducts() {
@@ -68,47 +76,59 @@ export default function AdminProductsPage() {
       }
     }
     loadProducts();
-  }, [t]);
+  }, []);
 
-  const handleDelete = async (id: string) => {
+
+  const initiateDelete = (id: string) => {
     if (isLocal) {
       notifyError('Cannot delete local mock products. Please connect a database.');
       return;
     }
+    setDeleteTarget(id);
+    setDeletePassword('');
+    setDeleteStep('password');
+  };
 
-    const password = window.prompt('Please enter the admin password to confirm deletion:');
-    if (password === null) return; // User cancelled
-
-    // Verify password first
+  const handleDeleteVerify = async () => {
+    if (!deleteTarget) return;
+    setVerifying(true);
     try {
       const verifyRes = await fetch('/api/admin-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ password: deletePassword }),
       });
 
       if (!verifyRes.ok) {
-        notifyError('Incorrect password. Deletion cancelled.');
+        notifyError(t(labels.incorrectPassword));
+        setDeleteTarget(null);
+        setVerifying(false);
         return;
       }
 
-      const confirmed = await confirm({
-        title: 'Are you absolutely sure?',
-        message: 'This product and its details will be permanently removed.',
-        confirmLabel: 'Yes, Delete',
-        cancelLabel: 'Cancel',
-        tone: 'danger',
-      });
-      if (!confirmed) return;
+      setDeleteStep('confirm');
+      setVerifying(false);
+    } catch {
+      notifyError(t(labels.incorrectPassword));
+      setDeleteTarget(null);
+      setVerifying(false);
+    }
+  };
 
-      await productService.delete(id);
-      setProducts(products.filter((p) => p.id !== id));
-      success('Product deleted successfully.');
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    try {
+      await productService.delete(deleteTarget);
+      setProducts(products.filter((p) => p.id !== deleteTarget));
+      success(t(labels.deleteSuccess));
     } catch (err: any) {
       console.error('Failed to delete:', err);
       const msg = err.message || 'Failed to delete product';
       setError(msg);
       notifyError(msg);
+    } finally {
+      setDeleteTarget(null);
+      setDeletePassword('');
     }
   };
 
@@ -274,7 +294,7 @@ export default function AdminProductsPage() {
                     </Link>
                     {!isLocal && (
                       <button 
-                        onClick={() => handleDelete(product.id)}
+                        onClick={() => initiateDelete(product.id)}
                         className="p-2 text-brand-grey transition hover:text-brand-orange"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -290,6 +310,69 @@ export default function AdminProductsPage() {
           <div className="p-12 text-center text-brand-grey">{t(labels.noProducts)}</div>
         )}
       </div>
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+            <div className="mb-4 flex justify-center">
+              <div className="rounded-2xl bg-red-50 p-3 text-red-600">
+                <Lock className="h-6 w-6" />
+              </div>
+            </div>
+            <h2 className="mb-2 text-center text-lg font-bold text-brand-dark">
+              {t(labels.enterPassword)}
+            </h2>
+            {deleteStep === 'password' ? (
+              <>
+                <input
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleDeleteVerify(); }}
+                  autoFocus
+                  placeholder="••••••••"
+                  className="w-full rounded-xl border border-brand-grey/30 px-4 py-3 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-blue mb-4"
+                />
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setDeleteTarget(null)}
+                    className="flex-1 rounded-lg border border-brand-grey/30 py-2 text-sm font-medium text-brand-dark hover:bg-brand-grey/10"
+                  >
+                    {t({ en: 'Cancel', fr: 'Annuler' })}
+                  </button>
+                  <button
+                    onClick={handleDeleteVerify}
+                    disabled={verifying || !deletePassword}
+                    className="flex-1 rounded-lg bg-red-600 py-2 text-sm font-semibold text-white hover:brightness-95 disabled:opacity-50"
+                  >
+                    {verifying ? t(labels.verifying) : t({ en: 'Verify', fr: 'Vérifier' })}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="mb-4 text-sm text-brand-dark/60 text-center">
+                  {t({ en: 'This product and its details will be permanently removed.', fr: 'Ce produit et ses détails seront définitivement supprimés.' })}
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setDeleteTarget(null)}
+                    className="flex-1 rounded-lg border border-brand-grey/30 py-2 text-sm font-medium text-brand-dark hover:bg-brand-grey/10"
+                  >
+                    {t({ en: 'Cancel', fr: 'Annuler' })}
+                  </button>
+                  <button
+                    onClick={handleDeleteConfirm}
+                    className="flex-1 rounded-lg bg-red-600 py-2 text-sm font-semibold text-white hover:brightness-95"
+                  >
+                    {t({ en: 'Delete', fr: 'Supprimer' })}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

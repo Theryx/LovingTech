@@ -24,8 +24,8 @@ export default function AdminReviewsPage() {
     try {
       const data = await reviewService.getAll();
       setReviews(data);
-    } catch {
-      // silent
+    } catch (err) {
+      console.error('Failed to load reviews:', err);
     } finally {
       setLoading(false);
     }

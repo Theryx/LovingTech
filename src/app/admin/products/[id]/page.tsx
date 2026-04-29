@@ -3,18 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, Plus, X, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 import { useNotifications } from '@/components/NotificationProvider';
-import { Product, ProductCondition, ProductCategory, Variant, productService } from '@/lib/supabase';
+import { Product, ProductCondition, Variant, productService } from '@/lib/supabase';
 import { useLanguage } from '@/context/LanguageContext';
-import ImageUploader from '@/components/ImageUploader';
+import ProductForm, { WARRANTY_DEFAULTS } from '@/components/ProductForm';
 import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts';
-
-const WARRANTY_DEFAULTS: Record<ProductCondition, string> = {
-  new: 'Garantie fabricant / Manufacturer warranty',
-  refurbished: '30 jours / 30 days',
-  second_hand: 'Aucune garantie / No warranty',
-};
 
 const emptyProduct: Product = {
   id: '',
@@ -37,9 +31,6 @@ const emptyProduct: Product = {
   low_stock_threshold: 3,
   compare_at_price: undefined,
 };
-
-const inputCls = 'w-full rounded-lg border border-brand-grey/30 bg-white px-4 py-2 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-blue';
-const labelCls = 'mb-2 block text-sm font-medium text-brand-dark';
 
 export default function AdminProductEditorPage() {
   const router = useRouter();
@@ -93,7 +84,6 @@ export default function AdminProductEditorPage() {
     set({ condition, warranty_info: WARRANTY_DEFAULTS[condition] });
   };
 
-  // Specs helpers
   const handleSpecKeyChange = (index: number, value: string) => {
     const newKeys = [...specKeys];
     const oldKey = newKeys[index];
@@ -122,7 +112,6 @@ export default function AdminProductEditorPage() {
     set({ specs: newSpecs });
   };
 
-  // Variant helpers
   const addVariantGroup = () => {
     set({ variants: [...(product.variants || []), { label: '', options: [{ name: '', stock_qty: 0, price_delta: 0 }] }] });
   };
@@ -157,13 +146,13 @@ export default function AdminProductEditorPage() {
     set({ variants: (product.variants || []).filter((_, i) => i !== vi) });
   };
 
-const handleSave = async () => {
+  const handleSave = async () => {
     if (product.price_xaf <= 0) {
       notifyError(t({ en: 'Price is required.', fr: 'Le prix est obligatoire.' }));
       return;
     }
     if (!product.name_fr && !product.name_en && !product.name) {
-      notifyError(t({ en: 'At least one product name is required (FR, EN, or Display Name).', fr: 'Au moins un nom de produit est requis (FR, EN ou Nom affiché).' }));
+      notifyError(t({ en: 'At least one product name is required.', fr: 'Au moins un nom de produit est requis.' }));
       return;
     }
     if (product.condition === 'second_hand' && (product.images || []).length < 2) {
@@ -174,7 +163,6 @@ const handleSave = async () => {
     try {
       const data = { ...product, specs: product.specs || {}, images: product.images || [] };
       if (isLocalProduct) {
-        // Check if a DB copy already exists by name; update it instead of creating a duplicate
         const existing = await productService.getByName(product.name);
         if (existing) {
           await productService.update(existing.id, data as any);
@@ -194,8 +182,6 @@ const handleSave = async () => {
       setSaving(false);
     }
   };
-
-  const hasVariants = (product.variants || []).length > 0;
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -218,177 +204,23 @@ const handleSave = async () => {
         </button>
       </div>
 
-      <div className="space-y-6">
-        {/* Condition & Category */}
-        <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
-          <h2 className="mb-4 text-lg font-semibold text-brand-dark">{t({ en: 'Classification', fr: 'Classification' })}</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={labelCls}>{t({ en: 'Condition', fr: 'État' })} *</label>
-              <select value={product.condition || 'new'} onChange={(e) => handleConditionChange(e.target.value as ProductCondition)} className={inputCls}>
-                <option value="new">{t({ en: 'New', fr: 'Neuf' })}</option>
-                <option value="refurbished">{t({ en: 'Refurbished', fr: 'Reconditionné' })}</option>
-                <option value="second_hand">{t({ en: 'Second-hand', fr: 'Occasion' })}</option>
-              </select>
-            </div>
-            <div>
-              <label className={labelCls}>{t({ en: 'Category', fr: 'Catégorie' })} *</label>
-              <select value={product.category || 'keyboard'} onChange={(e) => set({ category: e.target.value as ProductCategory })} className={inputCls}>
-                <option value="keyboard">{t({ en: 'Keyboard', fr: 'Clavier' })}</option>
-                <option value="mouse">{t({ en: 'Mouse', fr: 'Souris' })}</option>
-                <option value="cable">{t({ en: 'Cable', fr: 'Câble' })}</option>
-                <option value="speaker">{t({ en: 'Speaker', fr: 'Enceinte' })}</option>
-                <option value="solar_lamp">{t({ en: 'Solar Lamp', fr: 'Lampe solaire' })}</option>
-              </select>
-            </div>
-          </div>
-          {product.condition === 'second_hand' && (
-            <div className="mt-3 flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
-              <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
-              {t({ en: 'Second-hand products require at least 2 actual photos of the item. No returns accepted.', fr: "Les produits d'occasion nécessitent au moins 2 photos réelles de l'article. Aucun retour accepté." })}
-            </div>
-          )}
-        </div>
-
-        {/* Basic Info */}
-        <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
-          <h2 className="mb-4 text-lg font-semibold text-brand-dark">{t({ en: 'Basic Information', fr: 'Informations de base' })}</h2>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className={labelCls}>Nom (FR)</label>
-                <input type="text" value={product.name_fr || ''} onChange={(e) => set({ name_fr: e.target.value })} className={inputCls} placeholder="Nom en français" />
-              </div>
-              <div>
-                <label className={labelCls}>Name (EN)</label>
-                <input type="text" value={product.name_en || ''} onChange={(e) => set({ name_en: e.target.value })} className={inputCls} placeholder="Name in English" />
-              </div>
-            </div>
-            <div>
-              <label className={labelCls}>{t({ en: 'Display Name (fallback)', fr: 'Nom affiché (fallback)' })}</label>
-              <input type="text" value={product.name} onChange={(e) => set({ name: e.target.value })} className={inputCls} placeholder="Used if FR/EN names are empty" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className={labelCls}>Description (FR)</label>
-                <textarea value={product.description_fr || ''} onChange={(e) => set({ description_fr: e.target.value })} rows={3} className={`${inputCls} resize-none`} placeholder="Description en français" />
-              </div>
-              <div>
-                <label className={labelCls}>Description (EN)</label>
-                <textarea value={product.description_en || ''} onChange={(e) => set({ description_en: e.target.value })} rows={3} className={`${inputCls} resize-none`} placeholder="Description in English" />
-              </div>
-            </div>
-            <div>
-              <label className={labelCls}>{t({ en: 'Brand', fr: 'Marque' })}</label>
-              <input type="text" value={product.brand} onChange={(e) => set({ brand: e.target.value })} className={inputCls} placeholder="Logitech, Apple..." />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className={labelCls}>{t({ en: 'Price (XAF)', fr: 'Prix (XAF)' })} *</label>
-                <input type="number" value={product.price_xaf} onChange={(e) => set({ price_xaf: Number(e.target.value) })} className={inputCls} placeholder="0" />
-              </div>
-              <div>
-                <label className={labelCls}>{t({ en: 'Compare-at Price (XAF)', fr: 'Prix barré (XAF)' })}</label>
-                <input type="number" value={product.compare_at_price || ''} onChange={(e) => set({ compare_at_price: e.target.value ? Number(e.target.value) : null })} className={inputCls} placeholder={t({ en: 'Optional', fr: 'Optionnel' })} />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className={labelCls}>{t({ en: 'Stock Status', fr: 'Statut du stock' })}</label>
-                <select value={product.stock_status} onChange={(e) => set({ stock_status: e.target.value as any })} className={inputCls}>
-                  <option value="in_stock">{t({ en: 'In Stock', fr: 'En stock' })}</option>
-                  <option value="out_of_stock">{t({ en: 'Out of Stock', fr: 'Rupture de stock' })}</option>
-                  <option value="pre_order">{t({ en: 'Pre-order', fr: 'Pré-commande' })}</option>
-                </select>
-              </div>
-              {!hasVariants && (
-                <div>
-                  <label className={labelCls}>{t({ en: 'Stock Qty', fr: 'Quantité en stock' })}</label>
-                  <input type="number" value={product.stock_qty ?? 0} onChange={(e) => set({ stock_qty: Number(e.target.value) })} className={inputCls} placeholder="0" />
-                </div>
-              )}
-            </div>
-            <div>
-              <label className={labelCls}>{t({ en: 'Warranty', fr: 'Garantie' })}</label>
-              <input type="text" value={product.warranty_info || ''} onChange={(e) => set({ warranty_info: e.target.value })} className={inputCls} />
-            </div>
-            <div className="flex items-center gap-3">
-              <input type="checkbox" id="featured" checked={!!product.featured} onChange={(e) => set({ featured: e.target.checked })} className="h-4 w-4 rounded border-brand-grey text-brand-blue focus:ring-brand-blue" />
-              <label htmlFor="featured" className="text-sm font-medium text-brand-dark">{t({ en: 'Featured product', fr: 'Produit en vedette' })}</label>
-            </div>
-          </div>
-        </div>
-
-        {/* Variants */}
-        <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-brand-dark">{t({ en: 'Variants', fr: 'Variantes' })}</h2>
-            <button onClick={addVariantGroup} className="flex items-center gap-1 text-sm text-brand-grey transition hover:text-brand-blue">
-              <Plus className="w-4 h-4" />
-              {t({ en: 'Add Group', fr: 'Ajouter groupe' })}
-            </button>
-          </div>
-          {(product.variants || []).length === 0 ? (
-            <p className="text-sm text-brand-dark/40">{t({ en: 'No variants — uses stock qty above', fr: 'Aucune variante — utilise la quantité ci-dessus' })}</p>
-          ) : (
-            <div className="space-y-6">
-              {(product.variants || []).map((variant, vi) => (
-                <div key={vi} className="rounded-lg border border-brand-grey/20 p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <input type="text" value={variant.label} onChange={(e) => updateVariantLabel(vi, e.target.value)} className={`${inputCls} flex-1`} placeholder={t({ en: 'Group label (e.g. Color, Size)', fr: 'Nom du groupe (ex. Couleur, Taille)' })} />
-                    <button onClick={() => removeVariantGroup(vi)} className="p-2 text-brand-grey hover:text-brand-orange transition"><X className="w-4 h-4" /></button>
-                  </div>
-                  <div className="space-y-2">
-                    {variant.options.map((opt, oi) => (
-                      <div key={oi} className="grid grid-cols-[1fr_100px_100px_auto] gap-2 items-center">
-                        <input type="text" value={opt.name} onChange={(e) => updateVariantOption(vi, oi, { name: e.target.value })} className={inputCls} placeholder={t({ en: 'Option name', fr: 'Nom option' })} />
-                        <input type="number" value={opt.stock_qty} onChange={(e) => updateVariantOption(vi, oi, { stock_qty: Number(e.target.value) })} className={inputCls} placeholder="Qty" />
-                        <input type="number" value={opt.price_delta} onChange={(e) => updateVariantOption(vi, oi, { price_delta: Number(e.target.value) })} className={inputCls} placeholder="±XAF" />
-                        <button onClick={() => removeVariantOption(vi, oi)} className="p-2 text-brand-grey hover:text-brand-orange transition"><X className="w-3 h-3" /></button>
-                      </div>
-                    ))}
-                    <button onClick={() => addVariantOption(vi)} className="flex items-center gap-1 text-xs text-brand-grey hover:text-brand-blue transition mt-1">
-                      <Plus className="w-3 h-3" />
-                      {t({ en: 'Add option', fr: 'Ajouter option' })}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Specs */}
-        <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-brand-dark">{t({ en: 'Specifications', fr: 'Spécifications' })}</h2>
-            <button onClick={addSpec} className="flex items-center gap-1 text-sm text-brand-grey transition hover:text-brand-blue">
-              <Plus className="w-4 h-4" />
-              {t({ en: 'Add Spec', fr: 'Ajouter' })}
-            </button>
-          </div>
-          <div className="space-y-3">
-            {specKeys.map((key, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <input type="text" value={key} onChange={(e) => handleSpecKeyChange(index, e.target.value)} className="flex-1 rounded-lg border border-brand-grey/30 bg-white px-3 py-2 text-sm text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-blue" placeholder={t({ en: 'Spec name', fr: 'Nom spec' })} />
-                <span className="text-brand-grey">:</span>
-                <input type="text" value={product.specs[key] || ''} onChange={(e) => handleSpecValueChange(key, e.target.value)} className="flex-1 rounded-lg border border-brand-grey/30 bg-white px-3 py-2 text-sm text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-blue" placeholder={t({ en: 'Value', fr: 'Valeur' })} />
-                <button onClick={() => removeSpec(index)} className="p-2 text-brand-grey transition hover:text-brand-orange"><X className="w-4 h-4" /></button>
-              </div>
-            ))}
-            {specKeys.length === 0 && <p className="text-sm text-brand-dark/40">{t({ en: 'No specifications added', fr: 'Aucune spécification ajoutée' })}</p>}
-          </div>
-        </div>
-
-        {/* Images */}
-        <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
-          <h2 className="mb-1 text-lg font-semibold text-brand-dark">{t({ en: 'Images', fr: 'Images' })}</h2>
-          {product.condition === 'second_hand' && (
-            <p className="mb-3 text-xs text-amber-700">{t({ en: 'Min. 2 photos required for second-hand', fr: "Min. 2 photos requises pour l'occasion" })}</p>
-          )}
-          <ImageUploader images={product.images} onChange={(images) => set({ images })} />
-        </div>
-      </div>
+      <ProductForm
+        product={product}
+        specKeys={specKeys}
+        onChange={set}
+        onConditionChange={handleConditionChange}
+        onSpecKeyChange={handleSpecKeyChange}
+        onSpecValueChange={handleSpecValueChange}
+        onAddSpec={addSpec}
+        onRemoveSpec={removeSpec}
+        onAddVariantGroup={addVariantGroup}
+        onUpdateVariantLabel={updateVariantLabel}
+        onAddVariantOption={addVariantOption}
+        onUpdateVariantOption={updateVariantOption}
+        onRemoveVariantOption={removeVariantOption}
+        onRemoveVariantGroup={removeVariantGroup}
+        onImagesChange={(images) => set({ images })}
+      />
     </div>
   );
 }
