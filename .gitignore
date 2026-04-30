@@ -31,3 +31,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDE and tools
+.vscode/
+.cursor/
+.zed/
+.codex/
+.gemini/
+.mcp.json
+
+# Environment
+.env.temp
+.env.vercel
