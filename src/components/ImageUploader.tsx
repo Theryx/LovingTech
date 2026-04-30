@@ -1,147 +1,172 @@
-﻿'use client';
+﻿'use client'
 
-import { useState, useCallback, useRef } from 'react';
-import { Upload, X, Image, GripVertical, Star } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-import { useLanguage } from '@/context/LanguageContext';
+import { useState, useCallback, useRef } from 'react'
+import { Upload, X, Image, GripVertical, Star } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+import { useLanguage } from '@/context/LanguageContext'
 
 interface ImageUploaderProps {
-  images: string[];
-  onChange: (images: string[]) => void;
-  bucket?: string;
-  folder?: string;
+  images: string[]
+  onChange: (images: string[]) => void
+  bucket?: string
+  folder?: string
 }
 
 const labels = {
-  dragDrop: { en: 'Drag images here or click to upload', fr: 'Glissez les images ici ou cliquez pour télécharger' },
+  dragDrop: {
+    en: 'Drag images here or click to upload',
+    fr: 'Glissez les images ici ou cliquez pour télécharger',
+  },
   uploading: { en: 'Uploading...', fr: 'Téléchargement...' },
-  uploadFailed: { en: 'Upload failed. Enter image URL below instead.', fr: 'Échec. Entrez l\'URL de l\'image ci-dessous.' },
-  bucketMissing: { en: 'Storage not configured. Use URL below instead.', fr: 'Stockage non configuré. Utilisez l\'URL ci-dessous.' },
+  uploadFailed: {
+    en: 'Upload failed. Enter image URL below instead.',
+    fr: "Échec. Entrez l'URL de l'image ci-dessous.",
+  },
+  bucketMissing: {
+    en: 'Storage not configured. Use URL below instead.',
+    fr: "Stockage non configuré. Utilisez l'URL ci-dessous.",
+  },
   mainImage: { en: 'Main', fr: 'Principal' },
   remove: { en: 'Remove', fr: 'Supprimer' },
-  supportedFormats: { en: 'Max: 5MB • 800-1200px • JPEG, PNG, WebP', fr: 'Max: 5Mo • 800-1200px • JPEG, PNG, WebP' },
+  supportedFormats: {
+    en: 'Max: 5MB • 800-1200px • JPEG, PNG, WebP',
+    fr: 'Max: 5Mo • 800-1200px • JPEG, PNG, WebP',
+  },
   previewFailed: { en: 'Preview not available', fr: 'Aperçu non disponible' },
-  orUrl: { en: 'Or enter image URL:', fr: 'Ou entrez l\'URL de l\'image:' },
-};
+  orUrl: { en: 'Or enter image URL:', fr: "Ou entrez l'URL de l'image:" },
+}
 
-export default function ImageUploader({ images, onChange, bucket = 'products', folder = 'images' }: ImageUploaderProps) {
-  const { t } = useLanguage();
-  const [uploading, setUploading] = useState(false);
-  const [dragOver, setDragOver] = useState(false);
-  const [previewErrors, setPreviewErrors] = useState<Record<number, boolean>>({});
-  const [uploadError, setUploadError] = useState<string>('');
-  const [urlInput, setUrlInput] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
+export default function ImageUploader({
+  images,
+  onChange,
+  bucket = 'products',
+  folder = 'images',
+}: ImageUploaderProps) {
+  const { t } = useLanguage()
+  const [uploading, setUploading] = useState(false)
+  const [dragOver, setDragOver] = useState(false)
+  const [previewErrors, setPreviewErrors] = useState<Record<number, boolean>>({})
+  const [uploadError, setUploadError] = useState<string>('')
+  const [urlInput, setUrlInput] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const uploadToSupabase = async (file: File): Promise<string | null> => {
-    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    const filePath = `${folder}/${fileName}`;
+    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+    const filePath = `${folder}/${fileName}`
 
     try {
       const { data, error } = await supabase.storage.from(bucket).upload(filePath, file, {
         cacheControl: '3600',
         upsert: false,
-      });
+      })
 
       if (error) {
         if (error.message.includes('Bucket not found') || error.message.includes('bucket')) {
-          setUploadError(t(labels.bucketMissing));
-          return null;
+          setUploadError(t(labels.bucketMissing))
+          return null
         }
-        console.error('Upload error:', error);
-        setUploadError(t(labels.uploadFailed));
-        return null;
+        console.error('Upload error:', error)
+        setUploadError(t(labels.uploadFailed))
+        return null
       }
 
-      const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(filePath);
-      return publicUrl;
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from(bucket).getPublicUrl(filePath)
+      return publicUrl
     } catch (err: any) {
       if (err?.message?.includes('Bucket not found')) {
-        setUploadError(t(labels.bucketMissing));
+        setUploadError(t(labels.bucketMissing))
       } else {
-        setUploadError(t(labels.uploadFailed));
+        setUploadError(t(labels.uploadFailed))
       }
-      return null;
+      return null
     }
-  };
+  }
 
   const handleAddUrl = () => {
     if (urlInput.trim()) {
-      const newImages = [...images, urlInput.trim()];
-      onChange(newImages);
-      setUrlInput('');
-      setUploadError('');
+      const newImages = [...images, urlInput.trim()]
+      onChange(newImages)
+      setUrlInput('')
+      setUploadError('')
     }
-  };
+  }
 
-  const handleFiles = useCallback(async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
+  const handleFiles = useCallback(
+    async (files: FileList | null) => {
+      if (!files || files.length === 0) return
 
-    setUploading(true);
-    const newImages: string[] = [];
+      setUploading(true)
+      const newImages: string[] = []
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      
-      if (file.size > 5 * 1024 * 1024) {
-        console.error('File too large:', file.name);
-        continue;
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+
+        if (file.size > 5 * 1024 * 1024) {
+          console.error('File too large:', file.name)
+          continue
+        }
+
+        const url = await uploadToSupabase(file)
+        if (url) {
+          newImages.push(url)
+        }
       }
 
-      const url = await uploadToSupabase(file);
-      if (url) {
-        newImages.push(url);
+      setUploading(false)
+      if (newImages.length > 0) {
+        onChange([...images, ...newImages])
       }
-    }
+    },
+    [images, onChange]
+  )
 
-    setUploading(false);
-    if (newImages.length > 0) {
-      onChange([...images, ...newImages]);
-    }
-  }, [images, onChange]);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    handleFiles(e.dataTransfer.files);
-  }, [handleFiles]);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      setDragOver(false)
+      handleFiles(e.dataTransfer.files)
+    },
+    [handleFiles]
+  )
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(true);
-  }, []);
+    e.preventDefault()
+    setDragOver(true)
+  }, [])
 
   const handleDragLeave = useCallback(() => {
-    setDragOver(false);
-  }, []);
+    setDragOver(false)
+  }, [])
 
   const handleRemove = (index: number) => {
-    const newImages = images.filter((_, i) => i !== index);
-    onChange(newImages);
-  };
+    const newImages = images.filter((_, i) => i !== index)
+    onChange(newImages)
+  }
 
   const handleMakeMain = (index: number) => {
-    if (index === 0) return;
-    const newImages = [...images];
-    const [main] = newImages.splice(index, 1);
-    newImages.unshift(main);
-    onChange(newImages);
-  };
+    if (index === 0) return
+    const newImages = [...images]
+    const [main] = newImages.splice(index, 1)
+    newImages.unshift(main)
+    onChange(newImages)
+  }
 
   const handleMoveUp = (index: number) => {
-    if (index <= 0) return;
-    const newImages = [...images];
-    [newImages[index - 1], newImages[index]] = [newImages[index], newImages[index - 1]];
-    onChange(newImages);
-  };
+    if (index <= 0) return
+    const newImages = [...images]
+    ;[newImages[index - 1], newImages[index]] = [newImages[index], newImages[index - 1]]
+    onChange(newImages)
+  }
 
   const handleMoveDown = (index: number) => {
-    if (index >= images.length - 1) return;
-    const newImages = [...images];
-    [newImages[index], newImages[index + 1]] = [newImages[index + 1], newImages[index]];
-    onChange(newImages);
-  };
+    if (index >= images.length - 1) return
+    const newImages = [...images]
+    ;[newImages[index], newImages[index + 1]] = [newImages[index + 1], newImages[index]]
+    onChange(newImages)
+  }
 
   return (
     <div className="space-y-4">
@@ -150,7 +175,7 @@ export default function ImageUploader({ images, onChange, bucket = 'products', f
         type="file"
         accept="image/jpeg,image/png,image/webp"
         multiple
-        onChange={(e) => handleFiles(e.target.files)}
+        onChange={e => handleFiles(e.target.files)}
         className="hidden"
       />
 
@@ -163,8 +188,8 @@ export default function ImageUploader({ images, onChange, bucket = 'products', f
           dragOver
             ? 'border-brand-blue bg-brand-blue/5'
             : uploadError
-            ? 'border-brand-orange'
-            : 'border-brand-grey/40 hover:border-brand-blue/60'
+              ? 'border-brand-orange'
+              : 'border-brand-grey/40 hover:border-brand-blue/60'
         }`}
       >
         {uploading ? (
@@ -188,10 +213,10 @@ export default function ImageUploader({ images, onChange, bucket = 'products', f
             <input
               type="text"
               value={urlInput}
-              onChange={(e) => setUrlInput(e.target.value)}
+              onChange={e => setUrlInput(e.target.value)}
               placeholder="https://..."
               className="flex-1 rounded-lg border border-brand-grey/30 bg-white px-3 py-2 text-sm text-brand-dark"
-              onKeyDown={(e) => e.key === 'Enter' && handleAddUrl()}
+              onKeyDown={e => e.key === 'Enter' && handleAddUrl()}
             />
             <button
               onClick={handleAddUrl}
@@ -224,10 +249,10 @@ export default function ImageUploader({ images, onChange, bucket = 'products', f
                     src={url}
                     alt={`Image ${index + 1}`}
                     className="w-full h-full object-cover"
-                    onError={() => setPreviewErrors((prev) => ({ ...prev, [index]: true }))}
+                    onError={() => setPreviewErrors(prev => ({ ...prev, [index]: true }))}
                   />
                 )}
-                
+
                 <div className="absolute top-2 left-2">
                   {index === 0 ? (
                     <span className="flex items-center gap-1 rounded bg-brand-blue px-2 py-1 text-[10px] font-bold uppercase text-white">
@@ -283,5 +308,5 @@ export default function ImageUploader({ images, onChange, bucket = 'products', f
         </div>
       )}
     </div>
-  );
+  )
 }

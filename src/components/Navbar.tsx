@@ -1,18 +1,20 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
-import { useLanguage } from '@/context/LanguageContext';
-import LanguageToggle from './ui/LanguageToggle';
+import Link from 'next/link'
+import { useLanguage } from '@/context/LanguageContext'
+import LanguageToggle from './ui/LanguageToggle'
 
 export default function Navbar() {
-  const { language } = useLanguage();
+  const { language } = useLanguage()
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-white/90 backdrop-blur-xl border-b border-brand-grey/20">
       <Link
         href="/"
         className="flex items-center gap-2 text-xl font-bold italic tracking-tighter text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 rounded"
-        aria-label={language === 'fr' ? 'Loving Tech — Retour à l\'accueil' : 'Loving Tech — Back to home'}
+        aria-label={
+          language === 'fr' ? "Loving Tech — Retour à l'accueil" : 'Loving Tech — Back to home'
+        }
       >
         <img src="/logo.png" alt="" aria-hidden="true" className="h-8 w-8 object-contain" />
         LOVING TECH
@@ -22,5 +24,5 @@ export default function Navbar() {
         <LanguageToggle />
       </div>
     </nav>
-  );
+  )
 }

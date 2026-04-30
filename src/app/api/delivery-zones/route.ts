@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase/client'
+import { supabaseServer } from '@/lib/supabase/server'
 import { isAdmin } from '@/lib/api-auth'
 
 const createZoneSchema = z.object({
@@ -16,13 +17,15 @@ const createZoneSchema = z.object({
 const updateZoneSchema = createZoneSchema.partial()
 
 export async function GET(request: NextRequest) {
-  const query = supabase
+  const isAuthenticated = await isAdmin(request)
+
+  const query = (isAuthenticated ? supabaseServer : supabase)
     .from('delivery_zones')
     .select('*')
     .order('sort_order', { ascending: true })
     .order('city_name_fr', { ascending: true })
 
-  if (!(await isAdmin(request))) {
+  if (!isAuthenticated) {
     query.eq('is_available', true)
   }
 
@@ -40,7 +43,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const parsed = createZoneSchema.parse(body)
 
-    const { data, error } = await supabase.from('delivery_zones').insert([parsed]).select().single()
+    const { data, error } = await supabaseServer
+      .from('delivery_zones')
+      .insert([parsed])
+      .select()
+      .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json(data, { status: 201 })

@@ -1,16 +1,16 @@
-'use client';
+'use client'
 
-import React from 'react';
-import { useLanguage } from '@/context/LanguageContext';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import React from 'react'
+import { useLanguage } from '@/context/LanguageContext'
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
 function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return twMerge(clsx(inputs))
 }
 
 const LanguageToggle = () => {
-  const { language, toggleLanguage } = useLanguage();
+  const { language, toggleLanguage } = useLanguage()
 
   return (
     <div
@@ -45,7 +45,7 @@ const LanguageToggle = () => {
         EN
       </button>
     </div>
-  );
-};
+  )
+}
 
-export default LanguageToggle;
+export default LanguageToggle

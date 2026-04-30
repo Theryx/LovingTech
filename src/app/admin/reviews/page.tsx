@@ -1,66 +1,69 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { Star, CheckCircle, XCircle } from 'lucide-react';
-import { Review, ReviewStatus } from '@/lib/supabase';
-import { useLanguage } from '@/context/LanguageContext';
+import { useState, useEffect } from 'react'
+import { Star, CheckCircle, XCircle } from 'lucide-react'
+import { Review, ReviewStatus } from '@/lib/supabase'
+import { useLanguage } from '@/context/LanguageContext'
 
 const STATUS_STYLE: Record<ReviewStatus, { bg: string; text: string; label: string }> = {
-  pending:  { bg: 'bg-amber-100',  text: 'text-amber-800',  label: 'En attente' },
-  approved: { bg: 'bg-green-100',  text: 'text-green-800',  label: 'Approuvé' },
-  rejected: { bg: 'bg-red-100',    text: 'text-red-700',    label: 'Rejeté' },
-};
+  pending: { bg: 'bg-amber-100', text: 'text-amber-800', label: 'En attente' },
+  approved: { bg: 'bg-green-100', text: 'text-green-800', label: 'Approuvé' },
+  rejected: { bg: 'bg-red-100', text: 'text-red-700', label: 'Rejeté' },
+}
 
-type FilterValue = ReviewStatus | '';
+type FilterValue = ReviewStatus | ''
 
 export default function AdminReviewsPage() {
-  const { t } = useLanguage();
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<FilterValue>('pending');
-  const [updating, setUpdating] = useState<string | null>(null);
+  const { t } = useLanguage()
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState<FilterValue>('pending')
+  const [updating, setUpdating] = useState<string | null>(null)
 
   const load = async () => {
     try {
-      const res = await fetch('/api/reviews');
-      if (!res.ok) throw new Error('Failed to load');
-      const data = await res.json();
-      setReviews(data);
+      const res = await fetch('/api/reviews')
+      if (!res.ok) throw new Error('Failed to load')
+      const data = await res.json()
+      setReviews(data)
     } catch (err) {
-      console.error('Failed to load reviews:', err);
+      console.error('Failed to load reviews:', err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load()
+  }, [])
 
   const handleStatus = async (id: string, status: ReviewStatus) => {
-    setUpdating(id);
+    setUpdating(id)
     await fetch(`/api/reviews/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
-    });
-    setReviews(prev => prev.map(r => r.id === id ? { ...r, status } : r));
-    setUpdating(null);
-  };
+    })
+    setReviews(prev => prev.map(r => (r.id === id ? { ...r, status } : r)))
+    setUpdating(null)
+  }
 
-  const filtered = filter ? reviews.filter(r => r.status === filter) : reviews;
+  const filtered = filter ? reviews.filter(r => r.status === filter) : reviews
 
   const FILTERS: { value: FilterValue; label: string }[] = [
     { value: '', label: t({ en: 'All', fr: 'Tous' }) },
     { value: 'pending', label: t({ en: 'Pending', fr: 'En attente' }) },
     { value: 'approved', label: t({ en: 'Approved', fr: 'Approuvés' }) },
     { value: 'rejected', label: t({ en: 'Rejected', fr: 'Rejetés' }) },
-  ];
+  ]
 
   return (
     <div className="max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-brand-dark">{t({ en: 'Reviews', fr: 'Avis' })}</h1>
         <span className="text-sm text-brand-dark/40">
-          {reviews.filter(r => r.status === 'pending').length} {t({ en: 'pending', fr: 'en attente' })}
+          {reviews.filter(r => r.status === 'pending').length}{' '}
+          {t({ en: 'pending', fr: 'en attente' })}
         </span>
       </div>
 
@@ -70,7 +73,9 @@ export default function AdminReviewsPage() {
             key={f.value}
             onClick={() => setFilter(f.value)}
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
-              filter === f.value ? 'bg-brand-blue text-white' : 'bg-brand-grey/20 text-brand-dark hover:bg-brand-grey/40'
+              filter === f.value
+                ? 'bg-brand-blue text-white'
+                : 'bg-brand-grey/20 text-brand-dark hover:bg-brand-grey/40'
             }`}
           >
             {f.label}
@@ -79,11 +84,13 @@ export default function AdminReviewsPage() {
       </div>
 
       {loading ? (
-        <div className="py-20 text-center text-brand-dark/40">{t({ en: 'Loading…', fr: 'Chargement…' })}</div>
+        <div className="py-20 text-center text-brand-dark/40">
+          {t({ en: 'Loading…', fr: 'Chargement…' })}
+        </div>
       ) : (
         <div className="space-y-4">
           {filtered.map(r => {
-            const style = STATUS_STYLE[r.status || 'pending'];
+            const style = STATUS_STYLE[r.status || 'pending']
             return (
               <div key={r.id} className="rounded-xl border border-brand-grey/20 bg-white p-5">
                 <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -91,11 +98,19 @@ export default function AdminReviewsPage() {
                     <div className="flex items-center gap-3 flex-wrap mb-2">
                       <span className="font-semibold text-brand-dark">{r.reviewer_name}</span>
                       <span className="font-mono text-xs text-brand-dark/40">{r.order_ref}</span>
-                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${style.bg} ${style.text}`}>{style.label}</span>
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${style.bg} ${style.text}`}
+                      >
+                        {style.label}
+                      </span>
                     </div>
                     <div className="flex gap-0.5 mb-2">
-                      {[1,2,3,4,5].map(s => (
-                        <Star key={s} className={`h-4 w-4 ${s <= r.rating ? 'fill-brand-orange text-brand-orange' : 'text-brand-grey'}`} aria-hidden="true" />
+                      {[1, 2, 3, 4, 5].map(s => (
+                        <Star
+                          key={s}
+                          className={`h-4 w-4 ${s <= r.rating ? 'fill-brand-orange text-brand-orange' : 'text-brand-grey'}`}
+                          aria-hidden="true"
+                        />
                       ))}
                     </div>
                     {r.comment && <p className="text-sm text-brand-dark/70">{r.comment}</p>}
@@ -125,13 +140,15 @@ export default function AdminReviewsPage() {
                   )}
                 </div>
               </div>
-            );
+            )
           })}
           {filtered.length === 0 && (
-            <p className="py-12 text-center text-brand-dark/40">{t({ en: 'No reviews found', fr: 'Aucun avis trouvé' })}</p>
+            <p className="py-12 text-center text-brand-dark/40">
+              {t({ en: 'No reviews found', fr: 'Aucun avis trouvé' })}
+            </p>
           )}
         </div>
       )}
     </div>
-  );
+  )
 }

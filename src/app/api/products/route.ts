@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase/client'
+import { supabaseServer } from '@/lib/supabase/server'
 import { isAdmin } from '@/lib/api-auth'
 
 const createProductSchema = z.object({
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str)
     const id = crypto.randomUUID()
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseServer
       .from('products')
       .insert([{ ...parsed, id }])
       .select()

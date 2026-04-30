@@ -1,35 +1,35 @@
-'use client';
+'use client'
 
-import { useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Lock } from 'lucide-react';
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Lock } from 'lucide-react'
 
 function LoginForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const from = searchParams.get('from') || '/admin';
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const from = searchParams.get('from') || '/admin'
 
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+    e.preventDefault()
+    setLoading(true)
+    setError('')
 
     const res = await fetch('/api/admin-login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password }),
-    });
+    })
 
     if (res.ok) {
-      router.push(from);
-      router.refresh();
+      router.push(from)
+      router.refresh()
     } else {
-      setError('Mot de passe incorrect / Incorrect password');
-      setLoading(false);
+      setError('Mot de passe incorrect / Incorrect password')
+      setLoading(false)
     }
   }
 
@@ -49,9 +49,7 @@ function LoginForm() {
           </div>
         </div>
 
-        <h1 className="mb-6 text-center text-xl font-bold text-brand-dark">
-          Connexion Admin
-        </h1>
+        <h1 className="mb-6 text-center text-xl font-bold text-brand-dark">Connexion Admin</h1>
 
         <div className="mb-4">
           <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-brand-dark/60">
@@ -69,9 +67,7 @@ function LoginForm() {
           />
         </div>
 
-        {error && (
-          <p className="mb-4 text-sm text-red-600">{error}</p>
-        )}
+        {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
 
         <button
           type="submit"
@@ -82,7 +78,7 @@ function LoginForm() {
         </button>
       </div>
     </form>
-  );
+  )
 }
 
 export default function AdminLogin() {
@@ -92,5 +88,5 @@ export default function AdminLogin() {
         <LoginForm />
       </Suspense>
     </div>
-  );
+  )
 }

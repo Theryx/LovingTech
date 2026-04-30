@@ -1,13 +1,13 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
+import Link from 'next/link'
 
 export default function ProductError({
   error,
   reset,
 }: {
-  error: Error & { digest?: string };
-  reset: () => void;
+  error: Error & { digest?: string }
+  reset: () => void
 }) {
   return (
     <main className="min-h-screen bg-white flex flex-col items-center justify-center px-6 text-center">
@@ -15,7 +15,8 @@ export default function ProductError({
         Ce produit n&apos;est pas disponible / Product unavailable
       </h1>
       <p className="text-brand-dark/60 mb-8 max-w-md">
-        Une erreur s&apos;est produite lors du chargement de ce produit. Veuillez réessayer ou revenir au catalogue.
+        Une erreur s&apos;est produite lors du chargement de ce produit. Veuillez réessayer ou
+        revenir au catalogue.
         <br />
         <span className="text-sm opacity-70">{error.message}</span>
       </p>
@@ -34,5 +35,5 @@ export default function ProductError({
         </Link>
       </div>
     </main>
-  );
+  )
 }

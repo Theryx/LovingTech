@@ -1,30 +1,34 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
-import { useLanguage } from '@/context/LanguageContext';
+import { useEffect, useState } from 'react'
+import { useLanguage } from '@/context/LanguageContext'
 
 export default function SplashScreen() {
-  const [visible, setVisible] = useState(true);
-  const [fading, setFading] = useState(false);
-  const { language } = useLanguage();
+  const [visible, setVisible] = useState(true)
+  const [fading, setFading] = useState(false)
+  const { language } = useLanguage()
 
   const messages = {
-    en: { brand: 'Loving Tech', tagline: 'Premium Gadgets', loading: 'Loading product catalogue...' },
+    en: {
+      brand: 'Loving Tech',
+      tagline: 'Premium Gadgets',
+      loading: 'Loading product catalogue...',
+    },
     fr: { brand: 'Loving Tech', tagline: 'Premium Gadgets', loading: 'Chargement du catalogue...' },
-  };
+  }
 
-  const msg = messages[language] || messages.en;
+  const msg = messages[language] || messages.en
 
   useEffect(() => {
-    const fadeTimer = setTimeout(() => setFading(true), 2800);
-    const hideTimer = setTimeout(() => setVisible(false), 3300);
+    const fadeTimer = setTimeout(() => setFading(true), 2800)
+    const hideTimer = setTimeout(() => setVisible(false), 3300)
     return () => {
-      clearTimeout(fadeTimer);
-      clearTimeout(hideTimer);
-    };
-  }, []);
+      clearTimeout(fadeTimer)
+      clearTimeout(hideTimer)
+    }
+  }, [])
 
-  if (!visible) return null;
+  if (!visible) return null
 
   return (
     <div
@@ -37,17 +41,11 @@ export default function SplashScreen() {
           <div className="h-14 w-14 rounded-full border-4 border-t-brand-blue border-r-brand-blue border-b-transparent border-l-transparent animate-spin" />
         </div>
         <div className="text-center">
-          <p className="text-xl font-semibold tracking-widest text-white uppercase">
-            {msg.brand}
-          </p>
-          <p className="mt-1 text-xs uppercase tracking-widest text-brand-grey">
-            {msg.tagline}
-          </p>
-          <p className="mt-3 text-sm text-brand-grey">
-            {msg.loading}
-          </p>
+          <p className="text-xl font-semibold tracking-widest text-white uppercase">{msg.brand}</p>
+          <p className="mt-1 text-xs uppercase tracking-widest text-brand-grey">{msg.tagline}</p>
+          <p className="mt-3 text-sm text-brand-grey">{msg.loading}</p>
         </div>
       </div>
     </div>
-  );
+  )
 }

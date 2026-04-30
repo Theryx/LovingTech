@@ -1,41 +1,52 @@
-'use client';
+'use client'
 
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react'
 
-type ToastType = 'success' | 'error' | 'info';
+type ToastType = 'success' | 'error' | 'info'
 
 type Toast = {
-  id: number;
-  type: ToastType;
-  title?: string;
-  message: string;
-};
+  id: number
+  type: ToastType
+  title?: string
+  message: string
+}
 
 type ConfirmOptions = {
-  title: string;
-  message?: string;
-  confirmLabel?: string;
-  cancelLabel?: string;
-  tone?: 'danger' | 'default';
-};
+  title: string
+  message?: string
+  confirmLabel?: string
+  cancelLabel?: string
+  tone?: 'danger' | 'default'
+}
 
 type ConfirmState = ConfirmOptions & {
-  open: boolean;
-};
+  open: boolean
+}
 
 type NotificationContextValue = {
-  notify: (toast: Omit<Toast, 'id'>) => void;
-  success: (message: string, title?: string) => void;
-  error: (message: string, title?: string) => void;
-  info: (message: string, title?: string) => void;
-  confirm: (options: ConfirmOptions) => Promise<boolean>;
-};
+  notify: (toast: Omit<Toast, 'id'>) => void
+  success: (message: string, title?: string) => void
+  error: (message: string, title?: string) => void
+  info: (message: string, title?: string) => void
+  confirm: (options: ConfirmOptions) => Promise<boolean>
+}
 
-const NotificationContext = createContext<NotificationContextValue | null>(null);
+const NotificationContext = createContext<NotificationContextValue | null>(null)
 
-const TOAST_STYLES: Record<ToastType, { icon: typeof CheckCircle2; card: string; iconWrap: string }> = {
+const TOAST_STYLES: Record<
+  ToastType,
+  { icon: typeof CheckCircle2; card: string; iconWrap: string }
+> = {
   success: {
     icon: CheckCircle2,
     card: 'border-emerald-200 bg-emerald-50 text-emerald-900',
@@ -51,58 +62,70 @@ const TOAST_STYLES: Record<ToastType, { icon: typeof CheckCircle2; card: string;
     card: 'border-brand-blue/20 bg-white text-brand-dark',
     iconWrap: 'bg-brand-blue text-white',
   },
-};
+}
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
-  const [toasts, setToasts] = useState<Toast[]>([]);
-  const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
-  const confirmResolverRef = useRef<((value: boolean) => void) | null>(null);
-  const toastIdRef = useRef(0);
+  const [toasts, setToasts] = useState<Toast[]>([])
+  const [confirmState, setConfirmState] = useState<ConfirmState | null>(null)
+  const confirmResolverRef = useRef<((value: boolean) => void) | null>(null)
+  const toastIdRef = useRef(0)
 
   const dismissToast = useCallback((id: number) => {
-    setToasts((current) => current.filter((toast) => toast.id !== id));
-  }, []);
+    setToasts(current => current.filter(toast => toast.id !== id))
+  }, [])
 
   const notify = useCallback((toast: Omit<Toast, 'id'>) => {
-    const id = ++toastIdRef.current;
-    setToasts((current) => [...current, { ...toast, id }]);
+    const id = ++toastIdRef.current
+    setToasts(current => [...current, { ...toast, id }])
     window.setTimeout(() => {
-      setToasts((current) => current.filter((item) => item.id !== id));
-    }, 4200);
-  }, []);
+      setToasts(current => current.filter(item => item.id !== id))
+    }, 4200)
+  }, [])
 
-  const success = useCallback((message: string, title?: string) => {
-    notify({ type: 'success', message, title });
-  }, [notify]);
+  const success = useCallback(
+    (message: string, title?: string) => {
+      notify({ type: 'success', message, title })
+    },
+    [notify]
+  )
 
-  const error = useCallback((message: string, title?: string) => {
-    notify({ type: 'error', message, title });
-  }, [notify]);
+  const error = useCallback(
+    (message: string, title?: string) => {
+      notify({ type: 'error', message, title })
+    },
+    [notify]
+  )
 
-  const info = useCallback((message: string, title?: string) => {
-    notify({ type: 'info', message, title });
-  }, [notify]);
+  const info = useCallback(
+    (message: string, title?: string) => {
+      notify({ type: 'info', message, title })
+    },
+    [notify]
+  )
 
   const confirm = useCallback((options: ConfirmOptions) => {
-    setConfirmState({ ...options, open: true });
-    return new Promise<boolean>((resolve) => {
-      confirmResolverRef.current = resolve;
-    });
-  }, []);
+    setConfirmState({ ...options, open: true })
+    return new Promise<boolean>(resolve => {
+      confirmResolverRef.current = resolve
+    })
+  }, [])
 
   const resolveConfirm = useCallback((value: boolean) => {
-    confirmResolverRef.current?.(value);
-    confirmResolverRef.current = null;
-    setConfirmState(null);
-  }, []);
+    confirmResolverRef.current?.(value)
+    confirmResolverRef.current = null
+    setConfirmState(null)
+  }, [])
 
-  const value = useMemo<NotificationContextValue>(() => ({
-    notify,
-    success,
-    error,
-    info,
-    confirm,
-  }), [confirm, error, info, notify, success]);
+  const value = useMemo<NotificationContextValue>(
+    () => ({
+      notify,
+      success,
+      error,
+      info,
+      confirm,
+    }),
+    [confirm, error, info, notify, success]
+  )
 
   return (
     <NotificationContext.Provider value={value}>
@@ -110,9 +133,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
       <div className="pointer-events-none fixed right-4 top-4 z-[80] flex w-[calc(100vw-2rem)] max-w-sm flex-col gap-3">
         <AnimatePresence>
-          {toasts.map((toast) => {
-            const style = TOAST_STYLES[toast.type];
-            const Icon = style.icon;
+          {toasts.map(toast => {
+            const style = TOAST_STYLES[toast.type]
+            const Icon = style.icon
 
             return (
               <motion.div
@@ -126,7 +149,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
                 aria-live="polite"
               >
                 <div className="flex items-start gap-3">
-                  <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${style.iconWrap}`}>
+                  <div
+                    className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${style.iconWrap}`}
+                  >
                     <Icon className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -143,7 +168,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
                   </button>
                 </div>
               </motion.div>
-            );
+            )
           })}
         </AnimatePresence>
       </div>
@@ -195,15 +220,15 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         ) : null}
       </AnimatePresence>
     </NotificationContext.Provider>
-  );
+  )
 }
 
 export function useNotifications() {
-  const context = useContext(NotificationContext);
+  const context = useContext(NotificationContext)
 
   if (!context) {
-    throw new Error('useNotifications must be used within NotificationProvider');
+    throw new Error('useNotifications must be used within NotificationProvider')
   }
 
-  return context;
+  return context
 }

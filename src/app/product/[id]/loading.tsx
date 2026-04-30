@@ -9,8 +9,11 @@ export default function ProductLoading() {
         <div className="space-y-6">
           <div className="aspect-square animate-pulse rounded-3xl border border-brand-grey/20 bg-brand-grey/15" />
           <div className="grid grid-cols-4 gap-4">
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="aspect-square animate-pulse rounded-xl border border-brand-grey/20 bg-brand-grey/15" />
+            {[0, 1, 2, 3].map(i => (
+              <div
+                key={i}
+                className="aspect-square animate-pulse rounded-xl border border-brand-grey/20 bg-brand-grey/15"
+              />
             ))}
           </div>
         </div>
@@ -29,7 +32,7 @@ export default function ProductLoading() {
           </div>
 
           <div className="grid grid-cols-2 gap-4 pt-6">
-            {[0, 1, 2, 3].map((i) => (
+            {[0, 1, 2, 3].map(i => (
               <div key={i} className="space-y-1">
                 <div className="h-3 w-16 animate-pulse rounded bg-brand-grey/20" />
                 <div className="h-4 w-24 animate-pulse rounded bg-brand-grey/15" />
@@ -40,12 +43,12 @@ export default function ProductLoading() {
           <div className="mt-4 h-16 w-full animate-pulse rounded-2xl bg-brand-grey/20" />
 
           <div className="grid grid-cols-3 gap-6 border-t border-brand-grey/20 pt-12">
-            {[0, 1, 2].map((i) => (
+            {[0, 1, 2].map(i => (
               <div key={i} className="h-4 w-full animate-pulse rounded bg-brand-grey/20" />
             ))}
           </div>
         </div>
       </section>
     </main>
-  );
+  )
 }

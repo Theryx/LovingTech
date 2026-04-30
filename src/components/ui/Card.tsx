@@ -1,26 +1,26 @@
-'use client';
+'use client'
 
-import React, { useState } from 'react';
-import Image from 'next/image';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import React, { useState } from 'react'
+import Image from 'next/image'
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
-const PLACEHOLDER = '/images/placeholder.svg';
+const PLACEHOLDER = '/images/placeholder.svg'
 
 function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return twMerge(clsx(inputs))
 }
 
 interface CardProps {
-  image: string;
-  badge?: React.ReactNode;
-  brandLabel?: string;
-  name: string;
-  price: number;
-  compareAtPrice?: number;
-  ctaSlot?: React.ReactNode;
-  isOutOfStock?: boolean;
-  className?: string;
+  image: string
+  badge?: React.ReactNode
+  brandLabel?: string
+  name: string
+  price: number
+  compareAtPrice?: number
+  ctaSlot?: React.ReactNode
+  isOutOfStock?: boolean
+  className?: string
 }
 
 const Card = ({
@@ -32,15 +32,17 @@ const Card = ({
   compareAtPrice,
   ctaSlot,
   isOutOfStock,
-  className
+  className,
 }: CardProps) => {
-  const [imgSrc, setImgSrc] = useState(image || PLACEHOLDER);
+  const [imgSrc, setImgSrc] = useState(image || PLACEHOLDER)
 
   return (
-    <div className={cn(
-      'flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm border border-brand-grey/20 transition-all hover:scale-[1.01] hover:shadow-md',
-      className
-    )}>
+    <div
+      className={cn(
+        'flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm border border-brand-grey/20 transition-all hover:scale-[1.01] hover:shadow-md',
+        className
+      )}
+    >
       {/* Image Area */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-brand-grey/10">
         <Image
@@ -54,11 +56,7 @@ const Card = ({
           onError={() => setImgSrc(PLACEHOLDER)}
         />
 
-        {badge && (
-          <div className="absolute top-3 left-3 z-10">
-            {badge}
-          </div>
-        )}
+        {badge && <div className="absolute top-3 left-3 z-10">{badge}</div>}
 
         {brandLabel && (
           <div className="absolute top-3 right-3 z-10">
@@ -67,19 +65,14 @@ const Card = ({
             </span>
           </div>
         )}
-
       </div>
 
       {/* Content Area */}
       <div className="p-4 flex flex-col flex-grow">
-        <h3 className="mb-1 line-clamp-1 text-lg font-bold text-brand-dark">
-          {name}
-        </h3>
+        <h3 className="mb-1 line-clamp-1 text-lg font-bold text-brand-dark">{name}</h3>
 
         <div className="flex items-baseline gap-2 mb-4">
-          <span className="text-xl font-bold text-brand-dark">
-            {price.toLocaleString()} FCFA
-          </span>
+          <span className="text-xl font-bold text-brand-dark">{price.toLocaleString()} FCFA</span>
           {compareAtPrice && (
             <span className="text-sm text-brand-dark/40 line-through">
               {compareAtPrice.toLocaleString()} FCFA
@@ -87,14 +80,10 @@ const Card = ({
           )}
         </div>
 
-        {ctaSlot && (
-          <div className="mt-auto pt-2">
-            {ctaSlot}
-          </div>
-        )}
+        {ctaSlot && <div className="mt-auto pt-2">{ctaSlot}</div>}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Card;
+export default Card

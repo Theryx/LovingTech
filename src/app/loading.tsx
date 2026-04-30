@@ -12,7 +12,7 @@ export default function HomeLoading() {
       </section>
 
       <section className="mx-auto grid max-w-7xl grid-cols-1 gap-12 border-y border-brand-grey/20 px-6 py-20 md:grid-cols-3">
-        {[0, 1, 2].map((i) => (
+        {[0, 1, 2].map(i => (
           <div key={i} className="flex flex-col items-center space-y-4">
             <div className="h-16 w-16 animate-pulse rounded-2xl bg-brand-blue/20" />
             <div className="h-5 w-32 animate-pulse rounded bg-brand-grey/30" />
@@ -28,7 +28,7 @@ export default function HomeLoading() {
             <div className="h-5 w-56 animate-pulse rounded bg-brand-grey/20" />
           </div>
           <div className="flex gap-2">
-            {[0, 1, 2, 3].map((i) => (
+            {[0, 1, 2, 3].map(i => (
               <div key={i} className="h-10 w-20 animate-pulse rounded-full bg-brand-blue/20" />
             ))}
           </div>
@@ -36,7 +36,10 @@ export default function HomeLoading() {
 
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="overflow-hidden rounded-3xl border border-brand-grey/20 bg-brand-dark">
+            <div
+              key={i}
+              className="overflow-hidden rounded-3xl border border-brand-grey/20 bg-brand-dark"
+            >
               <div className="aspect-square animate-pulse bg-brand-grey/15" />
               <div className="space-y-3 p-6">
                 <div className="h-6 w-3/4 animate-pulse rounded bg-brand-grey/25" />
@@ -51,5 +54,5 @@ export default function HomeLoading() {
         </div>
       </section>
     </main>
-  );
+  )
 }

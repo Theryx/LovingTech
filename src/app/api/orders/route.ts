@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase/client'
+import { supabaseServer } from '@/lib/supabase/server'
 import { isAdmin } from '@/lib/api-auth'
 
 const createOrderSchema = z.object({
@@ -93,7 +94,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseServer
     .from('orders')
     .select('*')
     .order('created_at', { ascending: false })
@@ -126,13 +127,13 @@ export async function POST(req: NextRequest) {
     // Increment promo code usage server-side
     if (parsed.promo_code) {
       try {
-        const { data: promoData } = await supabase
+        const { data: promoData } = await supabaseServer
           .from('promo_codes')
           .select('uses_count')
           .ilike('code', parsed.promo_code)
           .single()
         if (promoData) {
-          await supabase
+          await supabaseServer
             .from('promo_codes')
             .update({ uses_count: (promoData.uses_count || 0) + 1 })
             .ilike('code', parsed.promo_code!)

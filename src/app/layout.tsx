@@ -1,17 +1,18 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import "@/lib/env";
-import SplashScreen from "@/components/SplashScreen";
-import FloatingWhatsApp from "@/components/FloatingWhatsApp";
-import { NotificationProvider } from "@/components/NotificationProvider";
-import { LanguageProvider } from "@/context/LanguageContext";
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import '@/lib/env'
+import SplashScreen from '@/components/SplashScreen'
+import FloatingWhatsApp from '@/components/FloatingWhatsApp'
+import { NotificationProvider } from '@/components/NotificationProvider'
+import { LanguageProvider } from '@/context/LanguageContext'
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Loving Tech — Accessoires Tech Premium | Cameroun',
-  description: 'Achetez des accessoires tech authentiques (claviers, souris, câbles) livrés partout au Cameroun. Paiement à la livraison. WhatsApp: +237 655 163 248',
+  description:
+    'Achetez des accessoires tech authentiques (claviers, souris, câbles) livrés partout au Cameroun. Paiement à la livraison. WhatsApp: +237 655 163 248',
   openGraph: {
     title: 'Loving Tech',
     description: 'Accessoires tech premium livrés partout au Cameroun. Paiement à la livraison.',
@@ -24,12 +25,12 @@ export const metadata: Metadata = {
     title: 'Loving Tech — Accessoires Tech Premium | Cameroun',
     description: 'Achetez des accessoires tech authentiques livrés partout au Cameroun.',
   },
-};
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="en">
@@ -43,5 +44,5 @@ export default function RootLayout({
         </NotificationProvider>
       </body>
     </html>
-  );
+  )
 }

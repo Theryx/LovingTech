@@ -1,23 +1,23 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { ProductWithFeatured } from '@/lib/localProducts';
-import LeadModal from './LeadModal';
-import Card from './ui/Card';
-import Badge from './ui/Badge';
-import Button from './ui/Button';
-import { useLanguage } from '@/context/LanguageContext';
+import { useState } from 'react'
+import Link from 'next/link'
+import { ProductWithFeatured } from '@/lib/localProducts'
+import LeadModal from './LeadModal'
+import Card from './ui/Card'
+import Badge from './ui/Badge'
+import Button from './ui/Button'
+import { useLanguage } from '@/context/LanguageContext'
 
 interface ProductCardProps {
-  product: ProductWithFeatured;
+  product: ProductWithFeatured
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const { language } = useLanguage();
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const { language } = useLanguage()
 
-  const isOutOfStock = product.stock_status === 'out_of_stock';
+  const isOutOfStock = product.stock_status === 'out_of_stock'
 
   return (
     <>
@@ -30,11 +30,17 @@ export default function ProductCard({ product }: ProductCardProps) {
         isOutOfStock={isOutOfStock}
         badge={
           isOutOfStock ? (
-            <Badge variant="out_of_stock" label={language === 'fr' ? 'Rupture de stock' : 'Out of Stock'} />
+            <Badge
+              variant="out_of_stock"
+              label={language === 'fr' ? 'Rupture de stock' : 'Out of Stock'}
+            />
           ) : product.condition === 'second_hand' ? (
             <Badge variant="second_hand" label={language === 'fr' ? 'Occasion' : 'Second-hand'} />
           ) : product.condition === 'refurbished' ? (
-            <Badge variant="refurbished" label={language === 'fr' ? 'Reconditionné' : 'Refurbished'} />
+            <Badge
+              variant="refurbished"
+              label={language === 'fr' ? 'Reconditionné' : 'Refurbished'}
+            />
           ) : (
             <Badge variant="new" label={language === 'fr' ? 'Neuf' : 'New'} />
           )
@@ -53,7 +59,11 @@ export default function ProductCard({ product }: ProductCardProps) {
               variant="secondary"
               className="px-4 py-2 text-xs"
               href={`/product/${product.id}`}
-              aria-label={language === 'fr' ? `Voir les détails de ${product.name}` : `View details for ${product.name}`}
+              aria-label={
+                language === 'fr'
+                  ? `Voir les détails de ${product.name}`
+                  : `View details for ${product.name}`
+              }
             >
               {language === 'fr' ? 'Détails' : 'Details'}
             </Button>
@@ -61,11 +71,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         }
       />
 
-      <LeadModal
-        product={product}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
+      <LeadModal product={product} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </>
-  );
+  )
 }

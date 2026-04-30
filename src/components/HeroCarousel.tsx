@@ -1,10 +1,10 @@
-'use client';
+'use client'
 
-import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
-import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowRight, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
-import { useLanguage } from '@/context/LanguageContext';
+import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowRight, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react'
+import { useLanguage } from '@/context/LanguageContext'
 
 const SLIDES = [
   {
@@ -47,39 +47,39 @@ const SLIDES = [
     ctaFr: 'Voir tous les produits',
     ctaEn: 'View all products',
   },
-];
+]
 
-const INTERVAL = 5000;
+const INTERVAL = 5000
 
 export default function HeroCarousel({ inStockCount }: { inStockCount: number }) {
-  const { t } = useLanguage();
-  const [current, setCurrent] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [direction, setDirection] = useState(1);
+  const { t } = useLanguage()
+  const [current, setCurrent] = useState(0)
+  const [paused, setPaused] = useState(false)
+  const [direction, setDirection] = useState(1)
 
-  const whatsappHref = `https://wa.me/237655163248?text=${encodeURIComponent("Bonjour Loving Tech! Je voudrais de l'aide pour choisir un produit.")}`;
+  const whatsappHref = `https://wa.me/237655163248?text=${encodeURIComponent("Bonjour Loving Tech! Je voudrais de l'aide pour choisir un produit.")}`
 
   const go = useCallback((idx: number, dir: number) => {
-    setDirection(dir);
-    setCurrent((idx + SLIDES.length) % SLIDES.length);
-  }, []);
+    setDirection(dir)
+    setCurrent((idx + SLIDES.length) % SLIDES.length)
+  }, [])
 
-  const prev = () => go(current - 1, -1);
-  const next = useCallback(() => go(current + 1, 1), [current, go]);
+  const prev = () => go(current - 1, -1)
+  const next = useCallback(() => go(current + 1, 1), [current, go])
 
   useEffect(() => {
-    if (paused) return;
-    const id = setTimeout(() => next(), INTERVAL);
-    return () => clearTimeout(id);
-  }, [current, paused, next]);
+    if (paused) return
+    const id = setTimeout(() => next(), INTERVAL)
+    return () => clearTimeout(id)
+  }, [current, paused, next])
 
-  const slide = SLIDES[current];
+  const slide = SLIDES[current]
 
   const variants = {
     enter: (dir: number) => ({ x: dir > 0 ? '100%' : '-100%', opacity: 0 }),
     center: { x: 0, opacity: 1 },
     exit: (dir: number) => ({ x: dir > 0 ? '-100%' : '100%', opacity: 0 }),
-  };
+  }
 
   return (
     <section
@@ -171,11 +171,20 @@ export default function HeroCarousel({ inStockCount }: { inStockCount: number })
             </div>
 
             <div className="mt-12 flex flex-wrap gap-6 text-sm text-white/60">
-              <span><strong className="text-white">{inStockCount}+</strong> {t({ en: 'Products', fr: 'Produits' })}</span>
+              <span>
+                <strong className="text-white">{inStockCount}+</strong>{' '}
+                {t({ en: 'Products', fr: 'Produits' })}
+              </span>
               <span>·</span>
-              <span><strong className="text-white">2–3j</strong> {t({ en: 'Delivery', fr: 'Livraison' })}</span>
+              <span>
+                <strong className="text-white">2–3j</strong>{' '}
+                {t({ en: 'Delivery', fr: 'Livraison' })}
+              </span>
               <span>·</span>
-              <span><strong className="text-white">100%</strong> {t({ en: 'Inspect before paying', fr: 'Inspection avant paiement' })}</span>
+              <span>
+                <strong className="text-white">100%</strong>{' '}
+                {t({ en: 'Inspect before paying', fr: 'Inspection avant paiement' })}
+              </span>
             </div>
           </motion.div>
         </AnimatePresence>
@@ -190,8 +199,9 @@ export default function HeroCarousel({ inStockCount }: { inStockCount: number })
                 role="tab"
                 aria-selected={i === current}
                 onClick={() => go(i, i > current ? 1 : -1)}
-                className={`h-1.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${i === current ? 'w-8 bg-white' : 'w-4 bg-white/30 hover:bg-white/60'
-                  }`}
+                className={`h-1.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
+                  i === current ? 'w-8 bg-white' : 'w-4 bg-white/30 hover:bg-white/60'
+                }`}
                 aria-label={`Slide ${i + 1}`}
               />
             ))}
@@ -217,5 +227,5 @@ export default function HeroCarousel({ inStockCount }: { inStockCount: number })
         </div>
       </div>
     </section>
-  );
+  )
 }

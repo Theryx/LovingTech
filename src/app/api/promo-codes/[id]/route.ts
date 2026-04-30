@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase/client'
+import { supabaseServer } from '@/lib/supabase/server'
 import { isAdmin } from '@/lib/api-auth'
 
 const updatePromoSchema = z.object({
@@ -31,7 +32,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     if (parsed.expires_at !== undefined) updates.expires_at = parsed.expires_at
     if (parsed.is_active !== undefined) updates.is_active = parsed.is_active
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseServer
       .from('promo_codes')
       .update(updates)
       .eq('id', params.id)
@@ -53,7 +54,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { error } = await supabase.from('promo_codes').delete().eq('id', params.id)
+  const { error } = await supabaseServer.from('promo_codes').delete().eq('id', params.id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })

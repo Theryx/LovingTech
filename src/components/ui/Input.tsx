@@ -1,20 +1,20 @@
-import React from 'react';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import React from 'react'
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
 function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return twMerge(clsx(inputs))
 }
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
-  error?: string;
-  prefix?: string;
+  label?: string
+  error?: string
+  prefix?: string
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, prefix, className, id, ...props }, ref) => {
-    const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
+    const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined)
 
     return (
       <div className="w-full">
@@ -25,7 +25,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         <div className="relative">
           {prefix && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-dark/50 font-medium border-r border-brand-grey/30 pr-2 pointer-events-none" aria-hidden="true">
+            <div
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-dark/50 font-medium border-r border-brand-grey/30 pr-2 pointer-events-none"
+              aria-hidden="true"
+            >
               {prefix}
             </div>
           )}
@@ -46,15 +49,19 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           />
         </div>
         {error && (
-          <p id={inputId ? `${inputId}-error` : undefined} className="mt-1.5 text-xs font-medium text-red-600" role="alert">
+          <p
+            id={inputId ? `${inputId}-error` : undefined}
+            className="mt-1.5 text-xs font-medium text-red-600"
+            role="alert"
+          >
             {error}
           </p>
         )}
       </div>
-    );
+    )
   }
-);
+)
 
-Input.displayName = 'Input';
+Input.displayName = 'Input'
 
-export default Input;
+export default Input

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase/client'
+import { supabaseServer } from '@/lib/supabase/server'
 import { isAdmin } from '@/lib/api-auth'
 
 const updateSettingsSchema = z.object({
@@ -24,17 +25,17 @@ export async function PUT(request: NextRequest) {
     const body = await request.json()
     const { free_delivery_threshold } = updateSettingsSchema.parse(body)
 
-    const { data: existing } = await supabase.from('delivery_settings').select('id').single()
+    const { data: existing } = await supabaseServer.from('delivery_settings').select('id').single()
 
     if (existing?.id) {
-      const { error } = await supabase
+      const { error } = await supabaseServer
         .from('delivery_settings')
         .update({ free_delivery_threshold, updated_at: new Date().toISOString() })
         .eq('id', existing.id)
 
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     } else {
-      const { error } = await supabase
+      const { error } = await supabaseServer
         .from('delivery_settings')
         .insert([{ free_delivery_threshold }])
 

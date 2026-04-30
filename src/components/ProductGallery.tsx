@@ -1,19 +1,19 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import Image from 'next/image';
+import { useState } from 'react'
+import Image from 'next/image'
 
-const PLACEHOLDER = '/images/placeholder.svg';
+const PLACEHOLDER = '/images/placeholder.svg'
 
 interface ProductGalleryProps {
-  images: string[];
-  productName: string;
+  images: string[]
+  productName: string
 }
 
 export default function ProductGallery({ images, productName }: ProductGalleryProps) {
-  const displayImages = images?.length > 0 ? images : [PLACEHOLDER];
-  const [mainImgSrc, setMainImgSrc] = useState(displayImages[0]);
-  const [thumbErrors, setThumbErrors] = useState<Record<number, boolean>>({});
+  const displayImages = images?.length > 0 ? images : [PLACEHOLDER]
+  const [mainImgSrc, setMainImgSrc] = useState(displayImages[0])
+  const [thumbErrors, setThumbErrors] = useState<Record<number, boolean>>({})
 
   return (
     <div className="space-y-6">
@@ -30,7 +30,11 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
       </div>
 
       {displayImages.length > 1 && (
-        <div className="grid grid-cols-4 gap-4" role="group" aria-label={`${productName} image thumbnails`}>
+        <div
+          className="grid grid-cols-4 gap-4"
+          role="group"
+          aria-label={`${productName} image thumbnails`}
+        >
           {displayImages.slice(0, 4).map((img, idx) => (
             <button
               key={idx}
@@ -57,5 +61,5 @@ export default function ProductGallery({ images, productName }: ProductGalleryPr
         </div>
       )}
     </div>
-  );
+  )
 }

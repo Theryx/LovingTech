@@ -1,23 +1,34 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
-import { ArrowLeft, ShieldCheck, Truck, ShoppingBag } from 'lucide-react';
-import { useLanguage } from '@/context/LanguageContext';
-import Navbar from '@/components/Navbar';
-import ProductGallery from '@/components/ProductGallery';
-import ProductDetailActions from '@/components/ProductDetailActions';
-import ProductCard from '@/components/ProductCard';
-import ReviewSection from '@/components/ReviewSection';
+import Link from 'next/link'
+import { ArrowLeft, ShieldCheck, Truck, ShoppingBag } from 'lucide-react'
+import { useLanguage } from '@/context/LanguageContext'
+import Navbar from '@/components/Navbar'
+import ProductGallery from '@/components/ProductGallery'
+import ProductDetailActions from '@/components/ProductDetailActions'
+import ProductCard from '@/components/ProductCard'
+import ReviewSection from '@/components/ReviewSection'
 
-const CONDITION_BADGE: Record<string, { bg: string; text: string; labelFr: string; labelEn: string }> = {
-  new:          { bg: '#D1FAE5', text: '#065F46', labelFr: 'Neuf',          labelEn: 'New' },
-  refurbished:  { bg: '#DBEAFE', text: '#1E3A8A', labelFr: 'Reconditionné', labelEn: 'Refurbished' },
-  second_hand:  { bg: '#FEF3C7', text: '#92400E', labelFr: 'Occasion',      labelEn: 'Second-hand' },
-};
+const CONDITION_BADGE: Record<
+  string,
+  { bg: string; text: string; labelFr: string; labelEn: string }
+> = {
+  new: { bg: '#D1FAE5', text: '#065F46', labelFr: 'Neuf', labelEn: 'New' },
+  refurbished: { bg: '#DBEAFE', text: '#1E3A8A', labelFr: 'Reconditionné', labelEn: 'Refurbished' },
+  second_hand: { bg: '#FEF3C7', text: '#92400E', labelFr: 'Occasion', labelEn: 'Second-hand' },
+}
 
-export default function ProductPageClient({ product, related, isDbProduct }: { product: any; related: any[]; isDbProduct: boolean }) {
-  const { t } = useLanguage();
-  const conditionStyle = product.condition ? CONDITION_BADGE[product.condition] : null;
+export default function ProductPageClient({
+  product,
+  related,
+  isDbProduct,
+}: {
+  product: any
+  related: any[]
+  isDbProduct: boolean
+}) {
+  const { t } = useLanguage()
+  const conditionStyle = product.condition ? CONDITION_BADGE[product.condition] : null
 
   return (
     <main className="min-h-screen bg-white text-brand-dark">
@@ -70,24 +81,26 @@ export default function ProductPageClient({ product, related, isDbProduct }: { p
                 product.stock_status === 'in_stock'
                   ? 'bg-brand-blue/15 text-brand-blue'
                   : product.stock_status === 'out_of_stock'
-                  ? 'bg-brand-dark text-white ring-1 ring-brand-grey/20'
-                  : 'bg-brand-orange/15 text-brand-orange'
+                    ? 'bg-brand-dark text-white ring-1 ring-brand-grey/20'
+                    : 'bg-brand-orange/15 text-brand-orange'
               }`}
             >
               {product.stock_status === 'in_stock'
                 ? t({ en: 'In Stock', fr: 'En stock' })
                 : product.stock_status === 'out_of_stock'
-                ? t({ en: 'Out of Stock', fr: 'En rupture' })
-                : t({ en: 'Pre-order', fr: 'Pré-commande' })}
+                  ? t({ en: 'Out of Stock', fr: 'En rupture' })
+                  : t({ en: 'Pre-order', fr: 'Pré-commande' })}
             </span>
-            {typeof product.stock_qty === 'number' && product.stock_qty > 0 && product.stock_status === 'in_stock' && (
-              <p className="mt-2 text-sm text-brand-dark/60">
-                {t({
-                  en: `${product.stock_qty.toLocaleString('en-US')} item${product.stock_qty > 1 ? 's' : ''} available`,
-                  fr: `${product.stock_qty.toLocaleString('fr-FR')} article${product.stock_qty > 1 ? 's' : ''} disponible${product.stock_qty > 1 ? 's' : ''}`
-                })}
-              </p>
-            )}
+            {typeof product.stock_qty === 'number' &&
+              product.stock_qty > 0 &&
+              product.stock_status === 'in_stock' && (
+                <p className="mt-2 text-sm text-brand-dark/60">
+                  {t({
+                    en: `${product.stock_qty.toLocaleString('en-US')} item${product.stock_qty > 1 ? 's' : ''} available`,
+                    fr: `${product.stock_qty.toLocaleString('fr-FR')} article${product.stock_qty > 1 ? 's' : ''} disponible${product.stock_qty > 1 ? 's' : ''}`,
+                  })}
+                </p>
+              )}
           </div>
 
           <div className="space-y-8 mb-12">
@@ -98,7 +111,7 @@ export default function ProductPageClient({ product, related, isDbProduct }: { p
               <p className="text-lg leading-relaxed text-brand-dark/60">
                 {t({
                   en: product.description_en || product.description || '',
-                  fr: product.description_fr || product.description || ''
+                  fr: product.description_fr || product.description || '',
                 })}
               </p>
             </div>
@@ -169,5 +182,5 @@ export default function ProductPageClient({ product, related, isDbProduct }: { p
         </section>
       )}
     </main>
-  );
+  )
 }
