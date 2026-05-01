@@ -40,6 +40,10 @@ next-env.d.ts
 .gemini/
 .mcp.json
 
+# logs
+/logs
+*.log
+
 # Environment
 .env.temp
 .env.vercel

@@ -1,9 +1,0 @@
-INFO [2026-05-01 02:35:11.754] (main): Logging to file: D:\LovingTech\logs\penpot-mcp-20260501-023511.log
-INFO [2026-05-01 02:35:11.755] (main): Usage: penpot-mcp [options]
-INFO [2026-05-01 02:35:11.755] (main): Options:
-INFO [2026-05-01 02:35:11.755] (main):   --stdio                Use stdio transport (for Claude Code/Desktop)
-INFO [2026-05-01 02:35:11.755] (main):   --multi-user           Enable multi-user mode (default: single-user)
-INFO [2026-05-01 02:35:11.755] (main):   --help, -h             Show this help message
-INFO [2026-05-01 02:35:11.755] (main): 
-INFO [2026-05-01 02:35:11.755] (main): Note that configuration is mostly handled through environment variables.
-INFO [2026-05-01 02:35:11.755] (main): Refer to the README for more information.
