@@ -172,19 +172,29 @@ export default function ImageUploader({
     <div className="space-y-4">
       <input
         ref={fileInputRef}
+        id="image-upload-input"
         type="file"
         accept="image/jpeg,image/png,image/webp"
         multiple
         onChange={e => handleFiles(e.target.files)}
-        className="hidden"
+        className="sr-only"
       />
 
-      <div
-        onClick={() => fileInputRef.current?.click()}
+      <label
+        htmlFor="image-upload-input"
+        role="button"
+        tabIndex={0}
+        aria-label={t(labels.dragDrop)}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            fileInputRef.current?.click()
+          }
+        }}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition ${
+        className={`block border-2 border-dashed rounded-xl p-8 text-center transition cursor-pointer ${
           dragOver
             ? 'border-brand-blue bg-brand-blue/5'
             : uploadError
@@ -204,7 +214,7 @@ export default function ImageUploader({
             <p className="mt-1 text-xs text-brand-grey">{t(labels.supportedFormats)}</p>
           </>
         )}
-      </div>
+      </label>
 
       {uploadError && (
         <div className="rounded-lg border border-brand-orange/30 bg-brand-orange/10 p-3">

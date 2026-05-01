@@ -1,50 +1,43 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save } from 'lucide-react'
+import { Save } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
-import { Product, ProductCondition, Variant } from '@/lib/supabase'
+import { ProductCondition, ProductCategory, Variant } from '@/lib/supabase'
 import { useLanguage } from '@/context/LanguageContext'
 import ProductForm, { WARRANTY_DEFAULTS } from '@/components/ProductForm'
 
-const emptyProduct: Omit<Product, 'created_at'> = {
-  id: '',
+const emptyProduct = {
   name: '',
   description: '',
-  price_xaf: 0,
-  compare_at_price: undefined,
+  price_xaf: 0 as number,
+  compare_at_price: null as number | null,
   brand: '',
-  specs: {},
-  images: [],
-  stock_status: 'in_stock',
+  specs: {} as Record<string, string>,
+  images: [] as string[],
+  stock_status: 'in_stock' as 'in_stock' | 'out_of_stock' | 'pre_order',
   stock_qty: 1,
-  low_stock_threshold: 3,
-  condition: 'new',
-  category: 'keyboard',
-  name_fr: '',
-  name_en: '',
-  description_fr: '',
-  description_en: '',
   warranty_info: WARRANTY_DEFAULTS.new,
-  variants: [],
-  tags: [],
+  featured: false,
+  condition: 'new' as ProductCondition,
+  category: 'keyboard' as ProductCategory,
+  variants: [] as Variant[],
+  tags: [] as string[],
 }
 
 export default function NewProductPage() {
   const router = useRouter()
   const { t } = useLanguage()
   const { error: notifyError, success } = useNotifications()
-  const [product, setProduct] = useState<Omit<Product, 'created_at'>>(emptyProduct)
+  const [product, setProduct] = useState(emptyProduct)
   const [specKeys, setSpecKeys] = useState<string[]>([])
+  const [errors, setErrors] = useState<{ name?: string; price_xaf?: string; brand?: string }>({})
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
-
-  const set = (patch: Partial<typeof product>) => setProduct(p => ({ ...p, ...patch }))
 
   const handleConditionChange = (condition: ProductCondition) => {
-    set({ condition, warranty_info: WARRANTY_DEFAULTS[condition] })
+    setProduct(p => ({ ...p, condition, warranty_info: WARRANTY_DEFAULTS[condition] }))
   }
 
   const handleSpecKeyChange = (index: number, value: string) => {
@@ -57,84 +50,104 @@ export default function NewProductPage() {
       const val = newSpecs[oldKey]
       delete newSpecs[oldKey]
       if (value) newSpecs[value] = val
-      set({ specs: newSpecs })
+      setProduct(p => ({ ...p, specs: newSpecs }))
     }
   }
 
   const handleSpecValueChange = (key: string, val: string) => {
-    set({ specs: { ...product.specs, [key]: val } })
+    setProduct(p => ({ ...p, specs: { ...p.specs, [key]: val } }))
   }
 
-  const addSpec = () => setSpecKeys([...specKeys, ''])
+  const addSpec = () => setSpecKeys(p => [...p, ''])
   const removeSpec = (index: number) => {
     const key = specKeys[index]
-    const newKeys = specKeys.filter((_, i) => i !== index)
+    setSpecKeys(specKeys.filter((_, i) => i !== index))
     const newSpecs = { ...product.specs }
     delete newSpecs[key]
-    setSpecKeys(newKeys)
-    set({ specs: newSpecs })
+    setProduct(p => ({ ...p, specs: newSpecs }))
   }
 
   const addVariantGroup = () => {
-    set({
+    setProduct(p => ({
+      ...p,
       variants: [
-        ...(product.variants || []),
+        ...p.variants,
         { label: '', options: [{ name: '', stock_qty: 0, price_delta: 0 }] },
       ],
-    })
+    }))
   }
 
   const updateVariantLabel = (vi: number, label: string) => {
-    const variants = [...(product.variants || [])]
-    variants[vi] = { ...variants[vi], label }
-    set({ variants })
+    setProduct(p => {
+      const variants = [...p.variants]
+      variants[vi] = { ...variants[vi], label }
+      return { ...p, variants }
+    })
   }
 
   const addVariantOption = (vi: number) => {
-    const variants = [...(product.variants || [])]
-    variants[vi] = {
-      ...variants[vi],
-      options: [...variants[vi].options, { name: '', stock_qty: 0, price_delta: 0 }],
-    }
-    set({ variants })
+    setProduct(p => {
+      const variants = [...p.variants]
+      variants[vi] = {
+        ...variants[vi],
+        options: [...variants[vi].options, { name: '', stock_qty: 0, price_delta: 0 }],
+      }
+      return { ...p, variants }
+    })
   }
 
-  const updateVariantOption = (vi: number, oi: number, patch: Partial<Variant['options'][0]>) => {
-    const variants = [...(product.variants || [])]
-    const options = [...variants[vi].options]
-    options[oi] = { ...options[oi], ...patch }
-    variants[vi] = { ...variants[vi], options }
-    set({ variants })
+  const updateVariantOption = (
+    vi: number,
+    oi: number,
+    patch: Partial<Variant['options'][0]>
+  ) => {
+    setProduct(p => {
+      const variants = [...p.variants]
+      const options = [...variants[vi].options]
+      options[oi] = { ...options[oi], ...patch }
+      variants[vi] = { ...variants[vi], options }
+      return { ...p, variants }
+    })
   }
 
   const removeVariantOption = (vi: number, oi: number) => {
-    const variants = [...(product.variants || [])]
-    variants[vi] = { ...variants[vi], options: variants[vi].options.filter((_, i) => i !== oi) }
-    set({ variants })
+    setProduct(p => {
+      const variants = [...p.variants]
+      variants[vi] = {
+        ...variants[vi],
+        options: variants[vi].options.filter((_, i) => i !== oi),
+      }
+      return { ...p, variants }
+    })
   }
 
   const removeVariantGroup = (vi: number) => {
-    set({ variants: (product.variants || []).filter((_, i) => i !== vi) })
+    setProduct(p => ({ ...p, variants: p.variants.filter((_, i) => i !== vi) }))
+  }
+
+  const validate = (): boolean => {
+    const errs: typeof errors = {}
+    if (!product.name.trim()) {
+      errs.name = t({ en: 'Product name is required', fr: 'Le nom du produit est requis' })
+    }
+    if (product.price_xaf <= 0) {
+      errs.price_xaf = t({ en: 'Price must be greater than 0', fr: 'Le prix doit être supérieur à 0' })
+    }
+    if (product.condition === 'second_hand' && product.images.length < 2) {
+      notifyError(
+        t({
+          en: 'Second-hand products require at least 2 photos.',
+          fr: 'Les produits d\'occasion nécessitent au moins 2 photos.',
+        })
+      )
+      return false
+    }
+    setErrors(errs)
+    return Object.keys(errs).length === 0
   }
 
   const handleSave = async () => {
-    if (product.price_xaf <= 0) {
-      notifyError(t({ en: 'Price is required.', fr: 'Le prix est obligatoire.' }))
-      return
-    }
-    if (!product.name_fr && !product.name_en && !product.name) {
-      notifyError(
-        t({
-          en: 'At least one product name is required.',
-          fr: 'Au moins un nom de produit est requis.',
-        })
-      )
-      return
-    }
-    if (product.condition === 'second_hand' && (product.images || []).length < 2) {
-      notifyError('Second-hand products require at least 2 photos of the actual item.')
-      return
-    }
+    if (!validate()) return
     setSaving(true)
     try {
       const res = await fetch('/api/products', {
@@ -144,18 +157,15 @@ export default function NewProductPage() {
           ...product,
           id: crypto.randomUUID(),
           specs: product.specs || {},
-          images: product.images || [],
         }),
       })
       if (!res.ok) {
         const errData = await res.json()
         throw new Error(errData.error || 'Failed to save')
       }
-      setSaved(true)
       success(t({ en: 'Product saved successfully.', fr: 'Produit enregistré avec succès.' }))
-      setTimeout(() => router.push('/admin/products'), 1000)
+      setTimeout(() => router.push('/admin/products'), 1200)
     } catch (error: any) {
-      console.error('Failed to save:', error)
       notifyError(`Failed to save: ${error.message || 'Unknown error'}`)
     } finally {
       setSaving(false)
@@ -168,9 +178,11 @@ export default function NewProductPage() {
         <div className="flex items-center gap-4">
           <Link
             href="/admin/products"
-            className="p-2 text-brand-grey transition hover:text-brand-blue"
+            className="rounded-lg p-2 text-brand-grey transition hover:bg-brand-grey/10 hover:text-brand-blue"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
           </Link>
           <h1 className="text-3xl font-bold text-brand-dark">
             {t({ en: 'Add Product', fr: 'Ajouter un produit' })}
@@ -179,21 +191,33 @@ export default function NewProductPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 rounded-lg bg-brand-orange px-4 py-2 font-medium text-white transition hover:brightness-95 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 disabled:opacity-50"
         >
-          <Save className="w-4 h-4" />
+          <Save className="w-4 h-4" aria-hidden="true" />
           {saving
-            ? t({ en: 'Saving...', fr: 'Enregistrement...' })
-            : saved
-              ? t({ en: 'Saved!', fr: 'Enregistré!' })
-              : t({ en: 'Save', fr: 'Enregistrer' })}
+            ? t({ en: 'Saving…', fr: 'Enregistrement…' })
+            : t({ en: 'Save', fr: 'Enregistrer' })}
         </button>
       </div>
 
       <ProductForm
-        product={product}
-        specKeys={specKeys}
-        onChange={set}
+        name={product.name}
+        description={product.description}
+        price_xaf={product.price_xaf}
+        compare_at_price={product.compare_at_price}
+        brand={product.brand}
+        specs={product.specs}
+        images={product.images}
+        stock_status={product.stock_status}
+        stock_qty={product.stock_qty}
+        warranty_info={product.warranty_info}
+        featured={product.featured}
+        condition={product.condition}
+        category={product.category}
+        variants={product.variants}
+        tags={product.tags}
+        errors={errors}
+        onChange={patch => setProduct(p => ({ ...p, ...patch }))}
         onConditionChange={handleConditionChange}
         onSpecKeyChange={handleSpecKeyChange}
         onSpecValueChange={handleSpecValueChange}
@@ -205,7 +229,7 @@ export default function NewProductPage() {
         onUpdateVariantOption={updateVariantOption}
         onRemoveVariantOption={removeVariantOption}
         onRemoveVariantGroup={removeVariantGroup}
-        onImagesChange={images => set({ images })}
+        onImagesChange={images => setProduct(p => ({ ...p, images }))}
       />
     </div>
   )

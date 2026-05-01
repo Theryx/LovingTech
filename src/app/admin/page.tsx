@@ -12,36 +12,53 @@ export default function AdminDashboard() {
   const [products, setProducts] = useState<Product[]>(LOCAL_PRODUCTS as Product[])
   const [stats, setStats] = useState({ todayCount: 0, todayRevenue: 0, pendingCount: 0 })
   const [pendingReviews, setPendingReviews] = useState(0)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/products')
-      .then(r => {
-        if (r.ok) return r.json()
-        return []
+    Promise.all([
+      fetch('/api/products'),
+      fetch('/api/orders'),
+      fetch('/api/reviews'),
+    ])
+      .then(([p, o, r]) => Promise.all([p.ok ? p.json() : [], o.ok ? o.json() : { stats: { todayCount: 0, todayRevenue: 0, pendingCount: 0 } }, r.ok ? r.json() : []]))
+      .then(([productsData, ordersData, reviewsData]: [any, any, Review[]]) => {
+        if (productsData?.length > 0) setProducts(productsData)
+        setStats(ordersData.stats || { todayCount: 0, todayRevenue: 0, pendingCount: 0 })
+        setPendingReviews(Array.isArray(reviewsData) ? reviewsData.filter((r: Review) => r.status === 'pending').length : 0)
       })
-      .then(data => {
-        if (data?.length > 0) setProducts(data)
-      })
-      .catch(err => console.error('Failed to load products for dashboard:', err))
-    fetch('/api/orders')
-      .then(r => {
-        if (!r.ok) return { stats: { todayCount: 0, todayRevenue: 0, pendingCount: 0 } }
-        return r.json()
-      })
-      .then((data: any) => {
-        setStats(data.stats || { todayCount: 0, todayRevenue: 0, pendingCount: 0 })
-      })
-      .catch(err => console.error('Failed to load order stats:', err))
-    fetch('/api/reviews')
-      .then(r => {
-        if (!r.ok) return []
-        return r.json()
-      })
-      .then((data: Review[]) => setPendingReviews(data.filter(r => r.status === 'pending').length))
-      .catch(err => console.error('Failed to load pending review count:', err))
+      .catch(err => console.error('Failed to load dashboard data:', err))
+      .finally(() => setLoading(false))
   }, [])
 
   const featuredCount = products.filter(p => (p as ProductWithFeatured).featured).length
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-6xl animate-pulse space-y-8">
+        <div className="h-9 w-40 rounded bg-brand-grey/10" />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="rounded-xl border border-brand-grey/20 bg-white p-6">
+              <div className="mb-4 h-4 w-24 rounded bg-brand-grey/10" />
+              <div className="h-8 w-16 rounded bg-brand-grey/10" />
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="rounded-xl border border-brand-grey/20 bg-white p-6">
+              <div className="mb-4 h-5 w-32 rounded bg-brand-grey/10" />
+              <div className="space-y-2">
+                {[...Array(3)].map((_, j) => (
+                  <div key={j} className="h-12 rounded-lg bg-brand-grey/10" />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="mx-auto max-w-6xl">

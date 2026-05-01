@@ -70,12 +70,8 @@ export default function AdminPromosPage() {
       setShowForm(false)
       setForm({ ...EMPTY_FORM })
       success(t({ en: 'Promo code created.', fr: 'Code promo créé.' }))
-    } catch (err: any) {
-      setFormError(err.message || 'Erreur lors de la création / Error creating code')
-      notifyError(
-        err.message ||
-          t({ en: 'Failed to create promo code.', fr: 'Échec de création du code promo.' })
-      )
+    } catch {
+      setFormError(t({ en: 'Failed to create promo code.', fr: 'Échec de création du code promo.' }))
     } finally {
       setSaving(false)
     }

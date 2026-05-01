@@ -318,8 +318,12 @@ export default function AdminDelivery() {
                     <td className="px-4 py-3">
                       <button
                         onClick={() => toggleAvailable(zone)}
+                        role="switch"
+                        aria-checked={zone.is_available}
+                        aria-label={zone.is_available
+                          ? t({ en: 'Disable delivery', fr: 'Désactiver la livraison' })
+                          : t({ en: 'Enable delivery', fr: 'Activer la livraison' })}
                         className={`relative inline-flex h-5 w-9 items-center rounded-full transition ${zone.is_available ? 'bg-brand-blue' : 'bg-brand-grey/40'}`}
-                        aria-label={zone.is_available ? 'Disable' : 'Enable'}
                       >
                         <span
                           className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition ${zone.is_available ? 'translate-x-4' : 'translate-x-1'}`}
@@ -437,6 +441,11 @@ export default function AdminDelivery() {
                   <div className="flex items-center gap-2 pt-2">
                     <button
                       onClick={() => setForm(f => ({ ...f, is_available: !f.is_available }))}
+                      role="switch"
+                      aria-checked={form.is_available}
+                      aria-label={form.is_available
+                        ? t({ en: 'Mark unavailable', fr: 'Marquer indisponible' })
+                        : t({ en: 'Mark available', fr: 'Marquer disponible' })}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${form.is_available ? 'bg-brand-blue' : 'bg-brand-grey/40'}`}
                     >
                       <span
