@@ -1,0 +1,25 @@
+{
+  "extends": ["next/core-web-vitals", "prettier"],
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["@supabase/supabase-js"],
+            "importNames": ["createClient"],
+            "message": "Use createSupabaseClient from '@/lib/supabase/factory' instead. This ensures consistent retry logic and fetch caching behavior."
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/lib/supabase/factory.ts"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ]
+}

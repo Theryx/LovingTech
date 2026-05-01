@@ -26,7 +26,7 @@ export function createMockNextRequest(
   const req = new NextRequest(url)
 
   const cookieStore = new Map(Object.entries(cookies))
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line
   vi.spyOn(req.cookies, 'get' as any).mockImplementation((name: any) => {
     const value = cookieStore.get(name)
     return value ? { name, value } : undefined

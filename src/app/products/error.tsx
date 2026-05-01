@@ -23,7 +23,7 @@ export default function ProductsError({
         </div>
         <h2 className="text-2xl font-bold mb-2">Something went wrong</h2>
         <p className="text-brand-dark/60 mb-6">
-          We couldn't load the products. Please try again.
+          We couldn&apos;t load the products. Please try again.
         </p>
         <div className="flex gap-3 justify-center">
           <button
