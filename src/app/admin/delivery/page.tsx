@@ -18,6 +18,44 @@ const emptyZone = (): Omit<DeliveryZone, 'id' | 'created_at'> => ({
   sort_order: 99,
 })
 
+function DeliverySkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
+        <div className="mb-4 h-5 w-48 rounded animate-pulse bg-brand-grey/10" />
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-28 rounded-xl animate-pulse bg-brand-grey/10" />
+          <div className="h-10 w-20 rounded-full animate-pulse bg-brand-grey/10" />
+        </div>
+      </div>
+      <div className="overflow-hidden rounded-xl border border-brand-grey/20 bg-white">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-brand-grey/20 bg-brand-grey/5">
+              {[...Array(6)].map((_, i) => (
+                <th key={i} className="px-4 py-3">
+                  <div className="h-3 w-16 rounded animate-pulse bg-brand-grey/10" />
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {[...Array(4)].map((_, i) => (
+              <tr key={i} className="border-b border-brand-grey/10">
+                {[...Array(6)].map((_, j) => (
+                  <td key={j} className="px-4 py-3">
+                    <div className="h-4 w-20 rounded animate-pulse bg-brand-grey/10" />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 export default function AdminDelivery() {
   const { t } = useLanguage()
   const { error: notifyError, success } = useNotifications()
@@ -245,7 +283,7 @@ export default function AdminDelivery() {
 
       {/* Zones table */}
       {loading ? (
-        <p className="text-brand-dark/40">{t({ en: 'Loading…', fr: 'Chargement…' })}</p>
+        <DeliverySkeleton />
       ) : zones.length === 0 ? (
         <div className="rounded-xl border border-dashed border-brand-grey/30 p-12 text-center text-brand-dark/40">
           <MapPin className="mx-auto mb-3 h-8 w-8 opacity-40" />
