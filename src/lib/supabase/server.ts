@@ -12,7 +12,7 @@ async function fetchWithRetry(input: RequestInfo | URL, init?: RequestInit): Pro
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const response = await fetch(input, init)
+      const response = await fetch(input, { ...init, cache: 'no-store' })
       if (response.status < 500) return response
       lastError = new Error(`Server error: ${response.status}`)
     } catch (err) {

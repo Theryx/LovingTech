@@ -29,6 +29,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
 }
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export default async function ProductPage({ params }: { params: { id: string } }) {
   let product: any = null
