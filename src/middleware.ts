@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAuthToken } from '@/lib/auth'
-import { loginRateLimit, orderRateLimit } from '@/lib/rate-limit'
+import { loginRateLimit, orderRateLimit, safeLimit } from '@/lib/rate-limit'
 
 function applySecurityHeaders(response: NextResponse): NextResponse {
   response.headers.set('X-Content-Type-Options', 'nosniff')
@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest) {
   // Rate limit admin login
   if (pathname === '/api/admin-login') {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown'
-    const { success } = await loginRateLimit.limit(ip)
+    const { success } = await safeLimit(loginRateLimit, ip)
     if (!success) {
       return applySecurityHeaders(
         NextResponse.json(
@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest) {
   // Rate limit order creation
   if (request.method === 'POST' && pathname === '/api/orders') {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown'
-    const { success } = await orderRateLimit.limit(ip)
+    const { success } = await safeLimit(orderRateLimit, ip)
     if (!success) {
       return applySecurityHeaders(
         NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
