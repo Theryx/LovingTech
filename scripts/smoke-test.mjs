@@ -46,8 +46,7 @@ try {
   } else {
     console.log(`  FAIL  Health deep check — status: ${body.status}`)
     for (const [name, check] of Object.entries(body.checks)) {
-      const c = check as any
-      if (c.status !== 'ok') console.log(`         ${name}: ${c.status} — ${c.message}`)
+      if (check.status !== 'ok') console.log(`         ${name}: ${check.status} — ${check.message}`)
     }
     failures++
   }
