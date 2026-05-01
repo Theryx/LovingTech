@@ -6,6 +6,35 @@ import { useNotifications } from '@/components/NotificationProvider'
 import { PromoCode } from '@/lib/supabase'
 import { useLanguage } from '@/context/LanguageContext'
 
+function PromoSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-xl border border-brand-grey/20 bg-white">
+      <table className="w-full min-w-[700px]">
+        <thead>
+          <tr className="border-b border-brand-grey/20">
+            {[...Array(6)].map((_, i) => (
+              <th key={i} className="px-5 py-3.5">
+                <div className="h-3 w-16 rounded bg-brand-grey/10 animate-pulse" />
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {[...Array(5)].map((_, i) => (
+            <tr key={i} className="border-b border-brand-grey/10">
+              {[...Array(6)].map((_, j) => (
+                <td key={j} className="px-5 py-4">
+                  <div className="h-4 w-20 rounded animate-pulse bg-brand-grey/10" />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 const EMPTY_FORM: Omit<PromoCode, 'id' | 'uses_count' | 'created_at'> = {
   code: '',
   type: 'percent',
@@ -258,11 +287,9 @@ export default function AdminPromosPage() {
       )}
 
       {loading ? (
-        <div className="py-20 text-center text-brand-dark/40">
-          {t({ en: 'Loading…', fr: 'Chargement…' })}
-        </div>
+        <PromoSkeleton />
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-brand-grey/20 bg-white">
+        <div className="relative overflow-x-auto rounded-xl border border-brand-grey/20 bg-white [&::after]:absolute [&::after]:top-0 [&::after]:right-0 [&::after]:bottom-0 [&::after]:w-8 [&::after]:bg-gradient-to-l [&::after]:from-white [&::after]:to-transparent [&::after]:pointer-events-none">
           <table className="w-full min-w-[700px]">
             <thead>
               <tr className="border-b border-brand-grey/20">
