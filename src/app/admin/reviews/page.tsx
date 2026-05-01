@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Star, CheckCircle, XCircle } from 'lucide-react'
+import { Star, CheckCircle, XCircle, Loader2 } from 'lucide-react'
 import { Review, ReviewStatus } from '@/lib/supabase'
 import { useLanguage } from '@/context/LanguageContext'
 
@@ -12,6 +12,37 @@ const STATUS_STYLE: Record<ReviewStatus, { bg: string; text: string; label: stri
 }
 
 type FilterValue = ReviewStatus | ''
+
+function ReviewSkeleton() {
+  return (
+    <div className="space-y-4">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="rounded-xl border border-brand-grey/20 bg-white p-5">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex-1 min-w-0 space-y-2">
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="h-4 w-28 rounded animate-pulse bg-brand-grey/10" />
+                <div className="h-4 w-20 rounded animate-pulse bg-brand-grey/10" />
+                <div className="h-5 w-16 rounded-full animate-pulse bg-brand-grey/10" />
+              </div>
+              <div className="flex gap-0.5">
+                {[...Array(5)].map((_, j) => (
+                  <div key={j} className="h-4 w-4 rounded animate-pulse bg-brand-grey/10" />
+                ))}
+              </div>
+              <div className="h-4 w-full rounded animate-pulse bg-brand-grey/10" />
+              <div className="h-3 w-32 rounded animate-pulse bg-brand-grey/10" />
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <div className="h-8 w-24 rounded-lg animate-pulse bg-brand-grey/10" />
+              <div className="h-8 w-20 rounded-lg animate-pulse bg-brand-grey/10" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export default function AdminReviewsPage() {
   const { t } = useLanguage()
@@ -84,9 +115,7 @@ export default function AdminReviewsPage() {
       </div>
 
       {loading ? (
-        <div className="py-20 text-center text-brand-dark/40">
-          {t({ en: 'Loading…', fr: 'Chargement…' })}
-        </div>
+        <ReviewSkeleton />
       ) : (
         <div className="space-y-4">
           {filtered.map(r => {
@@ -123,17 +152,27 @@ export default function AdminReviewsPage() {
                       <button
                         onClick={() => handleStatus(r.id!, 'approved')}
                         disabled={updating === r.id}
-                        className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:brightness-95 transition disabled:opacity-50"
+                        aria-label={t({ en: 'Approve review', fr: 'Approuver cet avis' })}
+                        className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700 transition disabled:opacity-50"
                       >
-                        <CheckCircle className="w-3.5 h-3.5" aria-hidden="true" />
+                        {updating === r.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+                        ) : (
+                          <CheckCircle className="w-3.5 h-3.5" aria-hidden="true" />
+                        )}
                         {t({ en: 'Approve', fr: 'Approuver' })}
                       </button>
                       <button
                         onClick={() => handleStatus(r.id!, 'rejected')}
                         disabled={updating === r.id}
-                        className="flex items-center gap-1.5 rounded-lg bg-red-500 px-3 py-1.5 text-xs font-semibold text-white hover:brightness-95 transition disabled:opacity-50"
+                        aria-label={t({ en: 'Reject review', fr: 'Rejeter cet avis' })}
+                        className="flex items-center gap-1.5 rounded-lg bg-red-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-600 transition disabled:opacity-50"
                       >
-                        <XCircle className="w-3.5 h-3.5" aria-hidden="true" />
+                        {updating === r.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+                        ) : (
+                          <XCircle className="w-3.5 h-3.5" aria-hidden="true" />
+                        )}
                         {t({ en: 'Reject', fr: 'Rejeter' })}
                       </button>
                     </div>
