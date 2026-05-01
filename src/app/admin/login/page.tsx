@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import { Lock } from 'lucide-react'
 
 function LoginForm() {
@@ -37,7 +38,7 @@ function LoginForm() {
     <form onSubmit={handleSubmit} className="w-full max-w-sm">
       <div className="mb-8 flex justify-center">
         <div className="flex items-center gap-3 text-2xl font-bold italic tracking-tighter text-brand-dark">
-          <img src="/logo.png" alt="" className="h-8 w-8 object-contain" />
+          <Image src="/logo.png" alt="" width={32} height={32} className="object-contain" />
           ADMIN
         </div>
       </div>
