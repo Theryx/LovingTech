@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, AlertTriangle } from 'lucide-react'
 
-export default function ProductError({
+export default function ProductsError({
   error,
   reset,
 }: {
@@ -12,7 +12,7 @@ export default function ProductError({
   reset: () => void
 }) {
   useEffect(() => {
-    console.error('Product page error:', error)
+    console.error('Products page error:', error)
   }, [error])
 
   return (
@@ -21,9 +21,9 @@ export default function ProductError({
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-orange/10 text-brand-orange mb-6">
           <AlertTriangle className="w-8 h-8" />
         </div>
-        <h2 className="text-2xl font-bold mb-2">Product not found</h2>
+        <h2 className="text-2xl font-bold mb-2">Something went wrong</h2>
         <p className="text-brand-dark/60 mb-6">
-          This product may have been removed or the link is incorrect.
+          We couldn't load the products. Please try again.
         </p>
         <div className="flex gap-3 justify-center">
           <button
@@ -33,11 +33,11 @@ export default function ProductError({
             Try again
           </button>
           <Link
-            href="/products"
+            href="/"
             className="inline-flex items-center gap-2 px-5 py-2.5 border border-brand-grey/30 rounded-full font-medium hover:bg-brand-grey/10 transition"
           >
             <ArrowLeft className="w-4 h-4" />
-            Browse Products
+            Go Home
           </Link>
         </div>
       </div>

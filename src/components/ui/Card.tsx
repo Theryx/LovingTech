@@ -21,6 +21,7 @@ interface CardProps {
   ctaSlot?: React.ReactNode
   isOutOfStock?: boolean
   className?: string
+  priority?: boolean
 }
 
 const Card = ({
@@ -33,6 +34,7 @@ const Card = ({
   ctaSlot,
   isOutOfStock,
   className,
+  priority = false,
 }: CardProps) => {
   const [imgSrc, setImgSrc] = useState(image || PLACEHOLDER)
 
@@ -49,6 +51,8 @@ const Card = ({
           src={imgSrc}
           alt={name}
           fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          priority={priority}
           className={cn(
             'object-cover transition-transform duration-500',
             isOutOfStock ? 'grayscale opacity-60' : 'hover:scale-110'

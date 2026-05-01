@@ -1,56 +1,105 @@
+function HeroSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <div className="h-[500px] md:h-[600px] bg-brand-grey/10" />
+    </div>
+  )
+}
+
+function CategorySkeleton() {
+  return (
+    <div className="animate-pulse">
+      <div className="aspect-square rounded-2xl bg-brand-grey/20" />
+      <div className="h-4 w-16 mx-auto mt-3 bg-brand-grey/20 rounded" />
+    </div>
+  )
+}
+
+function ProductSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <div className="aspect-square rounded-2xl bg-brand-grey/20 mb-4" />
+      <div className="h-4 bg-brand-grey/20 rounded w-1/3 mb-2" />
+      <div className="h-6 bg-brand-grey/20 rounded w-2/3 mb-2" />
+      <div className="h-5 bg-brand-grey/20 rounded w-1/4" />
+    </div>
+  )
+}
+
+function FeatureSkeleton() {
+  return (
+    <div className="animate-pulse rounded-3xl border border-brand-grey/20 bg-white p-8">
+      <div className="w-12 h-12 bg-brand-grey/20 rounded-2xl mb-5" />
+      <div className="h-6 bg-brand-grey/20 rounded w-2/3 mb-3" />
+      <div className="h-4 bg-brand-grey/20 rounded w-full" />
+    </div>
+  )
+}
+
 export default function HomeLoading() {
   return (
-    <main className="min-h-screen">
-      <section className="bg-brand-dark px-6 py-24 text-center">
-        <div className="mx-auto mb-4 h-14 w-96 max-w-full animate-pulse rounded bg-brand-grey/20" />
-        <div className="mx-auto mb-6 h-14 w-72 max-w-full animate-pulse rounded bg-brand-grey/20" />
-        <div className="mx-auto mb-3 h-5 w-[520px] max-w-full animate-pulse rounded bg-brand-grey/20" />
-        <div className="mx-auto mb-10 h-5 w-80 max-w-full animate-pulse rounded bg-brand-grey/20" />
-        <div className="flex justify-center">
-          <div className="h-12 w-40 animate-pulse rounded-full bg-brand-orange/70" />
-        </div>
-      </section>
+    <main className="min-h-screen bg-white text-brand-dark">
+      <div className="h-20 bg-white border-b border-brand-grey/20" />
 
-      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-12 border-y border-brand-grey/20 px-6 py-20 md:grid-cols-3">
-        {[0, 1, 2].map(i => (
-          <div key={i} className="flex flex-col items-center space-y-4">
-            <div className="h-16 w-16 animate-pulse rounded-2xl bg-brand-blue/20" />
-            <div className="h-5 w-32 animate-pulse rounded bg-brand-grey/30" />
-            <div className="h-4 w-48 animate-pulse rounded bg-brand-grey/20" />
-          </div>
-        ))}
-      </section>
+      <HeroSkeleton />
 
-      <section className="mx-auto max-w-7xl px-6 py-24">
-        <div className="mb-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <div>
-            <div className="mb-3 h-10 w-72 animate-pulse rounded bg-brand-grey/30" />
-            <div className="h-5 w-56 animate-pulse rounded bg-brand-grey/20" />
-          </div>
-          <div className="flex gap-2">
-            {[0, 1, 2, 3].map(i => (
-              <div key={i} className="h-10 w-20 animate-pulse rounded-full bg-brand-blue/20" />
+      <section className="border-b border-brand-grey/20 px-6 py-6">
+        <div className="mx-auto max-w-7xl flex justify-between">
+          <div className="h-4 w-48 bg-brand-grey/20 rounded" />
+          <div className="flex gap-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-8 w-20 bg-brand-grey/20 rounded-full" />
             ))}
           </div>
         </div>
+      </section>
 
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={i}
-              className="overflow-hidden rounded-3xl border border-brand-grey/20 bg-brand-dark"
-            >
-              <div className="aspect-square animate-pulse bg-brand-grey/15" />
-              <div className="space-y-3 p-6">
-                <div className="h-6 w-3/4 animate-pulse rounded bg-brand-grey/25" />
-                <div className="h-4 w-full animate-pulse rounded bg-brand-grey/15" />
-                <div className="flex items-center justify-between pt-3">
-                  <div className="h-6 w-28 animate-pulse rounded bg-brand-grey/20" />
-                  <div className="h-9 w-20 animate-pulse rounded-full bg-brand-orange/60" />
-                </div>
-              </div>
-            </div>
+      <section className="mx-auto max-w-7xl grid grid-cols-1 gap-12 border-b border-brand-grey/20 px-6 py-20 md:grid-cols-3">
+        {[...Array(3)].map((_, i) => (
+          <FeatureSkeleton key={i} />
+        ))}
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-16 border-b border-brand-grey/20">
+        <div className="h-4 w-40 bg-brand-grey/20 rounded mb-6" />
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          {[...Array(5)].map((_, i) => (
+            <CategorySkeleton key={i} />
           ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-24">
+        <div className="mb-14 flex justify-between">
+          <div className="space-y-4">
+            <div className="h-4 w-20 bg-brand-grey/20 rounded" />
+            <div className="h-10 w-80 bg-brand-grey/20 rounded" />
+          </div>
+          <div className="h-10 w-40 bg-brand-grey/20 rounded-full" />
+        </div>
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <ProductSkeleton key={i} />
+          ))}
+        </div>
+      </section>
+
+      <section className="border-y border-brand-grey/20 bg-white px-6 py-24">
+        <div className="mx-auto max-w-7xl">
+          <div className="space-y-4 mb-14">
+            <div className="h-4 w-20 bg-brand-grey/20 rounded" />
+            <div className="h-10 w-64 bg-brand-grey/20 rounded" />
+          </div>
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="animate-pulse rounded-3xl border border-brand-grey/20 bg-white p-8">
+                <div className="w-8 h-8 bg-brand-grey/20 mb-6" />
+                <div className="h-4 w-8 bg-brand-grey/20 rounded mb-3" />
+                <div className="h-6 bg-brand-grey/20 rounded w-2/3 mb-3" />
+                <div className="h-4 bg-brand-grey/20 rounded w-full" />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </main>
