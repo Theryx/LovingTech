@@ -6,6 +6,7 @@ import SplashScreen from '@/components/SplashScreen'
 import FloatingWhatsApp from '@/components/FloatingWhatsApp'
 import { NotificationProvider } from '@/components/NotificationProvider'
 import { LanguageProvider } from '@/context/LanguageContext'
+import { MetaPixel } from '@/components/MetaPixel'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,6 +20,15 @@ export const metadata: Metadata = {
     url: 'https://loving-tech.vercel.app',
     siteName: 'Loving Tech',
     locale: 'fr_CM',
+    type: 'website',
+    images: [
+      {
+        url: 'https://loving-tech.vercel.app/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Loving Tech',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
@@ -40,6 +50,7 @@ export default function RootLayout({
             <SplashScreen />
             {children}
             <FloatingWhatsApp />
+            <MetaPixel pixelId={process.env.NEXT_PUBLIC_META_PIXEL_ID!} />
           </LanguageProvider>
         </NotificationProvider>
       </body>
