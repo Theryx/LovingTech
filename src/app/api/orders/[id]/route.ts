@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase/client'
-import { supabaseServer } from '@/lib/supabase/server'
+import { getSupabaseServer } from '@/lib/supabase/server'
 import { isAdmin } from '@/lib/api-auth'
 
 const updateOrderSchema = z.object({
@@ -15,7 +15,7 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { data, error } = await supabaseServer
+  const { data, error } = await getSupabaseServer()
     .from('orders')
     .select('*')
     .eq('id', params.id)
@@ -43,7 +43,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     if (parsed.status) {
       updates.status = parsed.status
 
-      const { data: order } = await supabaseServer
+      const { data: order } = await getSupabaseServer()
         .from('orders')
         .select('status_history')
         .eq('id', params.id)
@@ -56,7 +56,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
     updates.updated_at = new Date().toISOString()
 
-    const { data, error } = await supabaseServer
+    const { data, error } = await getSupabaseServer()
       .from('orders')
       .update(updates)
       .eq('id', params.id)

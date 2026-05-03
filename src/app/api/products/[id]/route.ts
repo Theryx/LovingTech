@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase/client'
-import { supabaseServer } from '@/lib/supabase/server'
+import { getSupabaseServer } from '@/lib/supabase/server'
 import { isAdmin } from '@/lib/api-auth'
 
 const updateProductSchema = z.object({
@@ -61,7 +61,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     const updates = Object.fromEntries(Object.entries(parsed).filter(([, v]) => v !== undefined))
 
-    const { data, error } = await supabaseServer
+    const { data, error } = await getSupabaseServer()
       .from('products')
       .update(updates)
       .eq('id', params.id)
@@ -83,7 +83,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { error } = await supabaseServer.from('products').delete().eq('id', params.id)
+  const { error } = await getSupabaseServer().from('products').delete().eq('id', params.id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })

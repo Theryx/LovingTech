@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase/client'
-import { supabaseServer } from '@/lib/supabase/server'
+import { getSupabaseServer } from '@/lib/supabase/server'
 import { isAdmin } from '@/lib/api-auth'
 
 const updateReviewSchema = z.object({
@@ -17,7 +17,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     const body = await request.json()
     const { status } = updateReviewSchema.parse(body)
 
-    const { error } = await supabaseServer.from('reviews').update({ status }).eq('id', params.id)
+    const { error } = await getSupabaseServer().from('reviews').update({ status }).eq('id', params.id)
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ ok: true })
