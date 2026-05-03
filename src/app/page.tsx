@@ -15,6 +15,7 @@ import {
 import ProductCard from '@/components/ProductCard'
 import Navbar from '@/components/Navbar'
 import HeroCarousel from '@/components/HeroCarousel'
+import ShopByCategory from '@/components/ShopByCategory'
 import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts'
 import { Product, productService } from '@/lib/supabase'
 import { useLanguage } from '@/context/LanguageContext'
@@ -203,28 +204,8 @@ export default function Home() {
         ))}
       </section>
 
-      {/* Category grid */}
-      <section className="mx-auto max-w-7xl px-6 py-16 border-b border-brand-grey/20">
-        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand-dark/50 mb-6">
-          {t({ en: 'Browse by category', fr: 'Parcourir par catégorie' })}
-        </p>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {CATEGORIES.map(cat => (
-            <Link
-              key={cat.slug}
-              href={`/products?category=${cat.slug}`}
-              className="group flex flex-col items-center gap-3 rounded-2xl border border-brand-grey/20 bg-white p-6 text-center transition hover:border-brand-blue hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
-            >
-              <span className="text-brand-dark/40 transition group-hover:text-brand-blue">
-                {cat.icon}
-              </span>
-              <span className="text-sm font-semibold text-brand-dark">
-                {t({ en: cat.labelEn, fr: cat.labelFr })}
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
+      {/* Shop by Category */}
+      <ShopByCategory />
 
       {/* Featured products */}
       <section className="mx-auto max-w-7xl px-6 py-24">

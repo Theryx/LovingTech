@@ -26,6 +26,9 @@ const emptyProduct = {
   category: 'keyboard' as ProductCategory,
   variants: [] as Variant[],
   tags: [] as string[],
+  key_specs: [] as string[],
+  box_contents: [] as string[],
+  box_contents_fr: [] as string[],
 }
 
 interface ProductFormErrors {
@@ -71,6 +74,9 @@ export default function AdminProductEditorPage() {
               category: db.category || 'keyboard',
               variants: db.variants || [],
               tags: db.tags || [],
+              key_specs: db.key_specs || [],
+              box_contents: db.box_contents || [],
+              box_contents_fr: db.box_contents_fr || [],
             })
             setSpecKeys(Object.keys(db.specs || {}))
             setLoading(false)
@@ -99,6 +105,9 @@ export default function AdminProductEditorPage() {
           category: (local as any).category || 'keyboard',
           variants: [],
           tags: [],
+          key_specs: (local as any).key_specs || [],
+          box_contents: (local as any).box_contents || [],
+          box_contents_fr: (local as any).box_contents_fr || [],
         })
         setSpecKeys(Object.keys(local.specs || {}))
         setIsLocalProduct(true)
@@ -300,6 +309,9 @@ export default function AdminProductEditorPage() {
         category={product.category}
         variants={product.variants}
         tags={product.tags}
+        key_specs={product.key_specs}
+        box_contents={product.box_contents}
+        box_contents_fr={product.box_contents_fr}
         errors={errors}
         onChange={patch => setProduct(p => ({ ...p, ...patch }))}
         onConditionChange={handleConditionChange}

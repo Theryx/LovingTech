@@ -38,6 +38,9 @@ const createProductSchema = z.object({
     )
     .optional(),
   tags: z.array(z.string()).optional(),
+  key_specs: z.array(z.string()).optional(),
+  box_contents: z.array(z.string()).optional(),
+  box_contents_fr: z.array(z.string()).optional(),
 })
 
 const updateProductSchema = createProductSchema.partial()

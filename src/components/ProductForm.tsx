@@ -37,6 +37,9 @@ interface ProductFormProps {
   category: ProductCategory
   variants: Variant[]
   tags: string[]
+  key_specs?: string[]
+  box_contents?: string[]
+  box_contents_fr?: string[]
   errors?: ProductFormErrors
   onChange: (patch: Partial<ProductFormProps>) => void
   onConditionChange: (condition: ProductCondition) => void
@@ -105,6 +108,9 @@ export default function ProductForm({
   condition,
   category,
   variants,
+  key_specs = [],
+  box_contents = [],
+  box_contents_fr = [],
   errors = {},
   onChange,
   onConditionChange,
@@ -481,6 +487,141 @@ export default function ProductForm({
               {t({ en: 'No specifications added', fr: 'Aucune spécification ajoutée' })}
             </p>
           )}
+        </div>
+      </div>
+
+      {/* Key Specifications */}
+      <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
+        <h2 className={sectionTitleCls}>{t({ en: 'Key Specifications', fr: 'Spécifications clés' })}</h2>
+        {specKeys.length === 0 ? (
+          <p className="text-sm text-brand-dark/40">
+            {t({ en: 'Add specifications above to select key specs', fr: 'Ajoutez des spécifications ci-dessus pour sélectionner les spécifications clés' })}
+          </p>
+        ) : (
+          <div>
+            <p className="mb-3 text-xs text-brand-dark/60">
+              {t({ en: 'Select up to 4 specs to highlight on the product page', fr: 'Sélectionnez jusqu\'à 4 spécifications à mettre en évidence sur la page produit' })}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {specKeys.map(key => (
+                <label
+                  key={key}
+                  className={`inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition ${
+                    key_specs.includes(key)
+                      ? 'border-brand-blue bg-brand-blue/10 text-brand-blue'
+                      : 'border-brand-grey/30 text-brand-dark/70 hover:border-brand-blue/50'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={key_specs.includes(key)}
+                    onChange={e => {
+                      const newKeySpecs = e.target.checked
+                        ? [...key_specs, key].slice(0, 4)
+                        : key_specs.filter(k => k !== key)
+                      onChange({ key_specs: newKeySpecs })
+                    }}
+                    className="h-4 w-4 rounded border-brand-grey text-brand-blue focus:ring-brand-blue"
+                  />
+                  <span className="capitalize">{key}</span>
+                </label>
+              ))}
+            </div>
+            {key_specs.length > 0 && (
+              <p className="mt-2 text-xs text-brand-dark/40">
+                {key_specs.length} / 4 {t({ en: 'selected', fr: 'sélectionnées' })}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* What's in the Box */}
+      <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
+        <h2 className={sectionTitleCls}>{t({ en: "What's in the Box", fr: 'Contenu du colis' })}</h2>
+        
+        {/* English */}
+        <div className="mb-4">
+          <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-brand-dark/60">
+            EN
+          </h3>
+          <div className="space-y-2">
+            {box_contents.map((item, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={item}
+                  onChange={e => {
+                    const newBox = [...box_contents]
+                    newBox[index] = e.target.value
+                    onChange({ box_contents: newBox })
+                  }}
+                  className="flex-1 rounded-xl border border-brand-grey/30 bg-white px-3 py-2 text-sm text-brand-dark outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+                  placeholder={t({ en: 'e.g. 1x Wireless Mouse', fr: 'ex. 1x Souris sans fil' })}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newBox = box_contents.filter((_, i) => i !== index)
+                    onChange({ box_contents: newBox })
+                  }}
+                  className="rounded-lg p-2 text-brand-grey transition hover:bg-red-50 hover:text-red-500"
+                >
+                  <X className="w-4 h-4" aria-hidden="true" />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => onChange({ box_contents: [...box_contents, ''] })}
+              className="flex items-center gap-1.5 rounded-lg border border-brand-grey/30 px-3 py-1.5 text-sm font-medium text-brand-grey transition hover:border-brand-blue hover:text-brand-blue"
+            >
+              <Plus className="w-4 h-4" aria-hidden="true" />
+              {t({ en: 'Add item', fr: 'Ajouter' })}
+            </button>
+          </div>
+        </div>
+
+        {/* French */}
+        <div>
+          <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-brand-dark/60">
+            FR
+          </h3>
+          <div className="space-y-2">
+            {box_contents_fr.map((item, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={item}
+                  onChange={e => {
+                    const newBox = [...box_contents_fr]
+                    newBox[index] = e.target.value
+                    onChange({ box_contents_fr: newBox })
+                  }}
+                  className="flex-1 rounded-xl border border-brand-grey/30 bg-white px-3 py-2 text-sm text-brand-dark outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+                  placeholder={t({ en: 'e.g. 1x Souris sans fil', fr: 'ex. 1x Souris sans fil' })}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newBox = box_contents_fr.filter((_, i) => i !== index)
+                    onChange({ box_contents_fr: newBox })
+                  }}
+                  className="rounded-lg p-2 text-brand-grey transition hover:bg-red-50 hover:text-red-500"
+                >
+                  <X className="w-4 h-4" aria-hidden="true" />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => onChange({ box_contents_fr: [...box_contents_fr, ''] })}
+              className="flex items-center gap-1.5 rounded-lg border border-brand-grey/30 px-3 py-1.5 text-sm font-medium text-brand-grey transition hover:border-brand-blue hover:text-brand-blue"
+            >
+              <Plus className="w-4 h-4" aria-hidden="true" />
+              {t({ en: 'Add item', fr: 'Ajouter' })}
+            </button>
+          </div>
         </div>
       </div>
 

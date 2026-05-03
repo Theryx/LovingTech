@@ -25,6 +25,9 @@ const emptyProduct = {
   category: 'keyboard' as ProductCategory,
   variants: [] as Variant[],
   tags: [] as string[],
+  key_specs: [] as string[],
+  box_contents: [] as string[],
+  box_contents_fr: [] as string[],
 }
 
 export default function NewProductPage() {
@@ -216,6 +219,9 @@ export default function NewProductPage() {
         category={product.category}
         variants={product.variants}
         tags={product.tags}
+        key_specs={product.key_specs}
+        box_contents={product.box_contents}
+        box_contents_fr={product.box_contents_fr}
         errors={errors}
         onChange={patch => setProduct(p => ({ ...p, ...patch }))}
         onConditionChange={handleConditionChange}
