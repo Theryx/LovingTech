@@ -12,14 +12,17 @@ declare global {
 export function MetaPixel({ pixelId }: { pixelId: string }) {
   useEffect(() => {
     if (!pixelId) return
+
     const f = window as Window & { _fbq: unknown }
     if (!f._fbq) {
-      window.fbq = function () {
-        ;(window.fbq as unknown as { callMethod?: typeof Function.prototype.call }).callMethod
-          ? (window.fbq as unknown as { callMethod: (...a: unknown[]) => void }).callMethod(...arguments)
-          : (window.fbq as unknown as { queue: unknown[] }).queue.push(arguments)
-      }
-      if (!f._fbq) f._fbq = window.fbq
+      f._fbq = 1
+      window.fbq = function (this: { callMethod?: (...a: unknown[]) => void; queue?: unknown[] }) {
+        if (this.callMethod) {
+          this.callMethod.apply(this, arguments as unknown as unknown[])
+        } else if (this.queue) {
+          Array.prototype.push.apply(this.queue, arguments as unknown as unknown[])
+        }
+      } as unknown as typeof window.fbq
       window.fbq.push = window.fbq as unknown as (...args: unknown[]) => number
       window.fbq.loaded = true
       window.fbq.version = '2.0'
@@ -37,6 +40,7 @@ export function MetaPixel({ pixelId }: { pixelId: string }) {
 
   return (
     <noscript>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         height="1"
         width="1"
