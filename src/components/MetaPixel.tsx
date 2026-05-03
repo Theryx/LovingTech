@@ -2,31 +2,43 @@
 
 import { useEffect } from 'react'
 
+interface Fbq {
+  (action: string, param: string): void
+  (action: string, param: string, data: Record<string, unknown>): void
+  push: (...args: unknown[]) => number
+  loaded: boolean
+  version: string
+  queue: unknown[]
+  callMethod?: (...a: unknown[]) => void
+}
+
 declare global {
   interface Window {
-    fbq: (...args: unknown[]) => void
-    _fbq: unknown
+    fbq?: Fbq
+    _fbq?: unknown
   }
 }
 
 export function MetaPixel({ pixelId }: { pixelId: string }) {
   useEffect(() => {
     if (!pixelId) return
-
-    const f = window as Window & { _fbq: unknown }
-    if (!f._fbq) {
-      f._fbq = 1
-      window.fbq = function (this: { callMethod?: (...a: unknown[]) => void; queue?: unknown[] }) {
-        if (this.callMethod) {
-          this.callMethod.apply(this, arguments as unknown as unknown[])
-        } else if (this.queue) {
-          Array.prototype.push.apply(this.queue, arguments as unknown as unknown[])
+    const w = window as Window & { _fbq?: unknown }
+    if (!w._fbq) {
+      w._fbq = 1
+      const f = function (this: Fbq | void) {
+        // eslint-disable-next-line prefer-rest-params
+        const args = arguments
+        if (this && this.callMethod) {
+          this.callMethod.apply(this, args as unknown as unknown[])
+        } else if (this && this.queue) {
+          Array.prototype.push.apply(this.queue, args as unknown as unknown[])
         }
-      } as unknown as typeof window.fbq
-      window.fbq.push = window.fbq as unknown as (...args: unknown[]) => number
-      window.fbq.loaded = true
-      window.fbq.version = '2.0'
-      ;(window.fbq as unknown as { queue: unknown[] }).queue = []
+      } as unknown as Fbq
+      f.push = f as unknown as (...a: unknown[]) => number
+      f.loaded = true
+      f.version = '2.0'
+      f.queue = []
+      window.fbq = f
 
       const script = document.createElement('script')
       script.async = true
@@ -34,8 +46,8 @@ export function MetaPixel({ pixelId }: { pixelId: string }) {
       const first = document.getElementsByTagName('script')[0]
       first.parentNode?.insertBefore(script, first)
     }
-    window.fbq('init', pixelId)
-    window.fbq('track', 'PageView')
+    window.fbq?.('init', pixelId)
+    window.fbq?.('track', 'PageView')
   }, [pixelId])
 
   return (
