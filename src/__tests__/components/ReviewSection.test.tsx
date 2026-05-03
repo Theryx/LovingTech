@@ -24,6 +24,21 @@ vi.mock('lucide-react', () => ({
       ★
     </span>
   ),
+  Check: ({ className }: any) => (
+    <span data-testid="check-icon" className={className}>
+      ✓
+    </span>
+  ),
+  ChevronLeft: ({ className }: any) => (
+    <span data-testid="chevron-left" className={className}>
+      ◀
+    </span>
+  ),
+  ChevronRight: ({ className }: any) => (
+    <span data-testid="chevron-right" className={className}>
+      ▶
+    </span>
+  ),
 }))
 
 describe('ReviewSection', () => {
@@ -52,8 +67,8 @@ describe('ReviewSection', () => {
 
   it('displays reviews with reviewer name', async () => {
     vi.mocked(reviewService.getByProduct).mockResolvedValue([
-      { id: '1', reviewer_name: 'Jean', rating: 5, comment: 'Great!', created_at: '2026-01-01' },
-      { id: '2', reviewer_name: 'Marie', rating: 4, comment: 'Good', created_at: '2026-01-02' },
+      { id: '1', reviewer_name: 'Jean', rating: 5, comment: 'Great!', created_at: '2026-01-01', status: 'approved' },
+      { id: '2', reviewer_name: 'Marie', rating: 4, comment: 'Good', created_at: '2026-01-02', status: 'approved' },
     ] as any)
 
     render(<ReviewSection productId={productId} />)

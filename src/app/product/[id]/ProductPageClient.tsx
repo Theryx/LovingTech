@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
 import { ArrowLeft, ShieldCheck, Truck, ShoppingBag } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 import Navbar from '@/components/Navbar'
@@ -8,6 +9,9 @@ import ProductGallery from '@/components/ProductGallery'
 import ProductDetailActions from '@/components/ProductDetailActions'
 import ProductCard from '@/components/ProductCard'
 import ReviewSection from '@/components/ReviewSection'
+import ProductTabs from '@/components/ProductTabs'
+import ProductSpecs from '@/components/ProductSpecs'
+import WhatsInTheBox from '@/components/WhatsInTheBox'
 
 const CONDITION_BADGE: Record<
   string,
@@ -28,6 +32,7 @@ export default function ProductPageClient({
   isDbProduct: boolean
 }) {
   const { t } = useLanguage()
+  const [approvedReviewsCount, setApprovedReviewsCount] = useState(0)
   const conditionStyle = product.condition ? CONDITION_BADGE[product.condition] : null
 
   return (
@@ -103,70 +108,117 @@ export default function ProductPageClient({
               )}
           </div>
 
-          <div className="space-y-8 mb-12">
-            <div>
-              <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-brand-grey">
-                Description
-              </h3>
-              <p className="text-lg leading-relaxed text-brand-dark/60">
-                {t({
-                  en: product.description_en || product.description || '',
-                  fr: product.description_fr || product.description || '',
-                })}
-              </p>
-            </div>
-
-            {product.specs && Object.keys(product.specs).length > 0 && (
-              <div>
-                <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-brand-grey">
-                  {t({ en: 'Technical Specs', fr: 'Fiche Technique' })}
-                </h3>
-                <div className="grid grid-cols-2 gap-x-8 gap-y-4 border-t border-brand-grey/20 pt-4">
-                  {Object.entries(product.specs).map(([key, value]) => (
-                    <div key={key}>
-                      <p className="mb-1 text-xs uppercase tracking-wider text-brand-grey">{key}</p>
-                      <p className="font-medium text-brand-dark">{value as string}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {product.warranty_info && (
-              <div>
-                <h3 className="mb-2 text-xs font-bold uppercase tracking-widest text-brand-grey">
-                  {t({ en: 'Warranty', fr: 'Garantie' })}
-                </h3>
-                <p className="text-sm text-brand-dark/60">{product.warranty_info}</p>
-              </div>
-            )}
+          {/* Product Tabs Section */}
+          <div className="mb-8">
+            <ProductTabs reviewsCount={approvedReviewsCount}>
+              {{
+                details: (
+                  <div className="space-y-4">
+                    <p className="text-lg leading-relaxed text-brand-dark/60">
+                      {t({
+                        en: product.description_en || product.description || '',
+                        fr: product.description_fr || product.description || '',
+                      })}
+                    </p>
+                    {/* Show key specs in details tab if available */}
+                    {product.key_specs && product.key_specs.length > 0 && product.specs && (
+                      <div className="mt-6">
+                        <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-brand-grey">
+                          {t({ en: 'Highlights', fr: 'Points forts' })}
+                        </h4>
+                        <div className="grid grid-cols-2 gap-3">
+                          {product.key_specs
+                            .filter((key: string) => product.specs[key])
+                            .slice(0, 4)
+                            .map((key: string) => (
+                              <div key={key} className="flex items-center gap-2">
+                                <span className="h-2 w-2 rounded-full bg-brand-blue" />
+                                <span className="text-sm text-brand-dark/70">
+                                  <span className="font-medium capitalize">{key}:</span>{' '}
+                                  {product.specs[key]}
+                                </span>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ),
+                specifications: (
+                  <ProductSpecs 
+                    specs={product.specs || {}} 
+                    keySpecs={product.key_specs || []} 
+                  />
+                ),
+                boxContents: (
+                  <WhatsInTheBox 
+                    boxContents={product.box_contents || []} 
+                    boxContentsFr={product.box_contents_fr || []} 
+                  />
+                ),
+                reviews: isDbProduct ? (
+                  <ReviewSection 
+                    productId={product.id} 
+                    onApprovedCountChange={setApprovedReviewsCount}
+                  />
+                ) : (
+                  <p className="text-sm text-brand-dark/40">
+                    {t({ 
+                      en: 'Reviews are only available for database products.', 
+                      fr: 'Les avis sont uniquement disponibles pour les produits de la base de données.' 
+                    })}
+                  </p>
+                ),
+              }}
+            </ProductTabs>
           </div>
 
           <ProductDetailActions product={product} />
 
-          <div className="mt-12 grid grid-cols-1 gap-6 border-t border-brand-grey/20 pt-12 sm:grid-cols-3">
-            <div className="flex items-center gap-3 text-sm text-brand-grey">
-              <ShieldCheck className="h-5 w-5 text-brand-blue" />
-              {t({ en: '100% Authentic', fr: '100% Authentique' })}
+          {/* Trust Badges */}
+          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-3">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-blue/10">
+                <ShieldCheck className="h-5 w-5 text-brand-blue" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-brand-dark">
+                  {t({ en: '100% Authentic', fr: '100% Authentique' })}
+                </p>
+                <p className="text-xs text-brand-dark/60">
+                  {t({ en: 'Genuine products only', fr: 'Produits authentiques uniquement' })}
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-3 text-sm text-brand-grey">
-              <Truck className="h-5 w-5 text-brand-blue" />
-              {t({ en: 'Fast Delivery', fr: 'Livraison Rapide' })}
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-blue/10">
+                <Truck className="h-5 w-5 text-brand-blue" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-brand-dark">
+                  {t({ en: 'Fast Delivery', fr: 'Livraison Rapide' })}
+                </p>
+                <p className="text-xs text-brand-dark/60">
+                  {t({ en: 'Nationwide delivery', fr: 'Livraison nationale' })}
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-3 text-sm text-brand-grey">
-              <ShoppingBag className="h-5 w-5 text-brand-blue" />
-              {t({ en: 'Pay on Delivery', fr: 'Payer à la livraison' })}
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-blue/10">
+                <ShoppingBag className="h-5 w-5 text-brand-blue" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-brand-dark">
+                  {t({ en: 'Pay on Delivery', fr: 'Payer à la livraison' })}
+                </p>
+                <p className="text-xs text-brand-dark/60">
+                  {t({ en: 'Cash on delivery', fr: 'Paiement à la livraison' })}
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
-
-      {/* Reviews */}
-      {isDbProduct && (
-        <section className="max-w-7xl mx-auto px-6 pb-16 border-t border-brand-grey/20 pt-12">
-          <ReviewSection productId={product.id} />
-        </section>
-      )}
 
       {/* Related products */}
       {related.length > 0 && (

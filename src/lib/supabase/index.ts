@@ -40,6 +40,10 @@ export type Product = {
   warranty_info?: string
   variants?: Variant[]
   tags?: string[]
+  // Product detail page fields
+  key_specs?: string[]
+  box_contents?: string[]
+  box_contents_fr?: string[]
 }
 
 export type OrderStatus = 'pending' | 'confirmed' | 'dispatched' | 'delivered' | 'cancelled'
