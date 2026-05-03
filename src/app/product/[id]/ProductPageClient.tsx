@@ -2,16 +2,13 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { ArrowLeft, ShieldCheck, Truck, ShoppingBag } from 'lucide-react'
+import { ArrowLeft, ShieldCheck, Truck, ShoppingBag, Check } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 import Navbar from '@/components/Navbar'
 import ProductGallery from '@/components/ProductGallery'
 import ProductDetailActions from '@/components/ProductDetailActions'
 import ProductCard from '@/components/ProductCard'
 import ReviewSection from '@/components/ReviewSection'
-import ProductTabs from '@/components/ProductTabs'
-import ProductSpecs from '@/components/ProductSpecs'
-import WhatsInTheBox from '@/components/WhatsInTheBox'
 
 const CONDITION_BADGE: Record<
   string,
@@ -31,9 +28,23 @@ export default function ProductPageClient({
   related: any[]
   isDbProduct: boolean
 }) {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const [approvedReviewsCount, setApprovedReviewsCount] = useState(0)
   const conditionStyle = product.condition ? CONDITION_BADGE[product.condition] : null
+
+  const description = t({
+    en: product.description_en || product.description || '',
+    fr: product.description_fr || product.description || '',
+  })
+
+  const boxItems =
+    language === 'fr' && product.box_contents_fr?.length
+      ? product.box_contents_fr
+      : product.box_contents || []
+
+  const keySpecs = (product.key_specs || [])
+    .filter((key: string) => product.specs && product.specs[key])
+    .slice(0, 4)
 
   return (
     <main className="min-h-screen bg-white text-brand-dark">
@@ -108,70 +119,12 @@ export default function ProductPageClient({
               )}
           </div>
 
-          {/* Product Tabs Section */}
-          <div className="mb-8">
-            <ProductTabs reviewsCount={approvedReviewsCount}>
-              {{
-                details: (
-                  <div className="space-y-4">
-                    <p className="text-lg leading-relaxed text-brand-dark/60">
-                      {t({
-                        en: product.description_en || product.description || '',
-                        fr: product.description_fr || product.description || '',
-                      })}
-                    </p>
-                    {/* Show key specs in details tab if available */}
-                    {product.key_specs && product.key_specs.length > 0 && product.specs && (
-                      <div className="mt-6">
-                        <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-brand-grey">
-                          {t({ en: 'Highlights', fr: 'Points forts' })}
-                        </h4>
-                        <div className="grid grid-cols-2 gap-3">
-                          {product.key_specs
-                            .filter((key: string) => product.specs[key])
-                            .slice(0, 4)
-                            .map((key: string) => (
-                              <div key={key} className="flex items-center gap-2">
-                                <span className="h-2 w-2 rounded-full bg-brand-blue" />
-                                <span className="text-sm text-brand-dark/70">
-                                  <span className="font-medium capitalize">{key}:</span>{' '}
-                                  {product.specs[key]}
-                                </span>
-                              </div>
-                            ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ),
-                specifications: (
-                  <ProductSpecs 
-                    specs={product.specs || {}} 
-                    keySpecs={product.key_specs || []} 
-                  />
-                ),
-                boxContents: (
-                  <WhatsInTheBox 
-                    boxContents={product.box_contents || []} 
-                    boxContentsFr={product.box_contents_fr || []} 
-                  />
-                ),
-                reviews: isDbProduct ? (
-                  <ReviewSection 
-                    productId={product.id} 
-                    onApprovedCountChange={setApprovedReviewsCount}
-                  />
-                ) : (
-                  <p className="text-sm text-brand-dark/40">
-                    {t({ 
-                      en: 'Reviews are only available for database products.', 
-                      fr: 'Les avis sont uniquement disponibles pour les produits de la base de données.' 
-                    })}
-                  </p>
-                ),
-              }}
-            </ProductTabs>
-          </div>
+          {/* Brief description */}
+          {description && (
+            <p className="mb-8 text-base leading-relaxed text-brand-dark/60">
+              {description}
+            </p>
+          )}
 
           <ProductDetailActions product={product} />
 
@@ -219,6 +172,86 @@ export default function ProductPageClient({
           </div>
         </div>
       </section>
+
+      {/* Summary Section */}
+      <section className="max-w-7xl mx-auto px-6 pb-12 border-t border-brand-grey/20 pt-12">
+        <h2 className="text-lg font-bold text-brand-dark mb-6">
+          {t({ en: 'Summary', fr: 'Résumé' })}
+        </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Product description column */}
+          <div className="lg:col-span-2">
+            <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-brand-blue">
+              {t({ en: 'About this product', fr: 'À propos de ce produit' })}
+            </h3>
+            <p className="text-sm leading-relaxed text-brand-dark/70">
+              {description ||
+                t({
+                  en: product.name_en || product.name,
+                  fr: product.name_fr || product.name,
+                })}
+            </p>
+
+            {product.warranty_info && (
+              <div className="mt-4 rounded-xl border border-brand-grey/20 p-4">
+                <p className="text-sm text-brand-dark/70">{product.warranty_info}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Key specs sidebar */}
+          <div className="space-y-6">
+            {keySpecs.length > 0 && (
+              <div>
+                <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-brand-blue">
+                  {t({ en: 'Key Specs', fr: 'Spécifications clés' })}
+                </h3>
+                <div className="space-y-2">
+                  {keySpecs.map((key: string) => (
+                    <div
+                      key={key}
+                      className="flex items-center justify-between rounded-lg border border-brand-grey/20 px-3 py-2.5"
+                    >
+                      <span className="text-xs font-medium capitalize text-brand-dark/60">
+                        {key}
+                      </span>
+                      <span className="text-sm font-semibold text-brand-dark">
+                        {product.specs[key]}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {boxItems.length > 0 && (
+              <div>
+                <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-brand-blue">
+                  {t({ en: "What's in the Box", fr: 'Contenu du colis' })}
+                </h3>
+                <ul className="space-y-2">
+                  {boxItems.map((item: string, index: number) => (
+                    <li key={index} className="flex items-center gap-2 text-sm text-brand-dark/70">
+                      <Check className="h-3.5 w-3.5 shrink-0 text-brand-blue" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Reviews */}
+      {isDbProduct && (
+        <section className="max-w-7xl mx-auto px-6 pb-12 border-t border-brand-grey/20 pt-12">
+          <ReviewSection
+            productId={product.id}
+            onApprovedCountChange={setApprovedReviewsCount}
+          />
+        </section>
+      )}
 
       {/* Related products */}
       {related.length > 0 && (
