@@ -22,6 +22,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <>
       <Card
+        href={`/product/${product.id}`}
         image={product.images?.[0] || '/images/placeholder.svg'}
         name={product.name}
         price={product.price_xaf}
@@ -46,7 +47,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           )
         }
         ctaSlot={
-          <div className="flex gap-2">
+          <div className="flex gap-2" onClick={e => e.preventDefault()}>
             <Button
               variant="primary"
               className="flex-1 py-2 text-xs"
@@ -58,7 +59,6 @@ export default function ProductCard({ product }: ProductCardProps) {
             <Button
               variant="secondary"
               className="px-4 py-2 text-xs"
-              href={`/product/${product.id}`}
               aria-label={
                 language === 'fr'
                   ? `Voir les détails de ${product.name}`

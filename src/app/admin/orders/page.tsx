@@ -3,9 +3,10 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Search, Download, Eye, ShoppingBag, X, Filter, ChevronLeft, ChevronRight, AlertTriangle, RefreshCw } from 'lucide-react'
+import { Search, Download, Eye, ShoppingBag, X, Filter, ChevronLeft, ChevronRight, AlertTriangle, RefreshCw, CheckCircle, XCircle } from 'lucide-react'
 import { Order, OrderStatus } from '@/lib/supabase'
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, TABLE_HEADERS } from '@/lib/order-constants'
+import { useNotifications } from '@/components/NotificationProvider'
 
 const PAGE_SIZE = 50
 
@@ -48,6 +49,7 @@ function escapeCSV(val: string | number): string {
 
 export default function AdminOrdersPage() {
   const searchParams = useSearchParams()
+  const { error: notifyError, success: notifySuccess } = useNotifications()
 
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -61,6 +63,8 @@ export default function AdminOrdersPage() {
   const [page, setPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
+  const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set())
+  const [bulkActionLoading, setBulkActionLoading] = useState(false)
 
   const loadOrders = useCallback(async () => {
     setLoading(true)
@@ -114,6 +118,53 @@ export default function AdminOrdersPage() {
 
   const hasFilters = search || statusFilter || dateFrom || dateTo
 
+  const toggleSelectOrder = (orderId: string) => {
+    setSelectedOrders(prev => {
+      const next = new Set(prev)
+      if (next.has(orderId)) {
+        next.delete(orderId)
+      } else {
+        next.add(orderId)
+      }
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedOrders.size === filtered.length) {
+      setSelectedOrders(new Set())
+    } else {
+      setSelectedOrders(new Set(filtered.map(o => o.id!).filter(Boolean)))
+    }
+  }
+
+  const bulkUpdateStatus = async (newStatus: OrderStatus) => {
+    if (selectedOrders.size === 0) return
+    setBulkActionLoading(true)
+    try {
+      const results = await Promise.all(
+        Array.from(selectedOrders).map(async (orderId) => {
+          const res = await fetch(`/api/orders/${orderId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus }),
+          })
+          return res.ok
+        })
+      )
+      const successCount = results.filter(Boolean).length
+      notifySuccess(
+        `Successfully updated ${successCount} order${successCount > 1 ? 's' : ''} to ${newStatus}`
+      )
+      setSelectedOrders(new Set())
+      await loadOrders()
+    } catch (e: any) {
+      notifyError('Failed to update orders')
+    } finally {
+      setBulkActionLoading(false)
+    }
+  }
+
   const exportCSV = () => {
     const rows = [
       ['Reference', 'Product', 'Customer', 'Phone', 'City', 'Agency', 'Total', 'Status', 'Date'],
@@ -145,14 +196,39 @@ export default function AdminOrdersPage() {
         <h1 className="text-3xl font-bold text-brand-dark">
           Orders
         </h1>
-        <button
-          onClick={exportCSV}
-          disabled={filtered.length === 0}
-          className="flex items-center gap-2 rounded-xl border border-brand-grey/30 px-4 py-2 text-sm font-medium text-brand-dark hover:bg-brand-grey/10 transition disabled:opacity-40"
-        >
-          <Download className="w-4 h-4" aria-hidden="true" />
-          Export CSV
-        </button>
+        <div className="flex items-center gap-2">
+          {selectedOrders.size > 0 && (
+            <div className="flex items-center gap-2 mr-4">
+              <span className="text-sm text-brand-dark/60">
+                {selectedOrders.size} selected
+              </span>
+              <button
+                onClick={() => bulkUpdateStatus('delivered')}
+                disabled={bulkActionLoading}
+                className="flex items-center gap-1.5 rounded-xl bg-brand-blue px-3 py-2 text-sm font-medium text-white hover:bg-brand-blue/90 transition disabled:opacity-50"
+              >
+                <CheckCircle className="w-4 h-4" />
+                Complete
+              </button>
+              <button
+                onClick={() => bulkUpdateStatus('cancelled')}
+                disabled={bulkActionLoading}
+                className="flex items-center gap-1.5 rounded-xl bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 transition disabled:opacity-50"
+              >
+                <XCircle className="w-4 h-4" />
+                Cancel
+              </button>
+            </div>
+          )}
+          <button
+            onClick={exportCSV}
+            disabled={filtered.length === 0}
+            className="flex items-center gap-2 rounded-xl border border-brand-grey/30 px-4 py-2 text-sm font-medium text-brand-dark hover:bg-brand-grey/10 transition disabled:opacity-40"
+          >
+            <Download className="w-4 h-4" aria-hidden="true" />
+            Export CSV
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -293,6 +369,15 @@ export default function AdminOrdersPage() {
             </caption>
             <thead>
               <tr className="border-b border-brand-grey/20">
+                <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-brand-dark/40 w-12">
+                  <input
+                    type="checkbox"
+                    checked={filtered.length > 0 && selectedOrders.size === filtered.length}
+                    onChange={toggleSelectAll}
+                    className="rounded border-brand-grey/30 text-brand-blue focus:ring-brand-blue"
+                    aria-label="Select all orders"
+                  />
+                </th>
                 {TABLE_HEADERS.map(h => (
                   <th
                     key={h.key}
@@ -307,7 +392,7 @@ export default function AdminOrdersPage() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-5 py-16 text-center">
+                  <td colSpan={9} className="px-5 py-16 text-center">
                     <ShoppingBag className="mx-auto mb-3 h-10 w-10 text-brand-dark/20" />
                     <p className="text-brand-dark/40">
                       No orders found
@@ -324,10 +409,20 @@ export default function AdminOrdersPage() {
                   return (
                     <tr
                       key={order.id}
-                      className={`border-b border-brand-grey/10 transition hover:bg-brand-grey/5 ${
+                      onClick={() => window.location.href = `/admin/orders/${order.id}`}
+                      className={`border-b border-brand-grey/10 transition hover:bg-brand-grey/5 cursor-pointer ${
                         isPending ? 'border-l-4 border-l-brand-orange' : ''
                       } ${isCancelled ? 'opacity-50' : ''}`}
                     >
+                      <td className="px-5 py-4" onClick={e => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={order.id ? selectedOrders.has(order.id) : false}
+                          onChange={() => order.id && toggleSelectOrder(order.id)}
+                          className="rounded border-brand-grey/30 text-brand-blue focus:ring-brand-blue"
+                          aria-label={`Select order ${order.order_ref}`}
+                        />
+                      </td>
                       <td className="px-5 py-4 font-mono text-sm font-semibold text-brand-dark whitespace-nowrap">
                         {order.order_ref}
                       </td>
@@ -357,6 +452,7 @@ export default function AdminOrdersPage() {
                       <td className="px-5 py-4">
                         <Link
                           href={`/admin/orders/${order.id}`}
+                          onClick={e => e.stopPropagation()}
                           className="rounded-lg p-2 text-brand-dark/40 transition hover:bg-brand-grey/10 hover:text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue inline-block"
                           aria-label={`View order ${order.order_ref}`}
                         >

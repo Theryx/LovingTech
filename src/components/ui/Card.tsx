@@ -22,6 +22,7 @@ interface CardProps {
   isOutOfStock?: boolean
   className?: string
   priority?: boolean
+  href?: string
 }
 
 const Card = ({
@@ -35,16 +36,12 @@ const Card = ({
   isOutOfStock,
   className,
   priority = false,
+  href,
 }: CardProps) => {
   const [imgSrc, setImgSrc] = useState(image || PLACEHOLDER)
 
-  return (
-    <div
-      className={cn(
-        'flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm border border-brand-grey/20 transition-all hover:scale-[1.01] hover:shadow-md',
-        className
-      )}
-    >
+  const cardContent = (
+    <>
       {/* Image Area */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-brand-grey/10">
         <Image
@@ -86,6 +83,31 @@ const Card = ({
 
         {ctaSlot && <div className="mt-auto pt-2">{ctaSlot}</div>}
       </div>
+    </>
+  )
+
+  if (href) {
+    return (
+      <a
+        href={href}
+        className={cn(
+          'flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm border border-brand-grey/20 transition-all hover:scale-[1.01] hover:shadow-md',
+          className
+        )}
+      >
+        {cardContent}
+      </a>
+    )
+  }
+
+  return (
+    <div
+      className={cn(
+        'flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm border border-brand-grey/20 transition-all hover:scale-[1.01] hover:shadow-md',
+        className
+      )}
+    >
+      {cardContent}
     </div>
   )
 }
