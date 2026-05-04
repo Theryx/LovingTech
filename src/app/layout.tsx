@@ -7,6 +7,7 @@ import FloatingWhatsApp from '@/components/FloatingWhatsApp'
 import { NotificationProvider } from '@/components/NotificationProvider'
 import { LanguageProvider } from '@/context/LanguageContext'
 import { MetaPixel } from '@/components/MetaPixel'
+import { Analytics } from '@vercel/analytics/react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -51,6 +52,7 @@ export default function RootLayout({
             {children}
             <FloatingWhatsApp />
             <MetaPixel pixelId={process.env.NEXT_PUBLIC_META_PIXEL_ID!} />
+            <Analytics />
           </LanguageProvider>
         </NotificationProvider>
       </body>
