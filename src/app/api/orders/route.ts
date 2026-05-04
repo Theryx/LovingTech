@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
 import { z } from 'zod'
-import { supabase } from '@/lib/supabase/client'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { isAdmin } from '@/lib/api-auth'
 
@@ -12,7 +11,7 @@ const createOrderSchema = z.object({
   variant_chosen: z.string().optional(),
   quantity: z.number().int().min(1).max(99),
   unit_price: z.number().int().min(0),
-  total_price: z.number().int().min(0),
+  total_price: z.number().int().min(0).optional(),
   customer_name: z.string().min(2).max(200),
   customer_phone: z.string().min(8).max(20),
   customer_email: z.string().email().optional().or(z.literal('')),
@@ -52,7 +51,7 @@ function buildEmailHtml(order: Record<string, any>): string {
     order.address_details ? ['Détails adresse', order.address_details] : null,
     ['Sous-total', `${fmt(order.unit_price * order.quantity)} FCFA`],
     ['Livraison', order.delivery_fee === 0 ? 'GRATUITE' : `${fmt(order.delivery_fee)} FCFA`],
-    order.promo_code ? ['Promo', `${order.promo_code} — -${fmt(order.promo_discount)} FCFA`] : null,
+    order.promo_code ? ['Promo', `${order.promo_code} — -${fmt(order.promo_discount || 0)} FCFA`] : null,
     ['TOTAL', `${fmt(order.total_price)} FCFA`],
   ].filter(Boolean) as [string, any][]
 
@@ -65,6 +64,8 @@ function buildEmailHtml(order: Record<string, any>): string {
       </tr>`
     )
     .join('')
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://loving-tech.vercel.app'
 
   return `<!DOCTYPE html>
 <html>
@@ -79,7 +80,7 @@ function buildEmailHtml(order: Record<string, any>): string {
       ${tableRows}
     </table>
     <div style="padding:20px 28px;background:#f9f9f9;border-top:1px solid #eee">
-      <a href="https://loving-tech.vercel.app/admin/orders"
+      <a href="${siteUrl}/admin/orders"
          style="display:inline-block;background:#4494F3;color:#fff;text-decoration:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600">
         Voir dans l'admin →
       </a>
@@ -94,23 +95,72 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { data, error } = await getSupabaseServer()
+  const { searchParams } = new URL(request.url)
+  const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
+  const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50')))
+  const status = searchParams.get('status') || ''
+  const from = searchParams.get('from') || ''
+  const to = searchParams.get('to') || ''
+
+  const offset = (page - 1) * limit
+
+  let query = getSupabaseServer()
     .from('orders')
-    .select('*')
+    .select('*', { count: 'exact' })
     .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  if (status) {
+    query = query.eq('status', status)
+  }
+  if (from) {
+    query = query.gte('created_at', from)
+  }
+  if (to) {
+    query = query.lte('created_at', to)
+  }
+
+  const { data, error, count } = await query
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   const orders = data || []
+
+  // Get stats via separate queries for accuracy
   const today = new Date().toISOString().slice(0, 10)
-  const todayOrders = orders.filter(o => o.created_at?.startsWith(today))
+  const [
+    { count: todayCount },
+    { data: todayData },
+    { count: pendingCount },
+  ] = await Promise.all([
+    getSupabaseServer()
+      .from('orders')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', `${today}T00:00:00Z`),
+    getSupabaseServer()
+      .from('orders')
+      .select('total_price')
+      .gte('created_at', `${today}T00:00:00Z`),
+    getSupabaseServer()
+      .from('orders')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending'),
+  ])
+
   const stats = {
-    todayCount: todayOrders.length,
-    todayRevenue: todayOrders.reduce((s, o) => s + (o.total_price || 0), 0),
-    pendingCount: orders.filter(o => o.status === 'pending').length,
+    todayCount: todayCount || 0,
+    todayRevenue: (todayData || []).reduce((s: number, o: any) => s + (o.total_price || 0), 0),
+    pendingCount: pendingCount || 0,
   }
 
-  return NextResponse.json({ orders, stats })
+  return NextResponse.json({
+    orders,
+    stats,
+    total: count || 0,
+    page,
+    limit,
+    totalPages: count ? Math.ceil(count / limit) : 0,
+  })
 }
 
 export async function POST(req: NextRequest) {
@@ -118,7 +168,34 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const parsed = createOrderSchema.parse(body)
 
-    const { data: order, error } = await supabase.from('orders').insert([parsed]).select().single()
+    // Server-side total_price calculation
+    const subtotal = parsed.unit_price * parsed.quantity
+    const delivery = parsed.delivery_fee || 0
+    const discount = parsed.promo_discount || 0
+    const totalPrice = Math.max(0, subtotal + delivery - discount)
+
+    // Idempotency check — avoid duplicate orders with same ref+phone within 60s
+    const sixtySecondsAgo = new Date(Date.now() - 60000).toISOString()
+    const { data: existing } = await getSupabaseServer()
+      .from('orders')
+      .select('id')
+      .eq('order_ref', parsed.order_ref)
+      .eq('customer_phone', parsed.customer_phone)
+      .gte('created_at', sixtySecondsAgo)
+      .maybeSingle()
+
+    if (existing) {
+      return NextResponse.json(
+        { error: 'Une commande identique existe déjà.', id: existing.id },
+        { status: 409 }
+      )
+    }
+
+    const { data: order, error } = await getSupabaseServer()
+      .from('orders')
+      .insert([{ ...parsed, total_price: totalPrice }])
+      .select()
+      .single()
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
@@ -129,17 +206,17 @@ export async function POST(req: NextRequest) {
       try {
         const { data: promoData } = await getSupabaseServer()
           .from('promo_codes')
-          .select('uses_count')
-          .ilike('code', parsed.promo_code)
-          .single()
+          .select('id, uses_count')
+          .eq('code', parsed.promo_code.toUpperCase())
+          .maybeSingle()
         if (promoData) {
           await getSupabaseServer()
             .from('promo_codes')
             .update({ uses_count: (promoData.uses_count || 0) + 1 })
-            .ilike('code', parsed.promo_code!)
+            .eq('id', promoData.id)
         }
       } catch {
-        // Non-critical — ignore promo increment failures
+        // Non-critical
       }
     }
 
