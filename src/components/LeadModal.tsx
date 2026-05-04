@@ -57,7 +57,7 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
   const [promoLoading, setPromoLoading] = useState(false)
 
   const normalizedCity = normalizeCity(city)
-  const subtotal = product.price_xaf * quantity
+  const subtotal = (product.price_xaf || 0) * quantity
   const selectedZone =
     zones.find(
       z =>
@@ -435,7 +435,7 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
                       ) : (
                         <span className="text-brand-dark/50">
                           {t({ en: 'Delivery fee', fr: 'Frais de livraison' })}:{' '}
-                          <strong>{deliveryFee.toLocaleString('fr-FR')} FCFA</strong>
+                          <strong>{(deliveryFee || 0).toLocaleString('fr-FR')} FCFA</strong>
                         </span>
                       )}
                     </p>
@@ -613,44 +613,44 @@ export default function LeadModal({ product, isOpen, onClose }: LeadModalProps) 
                   {promoMessage && <p className="text-xs text-green-700">{promoMessage}</p>}
                   {promoError && <p className="text-xs text-red-600">{promoError}</p>}
 
-                  <div className="rounded-xl bg-brand-grey/10 p-4 space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-brand-dark/60">
-                        {t({ en: 'Subtotal', fr: 'Sous-total' })}
-                      </span>
-                      <span className="text-brand-dark">
-                        {subtotal.toLocaleString('fr-FR')} FCFA
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-brand-dark/60">
-                        {t({ en: 'Delivery', fr: 'Livraison' })}
-                      </span>
-                      <span
-                        className={
-                          deliveryFee === 0 ? 'text-green-700 font-medium' : 'text-brand-dark'
-                        }
-                      >
-                        {deliveryFee === 0
-                          ? t({ en: 'FREE', fr: 'GRATUITE' })
-                          : `${deliveryFee.toLocaleString('fr-FR')} FCFA`}
-                      </span>
-                    </div>
-                    {promoDiscount > 0 && (
+                    <div className="rounded-xl bg-brand-grey/10 p-4 space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-brand-dark/60">Promo ({promoCode})</span>
-                        <span className="text-green-700 font-medium">
-                          -{promoDiscount.toLocaleString('fr-FR')} FCFA
+                        <span className="text-brand-dark/60">
+                          {t({ en: 'Subtotal', fr: 'Sous-total' })}
+                        </span>
+                        <span className="text-brand-dark">
+                          {(subtotal || 0).toLocaleString('fr-FR')} FCFA
                         </span>
                       </div>
-                    )}
-                    <div className="flex justify-between border-t border-brand-grey/20 pt-2 font-bold">
-                      <span className="text-brand-dark">Total</span>
-                      <span className="text-brand-blue text-base">
-                        {total.toLocaleString('fr-FR')} FCFA
-                      </span>
+                      <div className="flex justify-between">
+                        <span className="text-brand-dark/60">
+                          {t({ en: 'Delivery', fr: 'Livraison' })}
+                        </span>
+                        <span
+                          className={
+                            deliveryFee === 0 ? 'text-green-700 font-medium' : 'text-brand-dark'
+                          }
+                        >
+                          {deliveryFee === 0
+                            ? t({ en: 'FREE', fr: 'GRATUITE' })
+                            : `${(deliveryFee || 0).toLocaleString('fr-FR')} FCFA`}
+                        </span>
+                      </div>
+                      {promoDiscount > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-brand-dark/60">Promo ({promoCode})</span>
+                          <span className="text-green-700 font-medium">
+                            -{(promoDiscount || 0).toLocaleString('fr-FR')} FCFA
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex justify-between border-t border-brand-grey/20 pt-2 font-bold">
+                        <span className="text-brand-dark">Total</span>
+                        <span className="text-brand-blue text-base">
+                          {(total || 0).toLocaleString('fr-FR')} FCFA
+                        </span>
+                      </div>
                     </div>
-                  </div>
                   <p className="text-xs text-brand-dark/40 text-center">
                     {language === 'fr' ? (
                       <>

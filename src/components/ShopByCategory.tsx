@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Keyboard, Mouse, Cable, Speaker, Sun, Package } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 
 interface Category {
@@ -10,6 +10,25 @@ interface Category {
   labelEn: string
   labelFr: string
   image: string
+  icon: 'keyboard' | 'mouse' | 'cable' | 'speaker' | 'sun' | 'package'
+}
+
+const CATEGORY_ICONS = {
+  keyboard: Keyboard,
+  mouse: Mouse,
+  cable: Cable,
+  speaker: Speaker,
+  sun: Sun,
+  package: Package,
+}
+
+const CATEGORY_COLORS = {
+  keyboard: 'from-blue-400 to-blue-500',
+  mouse: 'from-green-400 to-green-500',
+  cable: 'from-orange-400 to-orange-500',
+  speaker: 'from-purple-400 to-purple-500',
+  sun: 'from-yellow-400 to-yellow-500',
+  package: 'from-pink-400 to-pink-500',
 }
 
 const FALLBACK_CATEGORIES: Category[] = [
@@ -17,37 +36,43 @@ const FALLBACK_CATEGORIES: Category[] = [
     slug: 'keyboard',
     labelEn: 'Keyboards',
     labelFr: 'Claviers',
-    image: '/images/categories/keyboard.jpg',
+    image: '',
+    icon: 'keyboard',
   },
   {
     slug: 'mouse',
     labelEn: 'Mice',
     labelFr: 'Souris',
-    image: '/images/categories/mouse.jpg',
+    image: '',
+    icon: 'mouse',
   },
   {
     slug: 'cable',
     labelEn: 'Cables',
     labelFr: 'Câbles',
-    image: '/images/categories/cable.jpg',
+    image: '',
+    icon: 'cable',
   },
   {
     slug: 'speaker',
     labelEn: 'Speakers',
     labelFr: 'Enceintes',
-    image: '/images/categories/speaker.jpg',
+    image: '',
+    icon: 'speaker',
   },
   {
     slug: 'solar_lamp',
     labelEn: 'Solar Lamps',
     labelFr: 'Lampes Solaires',
-    image: '/images/categories/solar-lamp.jpg',
+    image: '',
+    icon: 'sun',
   },
   {
     slug: 'others',
     labelEn: 'Others',
     labelFr: 'Autres',
-    image: '/images/categories/others.jpg',
+    image: '',
+    icon: 'package',
   },
 ]
 
@@ -66,6 +91,7 @@ export default function ShopByCategory() {
               labelEn: cat.label_en,
               labelFr: cat.label_fr,
               image: cat.image_url || FALLBACK_CATEGORIES.find(f => f.slug === cat.slug)?.image || '',
+              icon: (FALLBACK_CATEGORIES.find(f => f.slug === cat.slug)?.icon || 'package') as Category['icon'],
             }))
           )
         }
@@ -96,26 +122,37 @@ export default function ShopByCategory() {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        {categories.map(category => (
-          <Link
-            key={category.slug}
-            href={`/products?category=${category.slug}`}
-            className="group relative overflow-hidden rounded-2xl border border-brand-grey/20 bg-white transition hover:shadow-lg hover:scale-[1.02]"
-          >
-            <div className="aspect-[4/3] overflow-hidden bg-brand-grey/10">
-              <div
-                className="h-full w-full bg-cover bg-center transition duration-300 group-hover:scale-105"
-                style={{ backgroundImage: `url(${category.image})` }}
-              />
-            </div>
-            <div className="flex items-center justify-between p-4">
-              <span className="font-semibold text-brand-dark text-sm">
-                {t({ en: category.labelEn, fr: category.labelFr })}
-              </span>
-              <ArrowRight className="h-4 w-4 text-brand-grey transition group-hover:text-brand-blue group-hover:translate-x-0.5" />
-            </div>
-          </Link>
-        ))}
+        {categories.map(category => {
+          const IconComponent = CATEGORY_ICONS[category.icon as keyof typeof CATEGORY_ICONS]
+          const colorClass = CATEGORY_COLORS[category.icon as keyof typeof CATEGORY_COLORS] || 'from-gray-400 to-gray-500'
+          
+          return (
+            <Link
+              key={category.slug}
+              href={`/products?category=${category.slug}`}
+              className="group relative overflow-hidden rounded-2xl border border-brand-grey/20 bg-white transition hover:shadow-lg hover:scale-[1.02]"
+            >
+              <div className="aspect-[4/3] overflow-hidden bg-brand-grey/10">
+                {category.image ? (
+                  <div
+                    className="h-full w-full bg-cover bg-center transition duration-300 group-hover:scale-105"
+                    style={{ backgroundImage: `url(${category.image})` }}
+                  />
+                ) : (
+                  <div className={`h-full w-full bg-gradient-to-br ${colorClass} flex items-center justify-center`}>
+                    <IconComponent className="h-12 w-12 text-white opacity-80" />
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center justify-between p-4">
+                <span className="font-semibold text-brand-dark text-sm">
+                  {t({ en: category.labelEn, fr: category.labelFr })}
+                </span>
+                <ArrowRight className="h-4 w-4 text-brand-grey transition group-hover:text-brand-blue group-hover:translate-x-0.5" />
+              </div>
+            </Link>
+          )
+        })}
       </div>
     </section>
   )

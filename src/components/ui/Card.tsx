@@ -76,7 +76,7 @@ const Card = ({
         <h3 className="mb-1 line-clamp-1 text-lg font-bold text-brand-dark">{name}</h3>
 
         <div className="flex items-baseline gap-2 mb-4">
-          <span className="text-xl font-bold text-brand-dark">{price.toLocaleString()} FCFA</span>
+          <span className="text-xl font-bold text-brand-dark">{(price || 0).toLocaleString()} FCFA</span>
           {compareAtPrice && (
             <span className="text-sm text-brand-dark/40 line-through">
               {compareAtPrice.toLocaleString()} FCFA

@@ -120,7 +120,7 @@ export default function TrackingPageClient({ order }: { order: any }) {
           <div className="flex justify-between border-t border-brand-grey/20 pt-3 font-bold">
             <span className="text-brand-dark">Total</span>
             <span className="text-brand-blue">
-              {order.total_price.toLocaleString('fr-FR')} FCFA
+              {(order.total_price || 0).toLocaleString('fr-FR')} FCFA
             </span>
           </div>
         </div>
@@ -143,7 +143,7 @@ export default function TrackingPageClient({ order }: { order: any }) {
                       })}
                     </span>
                     <span className="text-brand-dark/40 ml-2 text-xs">
-                      {new Date(h.at).toLocaleString(t({ en: 'en-US', fr: 'fr-FR' }))}
+                      {h.at ? new Date(h.at).toLocaleString(t({ en: 'en-US', fr: 'fr-FR' })) : ''}
                     </span>
                   </div>
                 </div>

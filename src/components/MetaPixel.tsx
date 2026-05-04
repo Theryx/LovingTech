@@ -21,7 +21,7 @@ declare global {
 
 export function MetaPixel({ pixelId }: { pixelId: string }) {
   useEffect(() => {
-    if (!pixelId) return
+    if (!pixelId || pixelId === 'undefined' || pixelId === '') return
     const w = window as Window & { _fbq?: unknown }
     if (!w._fbq) {
       w._fbq = 1

@@ -341,9 +341,9 @@ export default function AdminOrdersPage() {
                       <td className="px-5 py-4 text-sm text-brand-dark/70 whitespace-nowrap">
                         {order.city}
                       </td>
-                      <td className="px-5 py-4 text-sm font-semibold text-brand-dark whitespace-nowrap">
-                        {order.total_price.toLocaleString('en-US')} FCFA
-                      </td>
+                        <td className="px-5 py-4 text-sm font-semibold text-brand-dark whitespace-nowrap">
+                          {(order.total_price || 0).toLocaleString('en-US')} FCFA
+                        </td>
                       <td className="px-5 py-4 whitespace-nowrap">
                         <span
                           className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${colors.bg} ${colors.text}`}

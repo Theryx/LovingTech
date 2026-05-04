@@ -37,7 +37,18 @@ export default function ShippingPageClient() {
         const zonesData = await zonesRes.json()
         const settingsData = await settingsRes.json()
 
-        setZones(Array.isArray(zonesData) ? zonesData : zonesData.data ?? zonesData.zones ?? [])
+        // Map API response to expected format
+        const mappedZones = (Array.isArray(zonesData) ? zonesData : zonesData.data ?? zonesData.zones ?? []).map(
+          (z: any) => ({
+            id: z.id,
+            city: z.city_name_en || z.city_name_fr || z.city || 'Unknown',
+            fee: z.delivery_fee ?? z.fee ?? 0,
+            estimated_days: z.estimated_days || z.delay || '2-3 days',
+            agencies: z.agencies?.join(', ') || z.agency || 'N/A',
+          })
+        )
+
+        setZones(mappedZones)
         setSettings(settingsData)
       } catch {
         setError(true)
@@ -153,9 +164,9 @@ export default function ShippingPageClient() {
                     <tr key={zone.id} className="border-b border-brand-grey/10">
                       <td className="px-4 py-3 font-medium">{zone.city}</td>
                       <td className="px-4 py-3">
-                        {zone.fee === 0
-                          ? t({ en: 'Free', fr: 'Gratuit' })
-                          : `${zone.fee.toLocaleString()} FCFA`}
+                          {zone.fee === 0 || !zone.fee
+                            ? 'Free'
+                            : `${zone.fee.toLocaleString()} FCFA`}
                       </td>
                       <td className="px-4 py-3">{zone.estimated_days}</td>
                       <td className="px-4 py-3 text-brand-dark/60">{zone.agencies}</td>

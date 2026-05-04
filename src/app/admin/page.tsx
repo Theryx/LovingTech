@@ -98,7 +98,7 @@ export default function AdminDashboard() {
             </span>
           </div>
           <span className="text-4xl font-bold text-brand-dark">
-            {stats.todayRevenue.toLocaleString('en-US')}
+            {(stats.todayRevenue || 0).toLocaleString('en-US')}
           </span>
           <span className="ml-1 text-sm text-brand-dark/40">FCFA</span>
         </div>

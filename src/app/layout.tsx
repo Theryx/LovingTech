@@ -51,7 +51,9 @@ export default function RootLayout({
             <SplashScreen />
             {children}
             <FloatingWhatsApp />
-            <MetaPixel pixelId={process.env.NEXT_PUBLIC_META_PIXEL_ID!} />
+            {process.env.NEXT_PUBLIC_META_PIXEL_ID && process.env.NEXT_PUBLIC_META_PIXEL_ID !== 'undefined' && (
+              <MetaPixel pixelId={process.env.NEXT_PUBLIC_META_PIXEL_ID} />
+            )}
             <Analytics />
           </LanguageProvider>
         </NotificationProvider>

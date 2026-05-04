@@ -390,7 +390,7 @@ export default function OrderDetailPage() {
               </div>
               <div>
                 <p className={labelCls}>Unit price</p>
-                <p className={valueCls}>{order.unit_price.toLocaleString('en-US')} FCFA</p>
+                <p className={valueCls}>{(order.unit_price || 0).toLocaleString('en-US')} FCFA</p>
               </div>
             </div>
           </div>
@@ -425,7 +425,7 @@ export default function OrderDetailPage() {
             <div>
               <p className={labelCls}>Delivery fee</p>
               <p className={valueCls}>
-                {order.delivery_fee === 0
+                {!order.delivery_fee || order.delivery_fee === 0
                   ? 'FREE'
                   : `${order.delivery_fee.toLocaleString('en-US')} FCFA`}
               </p>
@@ -444,7 +444,7 @@ export default function OrderDetailPage() {
                 Subtotal
               </span>
               <span className="text-sm text-brand-dark">
-                {(order.unit_price * order.quantity).toLocaleString('en-US')} FCFA
+                {((order.unit_price || 0) * (order.quantity || 1)).toLocaleString('en-US')} FCFA
               </span>
             </div>
             <div className="flex justify-between">
@@ -452,7 +452,7 @@ export default function OrderDetailPage() {
                 Delivery
               </span>
               <span className="text-sm text-brand-dark">
-                {order.delivery_fee === 0
+                {!order.delivery_fee || order.delivery_fee === 0
                   ? 'FREE'
                   : `${order.delivery_fee.toLocaleString('en-US')} FCFA`}
               </span>
@@ -472,7 +472,7 @@ export default function OrderDetailPage() {
                 Total
               </span>
               <span className="text-sm font-bold text-brand-dark">
-                {order.total_price.toLocaleString('en-US')} FCFA
+                {(order.total_price || 0).toLocaleString('en-US')} FCFA
               </span>
             </div>
           </div>

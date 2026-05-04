@@ -153,7 +153,7 @@ export default function ProductPageClient({
 
           <div className="flex items-baseline gap-3 mb-4">
             <p className="text-2xl font-semibold text-brand-blue">
-              {product.price_xaf.toLocaleString('fr-FR')} XAF
+              {(product.price_xaf || 0).toLocaleString('fr-FR')} XAF
             </p>
             {product.compare_at_price && (
               <p className="text-lg text-brand-dark/40 line-through">

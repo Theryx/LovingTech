@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   }
 
   if (!product) return {}
-  const title = `${product.name_fr || product.name} — ${product.price_xaf.toLocaleString('fr-FR')} FCFA | Loving Tech`
+  const title = `${product.name_fr || product.name} — ${product.price_xaf ? product.price_xaf.toLocaleString('fr-FR') : '0'} FCFA | Loving Tech`
   const description = (product.description_fr || product.description || '').slice(0, 155)
   const image = product.images?.[0]
   return {
