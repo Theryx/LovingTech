@@ -43,7 +43,8 @@ export async function POST(
 
     const { error: dbError } = await getSupabaseServer()
       .from('categories')
-      .upsert({ slug, image_url: publicUrl, updated_at: new Date().toISOString() })
+      .update({ image_url: publicUrl, updated_at: new Date().toISOString() })
+      .eq('slug', slug)
 
     if (dbError) {
       return NextResponse.json({ error: dbError.message }, { status: 500 })

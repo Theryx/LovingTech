@@ -23,9 +23,14 @@ export async function PUT(
     const body = await request.json()
     const parsed = updateSchema.parse(body)
 
+    const validUpdates = Object.fromEntries(
+      Object.entries({ ...parsed, updated_at: new Date().toISOString() }).filter(([, v]) => v !== undefined)
+    )
+
     const { data, error } = await getSupabaseServer()
       .from('categories')
-      .upsert({ slug, ...parsed, updated_at: new Date().toISOString() })
+      .update(validUpdates)
+      .eq('slug', slug)
       .select()
       .single()
 
