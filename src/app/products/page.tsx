@@ -53,7 +53,9 @@ function ProductsContent() {
   const category = (searchParams.get('category') || '') as ProductCategory | ''
   const condition = (searchParams.get('condition') || '') as ProductCondition | ''
   const sort = (searchParams.get('sort') || 'newest') as SortKey
-  const stockOnly = searchParams.get('stock') === '1'
+  const stockParam = searchParams.get('stock')
+  const showAll = stockParam === '0'
+  const stockOnly = stockParam === null || stockParam === '' ? true : !showAll
 
   useEffect(() => {
     productService
@@ -95,7 +97,7 @@ function ProductsContent() {
     sort
   )
 
-  const hasActiveFilters = category || condition || stockOnly || searchQuery
+  const hasActiveFilters = category || condition || searchQuery || stockParam === '0'
 
   return (
     <main className="min-h-screen bg-white text-brand-dark">
@@ -190,7 +192,7 @@ function ProductsContent() {
             </button>
           ))}
           <button
-            onClick={() => setParam('stock', stockOnly ? '' : '1')}
+            onClick={() => setParam('stock', stockOnly ? '0' : '')}
             aria-pressed={stockOnly}
             className={`rounded-full border px-3 py-1 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 ${
               stockOnly
