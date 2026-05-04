@@ -40,6 +40,7 @@ interface ProductFormProps {
   box_contents?: string[]
   box_contents_fr?: string[]
   errors?: ProductFormErrors
+  brands?: string[]
   onChange: (patch: Partial<ProductFormProps>) => void
   onConditionChange: (condition: ProductCondition) => void
   onSpecKeyChange: (index: number, value: string) => void
@@ -111,6 +112,7 @@ export default function ProductForm({
   box_contents = [],
   box_contents_fr = [],
   errors = {},
+  brands = [],
   onChange,
   onConditionChange,
   onSpecKeyChange,
@@ -206,7 +208,16 @@ export default function ProductForm({
               onChange={e => onChange({ brand: e.target.value })}
               className={inputCls}
               placeholder="Logitech, Apple, Anker..."
+              list="brand-list"
+              autoComplete="off"
             />
+            {brands.length > 0 && (
+              <datalist id="brand-list">
+                {brands.map(b => (
+                  <option key={b} value={b} />
+                ))}
+              </datalist>
+            )}
           </Field>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -5,13 +5,14 @@ import Link from 'next/link'
 import {
   Plus,
   Search,
-  Filter,
   Star,
   Pencil,
   Trash2,
   AlertCircle,
   Database,
   Package,
+  X,
+  ArrowUpDown,
 } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
 import { Product } from '@/lib/supabase'
@@ -22,6 +23,39 @@ const CONDITION_STYLE: Record<string, { bg: string; text: string; label: string 
   refurbished: { bg: '#DBEAFE', text: '#1E3A8A', label: 'Refurbished' },
   second_hand: { bg: '#FEF3C7', text: '#92400E', label: 'Second-hand' },
 }
+
+const STOCK_STATUS_OPTIONS = [
+  { value: '', label: 'All Stock' },
+  { value: 'in_stock', label: 'In Stock' },
+  { value: 'out_of_stock', label: 'Out of Stock' },
+  { value: 'pre_order', label: 'Pre-order' },
+]
+
+const CATEGORY_OPTIONS = [
+  { value: '', label: 'All Categories' },
+  { value: 'keyboard', label: 'Keyboards' },
+  { value: 'mouse', label: 'Mice' },
+  { value: 'cable', label: 'Cables' },
+  { value: 'speaker', label: 'Speakers' },
+  { value: 'solar_lamp', label: 'Solar Lamps' },
+  { value: 'others', label: 'Others' },
+]
+
+const CONDITION_OPTIONS = [
+  { value: '', label: 'All Conditions' },
+  { value: 'new', label: 'New' },
+  { value: 'refurbished', label: 'Refurbished' },
+  { value: 'second_hand', label: 'Second-hand' },
+]
+
+type SortKey = 'newest' | 'price_asc' | 'price_desc' | 'name_asc'
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: 'newest', label: 'Newest' },
+  { value: 'price_asc', label: 'Price ↑' },
+  { value: 'price_desc', label: 'Price ↓' },
+  { value: 'name_asc', label: 'Name A-Z' },
+]
 
 function ProductSkeleton() {
   return (
@@ -56,6 +90,10 @@ export default function AdminProductsPage() {
   const { confirm, error: notifyError, success } = useNotifications()
   const [search, setSearch] = useState('')
   const [filterBrand, setFilterBrand] = useState<string>('')
+  const [filterCategory, setFilterCategory] = useState('')
+  const [filterCondition, setFilterCondition] = useState('')
+  const [filterStock, setFilterStock] = useState('')
+  const [sort, setSort] = useState<SortKey>('newest')
   const [products, setProducts] = useState<Product[]>([])
   const [error, setError] = useState<string>('')
   const [loading, setLoading] = useState(true)
@@ -116,18 +154,48 @@ export default function AdminProductsPage() {
     }
   }
 
-  const filteredProducts = products.filter(p => {
-    const nameMatch = p.name?.toLowerCase().includes(search.toLowerCase()) || false
-    const descMatch = p.description?.toLowerCase().includes(search.toLowerCase()) || false
-    const matchesSearch = nameMatch || descMatch
-    const matchesBrand = !filterBrand || p.brand === filterBrand
-    return matchesSearch && matchesBrand
-  })
+  const filteredProducts = (() => {
+    let result = products.filter(p => {
+      const nameMatch = p.name?.toLowerCase().includes(search.toLowerCase()) || false
+      const descMatch = p.description?.toLowerCase().includes(search.toLowerCase()) || false
+      const matchesSearch = nameMatch || descMatch
+      const matchesBrand = !filterBrand || p.brand === filterBrand
+      const matchesCategory = !filterCategory || p.category === filterCategory
+      const matchesCondition = !filterCondition || p.condition === filterCondition
+      const matchesStock = !filterStock || p.stock_status === filterStock
+      return matchesSearch && matchesBrand && matchesCategory && matchesCondition && matchesStock
+    })
+
+    switch (sort) {
+      case 'price_asc':
+        return result.sort((a, b) => (a.price_xaf || 0) - (b.price_xaf || 0))
+      case 'price_desc':
+        return result.sort((a, b) => (b.price_xaf || 0) - (a.price_xaf || 0))
+      case 'name_asc':
+        return result.sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+      default:
+        return result
+    }
+  })()
 
   const brands = Array.from(new Set(products.map(p => p.brand).filter(Boolean)))
 
+  const hasFilters = filterBrand || filterCategory || filterCondition || filterStock || search
+
+  const clearFilters = () => {
+    setSearch('')
+    setFilterBrand('')
+    setFilterCategory('')
+    setFilterCondition('')
+    setFilterStock('')
+    setSort('newest')
+  }
+
   const formatPrice = (price: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'XAF' }).format(price)
+
+  const selectCls =
+    'w-full appearance-none rounded-xl border border-brand-grey/30 bg-white py-2.5 pl-4 pr-8 text-brand-dark text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue cursor-pointer'
 
   return (
     <div className="max-w-6xl mx-auto px-4">
@@ -168,37 +236,102 @@ export default function AdminProductsPage() {
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
-        <div className="relative flex-1 w-full">
-          <Search
-            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-grey"
-            aria-hidden="true"
-          />
-          <input
-            type="text"
-            placeholder="Search products..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full rounded-xl border border-brand-grey/30 bg-white py-2.5 pl-10 pr-4 text-brand-dark placeholder:text-brand-dark/30 focus:outline-none focus:ring-2 focus:ring-brand-blue"
-          />
+      {/* Filters */}
+      <div className="flex flex-col gap-3 mb-6">
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <div className="relative flex-1 w-full">
+            <Search
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-grey"
+              aria-hidden="true"
+            />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full rounded-xl border border-brand-grey/30 bg-white py-2.5 pl-10 pr-4 text-brand-dark placeholder:text-brand-dark/30 focus:outline-none focus:ring-2 focus:ring-brand-blue"
+            />
+          </div>
+          <div className="relative w-full sm:w-44">
+            <ArrowUpDown
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-grey"
+              aria-hidden="true"
+            />
+            <select
+              value={sort}
+              onChange={e => setSort(e.target.value as SortKey)}
+              className={selectCls}
+            >
+              {SORT_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
-        <div className="relative w-full sm:w-auto">
-          <Filter
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-grey"
-            aria-hidden="true"
-          />
-          <select
-            value={filterBrand}
-            onChange={e => setFilterBrand(e.target.value)}
-            className="w-full appearance-none rounded-xl border border-brand-grey/30 bg-white py-2.5 pl-10 pr-8 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-blue cursor-pointer"
-          >
-            <option value="">All Brands</option>
-            {brands.map(brand => (
-              <option key={brand} value={brand}>
-                {brand}
-              </option>
-            ))}
-          </select>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative w-full sm:w-44">
+            <select
+              value={filterBrand}
+              onChange={e => setFilterBrand(e.target.value)}
+              className={selectCls}
+            >
+              <option value="">All Brands</option>
+              {brands.map(brand => (
+                <option key={brand} value={brand}>{brand}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="relative w-full sm:w-44">
+            <select
+              value={filterCategory}
+              onChange={e => setFilterCategory(e.target.value)}
+              className={selectCls}
+            >
+              {CATEGORY_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="relative w-full sm:w-44">
+            <select
+              value={filterCondition}
+              onChange={e => setFilterCondition(e.target.value)}
+              className={selectCls}
+            >
+              {CONDITION_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="relative w-full sm:w-40">
+            <select
+              value={filterStock}
+              onChange={e => setFilterStock(e.target.value)}
+              className={selectCls}
+            >
+              {STOCK_STATUS_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {hasFilters && (
+            <button
+              onClick={clearFilters}
+              className="flex items-center gap-1.5 rounded-xl border border-brand-grey/30 px-3 py-2.5 text-sm text-brand-dark/60 hover:bg-brand-grey/10 transition"
+            >
+              <X className="w-4 h-4" />
+              Clear
+            </button>
+          )}
+
+          <span className="text-sm text-brand-dark/40 ml-auto">
+            {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
+          </span>
         </div>
       </div>
 

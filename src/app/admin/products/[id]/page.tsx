@@ -48,6 +48,7 @@ export default function AdminProductEditorPage() {
   const [saving, setSaving] = useState(false)
   const [isLocalProduct, setIsLocalProduct] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [brands, setBrands] = useState<string[]>([])
 
   useEffect(() => {
     async function load() {
@@ -114,6 +115,16 @@ export default function AdminProductEditorPage() {
     }
     load()
   }, [productId])
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(r => r.json())
+      .then(data => {
+        const uniqueBrands: string[] = Array.from(new Set<string>((data || []).map((p: any) => p.brand).filter(Boolean)))
+        setBrands(uniqueBrands)
+      })
+      .catch(() => {})
+  }, [])
 
   const handleConditionChange = (condition: ProductCondition) => {
     setProduct(p => ({ ...p, condition, warranty_info: WARRANTY_DEFAULTS[condition] }))
@@ -315,6 +326,7 @@ export default function AdminProductEditorPage() {
         onRemoveVariantOption={removeVariantOption}
         onRemoveVariantGroup={removeVariantGroup}
         onImagesChange={images => setProduct(p => ({ ...p, images }))}
+        brands={brands}
       />
     </div>
   )

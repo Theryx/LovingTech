@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Save } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
@@ -36,6 +36,17 @@ export default function NewProductPage() {
   const [specKeys, setSpecKeys] = useState<string[]>([])
   const [errors, setErrors] = useState<{ name?: string; price_xaf?: string; brand?: string }>({})
   const [saving, setSaving] = useState(false)
+  const [brands, setBrands] = useState<string[]>([])
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(r => r.json())
+      .then(data => {
+        const uniqueBrands: string[] = Array.from(new Set<string>((data || []).map((p: any) => p.brand).filter(Boolean)))
+        setBrands(uniqueBrands)
+      })
+      .catch(() => {})
+  }, [])
 
   const handleConditionChange = (condition: ProductCondition) => {
     setProduct(p => ({ ...p, condition, warranty_info: WARRANTY_DEFAULTS[condition] }))
@@ -225,6 +236,7 @@ export default function NewProductPage() {
         onRemoveVariantOption={removeVariantOption}
         onRemoveVariantGroup={removeVariantGroup}
         onImagesChange={images => setProduct(p => ({ ...p, images }))}
+        brands={brands}
       />
     </div>
   )

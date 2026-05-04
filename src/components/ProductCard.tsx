@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { ProductWithFeatured } from '@/lib/localProducts'
 import LeadModal from './LeadModal'
 import Card from './ui/Card'
@@ -47,15 +46,17 @@ export default function ProductCard({ product }: ProductCardProps) {
           )
         }
         ctaSlot={
-          <div className="flex gap-2" onClick={e => e.preventDefault()}>
-            <Button
-              variant="primary"
-              className="flex-1 py-2 text-xs"
-              onClick={() => setIsModalOpen(true)}
-              aria-label={language === 'fr' ? `Commander ${product.name}` : `Order ${product.name}`}
-            >
-              {language === 'fr' ? 'Commander' : 'Order'}
-            </Button>
+          <div className="flex gap-2">
+            <span onClick={e => e.preventDefault()}>
+              <Button
+                variant="primary"
+                className="flex-1 py-2 text-xs"
+                onClick={() => setIsModalOpen(true)}
+                aria-label={language === 'fr' ? `Commander ${product.name}` : `Order ${product.name}`}
+              >
+                {language === 'fr' ? 'Commander' : 'Order'}
+              </Button>
+            </span>
             <Button
               variant="secondary"
               className="px-4 py-2 text-xs"
