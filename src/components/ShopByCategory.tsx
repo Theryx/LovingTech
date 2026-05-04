@@ -43,6 +43,12 @@ const FALLBACK_CATEGORIES: Category[] = [
     labelFr: 'Lampes Solaires',
     image: '/images/categories/solar-lamp.jpg',
   },
+  {
+    slug: 'others',
+    labelEn: 'Others',
+    labelFr: 'Autres',
+    image: '/images/categories/others.jpg',
+  },
 ]
 
 export default function ShopByCategory() {

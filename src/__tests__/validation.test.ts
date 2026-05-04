@@ -424,7 +424,7 @@ describe('Product validation schema', () => {
     stock_status: z.enum(['in_stock', 'out_of_stock', 'pre_order']).optional().default('in_stock'),
     featured: z.boolean().optional().default(false),
     condition: z.enum(['new', 'refurbished', 'second_hand']).optional(),
-    category: z.enum(['keyboard', 'mouse', 'cable', 'speaker', 'solar_lamp']).optional(),
+    category: z.enum(['keyboard', 'mouse', 'cable', 'speaker', 'solar_lamp', 'others']).optional(),
   })
 
   it('accepts minimal valid product', () => {
@@ -460,7 +460,7 @@ describe('Product validation schema', () => {
   })
 
   it('accepts all valid categories', () => {
-    for (const category of ['keyboard', 'mouse', 'cable', 'speaker', 'solar_lamp'] as const) {
+    for (const category of ['keyboard', 'mouse', 'cable', 'speaker', 'solar_lamp', 'others'] as const) {
       const valid = { name: 'Test', price_xaf: 1000, category }
       expect(() => createProductSchema.parse(valid)).not.toThrow()
     }

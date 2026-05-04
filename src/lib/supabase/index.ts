@@ -39,7 +39,7 @@ export const categoryService = {
 }
 
 export type ProductCondition = 'new' | 'refurbished' | 'second_hand'
-export type ProductCategory = 'keyboard' | 'mouse' | 'cable' | 'speaker' | 'solar_lamp'
+export type ProductCategory = 'keyboard' | 'mouse' | 'cable' | 'speaker' | 'solar_lamp' | 'others'
 
 export type VariantOption = {
   name: string

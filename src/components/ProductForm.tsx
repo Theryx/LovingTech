@@ -166,6 +166,7 @@ export default function ProductForm({
               <option value="cable">{t({ en: 'Cable', fr: 'Câble' })}</option>
               <option value="speaker">{t({ en: 'Speaker', fr: 'Enceinte' })}</option>
               <option value="solar_lamp">{t({ en: 'Solar Lamp', fr: 'Lampe solaire' })}</option>
+              <option value="others">{t({ en: 'Others', fr: 'Autres' })}</option>
             </select>
           </Field>
         </div>

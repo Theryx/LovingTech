@@ -12,6 +12,7 @@ const labelMap: Record<string, { en: string; fr: string }> = {
   cable: { en: 'Cables', fr: 'Câbles' },
   speaker: { en: 'Speakers', fr: 'Enceintes' },
   solar_lamp: { en: 'Solar Lamps', fr: 'Lampes Solaires' },
+  others: { en: 'Others', fr: 'Autres' },
 }
 
 function CategorySkeleton() {

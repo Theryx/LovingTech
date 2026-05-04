@@ -17,6 +17,7 @@ const CATEGORIES: { value: ProductCategory | ''; labelEn: string; labelFr: strin
   { value: 'cable', labelEn: 'Cables', labelFr: 'Câbles' },
   { value: 'speaker', labelEn: 'Speakers', labelFr: 'Enceintes' },
   { value: 'solar_lamp', labelEn: 'Solar Lamps', labelFr: 'Lampes Solaires' },
+  { value: 'others', labelEn: 'Others', labelFr: 'Autres' },
 ]
 
 const CONDITIONS: { value: ProductCondition | ''; labelEn: string; labelFr: string }[] = [

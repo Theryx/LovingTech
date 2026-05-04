@@ -14,7 +14,7 @@ const updateProductSchema = z.object({
   stock_status: z.enum(['in_stock', 'out_of_stock', 'pre_order']).optional(),
   featured: z.boolean().optional(),
   condition: z.enum(['new', 'refurbished', 'second_hand']).nullable().optional(),
-  category: z.enum(['keyboard', 'mouse', 'cable', 'speaker', 'solar_lamp']).nullable().optional(),
+  category: z.enum(['keyboard', 'mouse', 'cable', 'speaker', 'solar_lamp', 'others']).nullable().optional(),
   name_fr: z.string().nullable().optional(),
   name_en: z.string().nullable().optional(),
   description_fr: z.string().nullable().optional(),

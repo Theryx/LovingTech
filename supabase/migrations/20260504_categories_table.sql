@@ -30,5 +30,6 @@ INSERT INTO public.categories (slug, label_en, label_fr) VALUES
   ('mouse', 'Mice', 'Souris'),
   ('cable', 'Cables', 'Câbles'),
   ('speaker', 'Speakers', 'Enceintes'),
-  ('solar_lamp', 'Solar Lamps', 'Lampes Solaires')
+  ('solar_lamp', 'Solar Lamps', 'Lampes Solaires'),
+  ('others', 'Others', 'Autres')
 ON CONFLICT (slug) DO NOTHING;
