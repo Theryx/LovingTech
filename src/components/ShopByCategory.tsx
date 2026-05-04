@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
@@ -11,7 +12,7 @@ interface Category {
   image: string
 }
 
-const CATEGORIES: Category[] = [
+const FALLBACK_CATEGORIES: Category[] = [
   {
     slug: 'keyboard',
     labelEn: 'Keyboards',
@@ -46,6 +47,27 @@ const CATEGORIES: Category[] = [
 
 export default function ShopByCategory() {
   const { t } = useLanguage()
+  const [categories, setCategories] = useState<Category[]>(FALLBACK_CATEGORIES)
+
+  useEffect(() => {
+    fetch('/api/categories')
+      .then(res => res.json())
+      .then((data: { slug: string; label_en: string; label_fr: string; image_url: string | null }[]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setCategories(
+            data.map(cat => ({
+              slug: cat.slug,
+              labelEn: cat.label_en,
+              labelFr: cat.label_fr,
+              image: cat.image_url || FALLBACK_CATEGORIES.find(f => f.slug === cat.slug)?.image || '',
+            }))
+          )
+        }
+      })
+      .catch(() => {
+        // Keep fallback data on error
+      })
+  }, [])
 
   return (
     <section className="max-w-7xl mx-auto px-6 py-16">
@@ -68,7 +90,7 @@ export default function ShopByCategory() {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        {CATEGORIES.map(category => (
+        {categories.map(category => (
           <Link
             key={category.slug}
             href={`/products?category=${category.slug}`}

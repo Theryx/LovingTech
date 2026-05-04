@@ -14,6 +14,7 @@ import {
   Tag,
   Truck,
   LogOut,
+  LayoutGrid,
 } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 
@@ -24,6 +25,7 @@ const labels = {
   reviews: { en: 'Reviews', fr: 'Avis' },
   promos: { en: 'Promos', fr: 'Codes' },
   delivery: { en: 'Delivery', fr: 'Livraison' },
+  categories: { en: 'Categories', fr: 'Catégories' },
   backToStore: { en: 'Back to Store', fr: 'Retour à la boutique' },
 } as const
 
@@ -44,6 +46,7 @@ const adminNav: { group: string; items: { href: string; labelKey: LabelKey; icon
     items: [
       { href: '/admin/reviews', labelKey: 'reviews', icon: Star },
       { href: '/admin/promos', labelKey: 'promos', icon: Tag },
+      { href: '/admin/categories', labelKey: 'categories', icon: LayoutGrid },
     ],
   },
 ]

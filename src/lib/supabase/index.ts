@@ -2,6 +2,42 @@ import { supabase } from './client'
 
 export { supabase }
 
+export type Category = {
+  slug: string
+  label_en: string
+  label_fr: string
+  image_url: string | null
+  created_at?: string
+  updated_at?: string
+}
+
+export const categoryService = {
+  async getAll(): Promise<Category[]> {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('slug', { ascending: true })
+    if (error) throw error
+    return data || []
+  },
+
+  async getBySlug(slug: string): Promise<Category | null> {
+    const { data, error } = await supabase.from('categories').select('*').eq('slug', slug).single()
+    if (error) return null
+    return data
+  },
+
+  async upsert(slug: string, updates: Partial<Category>): Promise<Category> {
+    const { data, error } = await supabase
+      .from('categories')
+      .upsert({ slug, ...updates, updated_at: new Date().toISOString() })
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  },
+}
+
 export type ProductCondition = 'new' | 'refurbished' | 'second_hand'
 export type ProductCategory = 'keyboard' | 'mouse' | 'cable' | 'speaker' | 'solar_lamp'
 
