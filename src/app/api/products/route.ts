@@ -77,14 +77,16 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      // If schema cache error (missing columns not yet migrated), retry without them
-      if (error.message.includes('schema cache') || error.message.includes('Could not find')) {
-        delete insertPayload.box_contents
-        delete insertPayload.box_contents_fr
-        delete insertPayload.key_specs
+      // If schema cache error (missing columns not yet migrated), retry with core fields only
+      if (error.message.includes('schema cache') || error.message.includes('Could not find') || error.message.includes('column')) {
+        const coreFields: Record<string, unknown> = { id }
+        const safeKeys = ['name', 'description', 'price_xaf', 'brand', 'specs', 'images', 'stock_status', 'featured']
+        for (const key of safeKeys) {
+          if (key in insertPayload) coreFields[key] = insertPayload[key]
+        }
         const { data: retryData, error: retryError } = await getSupabaseServer()
           .from('products')
-          .insert([insertPayload])
+          .insert([coreFields])
           .select()
           .single()
         if (retryError) return NextResponse.json({ error: retryError.message }, { status: 500 })

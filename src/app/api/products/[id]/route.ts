@@ -69,13 +69,16 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       .single()
 
     if (error) {
-      if (error.message.includes('schema cache') || error.message.includes('Could not find')) {
-        delete updates.box_contents
-        delete updates.box_contents_fr
-        delete updates.key_specs
+      if (error.message.includes('schema cache') || error.message.includes('Could not find') || error.message.includes('column')) {
+        // Retry with only core columns that definitely exist in the table
+        const coreFields: Record<string, unknown> = {}
+        const safeKeys = ['name', 'description', 'price_xaf', 'brand', 'specs', 'images', 'stock_status', 'featured']
+        for (const key of safeKeys) {
+          if (key in updates) coreFields[key] = updates[key]
+        }
         const { data: retryData, error: retryError } = await getSupabaseServer()
           .from('products')
-          .update(updates)
+          .update(coreFields)
           .eq('id', params.id)
           .select()
           .single()
