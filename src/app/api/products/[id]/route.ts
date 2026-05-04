@@ -69,7 +69,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       .single()
 
     if (error) {
-      if (error.message.includes('schema cache') || error.message.includes('Could not find') || error.message.includes('column')) {
+      if (error.message.includes('schema cache') || error.message.includes('Could not find') || error.message.includes('column') || error.message.includes('constraint')) {
         // Retry with only core columns that definitely exist in the table
         const coreFields: Record<string, unknown> = {}
         const safeKeys = ['name', 'description', 'price_xaf', 'brand', 'specs', 'images', 'stock_status', 'featured']

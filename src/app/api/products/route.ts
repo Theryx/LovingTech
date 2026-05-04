@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       // If schema cache error (missing columns not yet migrated), retry with core fields only
-      if (error.message.includes('schema cache') || error.message.includes('Could not find') || error.message.includes('column')) {
+      if (error.message.includes('schema cache') || error.message.includes('Could not find') || error.message.includes('column') || error.message.includes('constraint')) {
         const coreFields: Record<string, unknown> = { id }
         const safeKeys = ['name', 'description', 'price_xaf', 'brand', 'specs', 'images', 'stock_status', 'featured']
         for (const key of safeKeys) {
