@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { Upload, Image, Loader2 } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
 import { useLanguage } from '@/context/LanguageContext'
-import { supabase } from '@/lib/supabase'
 import type { Category } from '@/lib/supabase'
 
 const labelMap: Record<string, { en: string; fr: string }> = {
@@ -64,41 +63,23 @@ export default function AdminCategories() {
     setUploading(slug)
 
     try {
-      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-      const fileName = `category-${slug}-${Date.now()}.${fileExt}`
+      const formData = new FormData()
+      formData.append('file', file)
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('categories')
-        .upload(fileName, file, { cacheControl: '3600', upsert: true })
-
-      if (uploadError) {
-        if (uploadError.message.includes('Bucket not found') || uploadError.message.includes('bucket')) {
-          notifyError(
-            t({
-              en: 'Storage bucket "categories" not configured. Create it in Supabase first.',
-              fr: 'Le bucket de stockage "categories" n\'est pas configuré. Créez-le dans Supabase d\'abord.',
-            })
-          )
-          setUploading(null)
-          return
-        }
-        throw uploadError
-      }
-
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from('categories').getPublicUrl(fileName)
-
-      const res = await fetch(`/api/categories/${slug}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image_url: publicUrl }),
+      const res = await fetch(`/api/categories/${slug}/upload`, {
+        method: 'POST',
+        body: formData,
       })
 
-      if (!res.ok) throw new Error('Failed to save')
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ error: 'Upload failed' }))
+        throw new Error(errData.error || 'Upload failed')
+      }
+
+      const result = await res.json()
 
       setCategories(prev =>
-        prev.map(c => (c.slug === slug ? { ...c, image_url: publicUrl } : c))
+        prev.map(c => (c.slug === slug ? { ...c, image_url: result.image_url } : c))
       )
 
       success(
