@@ -53,11 +53,11 @@ export default function AdminOrdersPage() {
   useEffect(() => {
     fetch('/api/orders')
       .then(r => {
-        if (!r.ok) return []
+        if (!r.ok) throw new Error('Failed to load')
         return r.json()
       })
       .then(data => {
-        setOrders(data)
+        setOrders(data.orders || [])
         setLoading(false)
       })
       .catch(() => setLoading(false))

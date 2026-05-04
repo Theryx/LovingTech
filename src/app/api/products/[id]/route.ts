@@ -68,7 +68,22 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       .select()
       .single()
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+      if (error.message.includes('schema cache') || error.message.includes('Could not find')) {
+        delete updates.box_contents
+        delete updates.box_contents_fr
+        delete updates.key_specs
+        const { data: retryData, error: retryError } = await getSupabaseServer()
+          .from('products')
+          .update(updates)
+          .eq('id', params.id)
+          .select()
+          .single()
+        if (retryError) return NextResponse.json({ error: retryError.message }, { status: 500 })
+        return NextResponse.json(retryData)
+      }
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
     return NextResponse.json(data)
   } catch (err: any) {
     if (err instanceof z.ZodError) {

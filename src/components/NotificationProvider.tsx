@@ -112,6 +112,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const dismissToast = useCallback((id: number) => {
     setExitingIds(prev => new Set(prev).add(id))
+    setToasts(current => current.filter(t => t.id !== id))
   }, [])
 
   const notify = useCallback((toast: Omit<Toast, 'id'>) => {
@@ -165,6 +166,13 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
   }, [confirmState?.open, resolveConfirm])
+
+  useEffect(() => {
+    if (toasts.length === 0) return
+    const newest = toasts[toasts.length - 1]
+    const timer = setTimeout(() => dismissToast(newest.id), TOAST_DISMISS_MS)
+    return () => clearTimeout(timer)
+  }, [toasts, dismissToast])
 
   const value = useMemo<NotificationContextValue>(
     () => ({ notify, success, error, info, confirm }),

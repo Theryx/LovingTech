@@ -68,13 +68,30 @@ export async function POST(request: NextRequest) {
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str)
     const id = crypto.randomUUID()
 
+    const insertPayload: Record<string, unknown> = { ...parsed, id }
+
     const { data, error } = await getSupabaseServer()
       .from('products')
-      .insert([{ ...parsed, id }])
+      .insert([insertPayload])
       .select()
       .single()
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+      // If schema cache error (missing columns not yet migrated), retry without them
+      if (error.message.includes('schema cache') || error.message.includes('Could not find')) {
+        delete insertPayload.box_contents
+        delete insertPayload.box_contents_fr
+        delete insertPayload.key_specs
+        const { data: retryData, error: retryError } = await getSupabaseServer()
+          .from('products')
+          .insert([insertPayload])
+          .select()
+          .single()
+        if (retryError) return NextResponse.json({ error: retryError.message }, { status: 500 })
+        return NextResponse.json(retryData, { status: 201 })
+      }
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
     return NextResponse.json(data, { status: 201 })
   } catch (err: any) {
     if (err instanceof z.ZodError) {
