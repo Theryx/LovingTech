@@ -29,7 +29,7 @@ function LoginForm() {
       router.push(from)
       router.refresh()
     } else {
-      setError('Mot de passe incorrect / Incorrect password')
+      setError('Incorrect password')
       setLoading(false)
     }
   }
@@ -50,11 +50,11 @@ function LoginForm() {
           </div>
         </div>
 
-        <h1 className="mb-6 text-center text-xl font-bold text-brand-dark">Connexion Admin</h1>
+        <h1 className="mb-6 text-center text-xl font-bold text-brand-dark">Admin Login</h1>
 
         <div className="mb-4">
           <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-brand-dark/60">
-            Mot de passe / Password
+            Password
           </label>
           <input
             id="password"
@@ -75,7 +75,7 @@ function LoginForm() {
           disabled={loading || !password}
           className="w-full rounded-xl bg-brand-blue py-3 text-sm font-bold text-white transition hover:bg-brand-blue/90 disabled:opacity-50"
         >
-          {loading ? 'Connexion…' : 'Se connecter / Login'}
+          {loading ? 'Logging in…' : 'Login'}
         </button>
       </div>
     </form>

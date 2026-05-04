@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Search, Download, Eye, ShoppingBag, X, Filter, ChevronLeft, ChevronRight, AlertTriangle, RefreshCw } from 'lucide-react'
 import { Order, OrderStatus } from '@/lib/supabase'
-import { useLanguage } from '@/context/LanguageContext'
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, TABLE_HEADERS } from '@/lib/order-constants'
 
 const PAGE_SIZE = 50
@@ -48,7 +47,6 @@ function escapeCSV(val: string | number): string {
 }
 
 export default function AdminOrdersPage() {
-  const { t } = useLanguage()
   const searchParams = useSearchParams()
 
   const [orders, setOrders] = useState<Order[]>([])
@@ -118,7 +116,7 @@ export default function AdminOrdersPage() {
 
   const exportCSV = () => {
     const rows = [
-      ['Référence', 'Produit', 'Client', 'Téléphone', 'Ville', 'Agence', 'Total', 'Statut', 'Date'],
+      ['Reference', 'Product', 'Customer', 'Phone', 'City', 'Agency', 'Total', 'Status', 'Date'],
       ...filtered.map(o => [
         o.order_ref,
         o.product_name,
@@ -128,7 +126,7 @@ export default function AdminOrdersPage() {
         o.bus_agency || '',
         `${o.total_price} FCFA`,
         o.status || '',
-        o.created_at ? new Date(o.created_at).toLocaleDateString('fr-FR') : '',
+        o.created_at ? new Date(o.created_at).toLocaleDateString('en-US') : '',
       ].map(escapeCSV)),
     ]
     const csv = rows.map(r => r.join(',')).join('\n')
@@ -145,7 +143,7 @@ export default function AdminOrdersPage() {
     <div className="max-w-6xl mx-auto px-4">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-brand-dark">
-          {t({ en: 'Orders', fr: 'Commandes' })}
+          Orders
         </h1>
         <button
           onClick={exportCSV}
@@ -153,7 +151,7 @@ export default function AdminOrdersPage() {
           className="flex items-center gap-2 rounded-xl border border-brand-grey/30 px-4 py-2 text-sm font-medium text-brand-dark hover:bg-brand-grey/10 transition disabled:opacity-40"
         >
           <Download className="w-4 h-4" aria-hidden="true" />
-          {t({ en: 'Export CSV', fr: 'Exporter CSV' })}
+          Export CSV
         </button>
       </div>
 
@@ -161,7 +159,7 @@ export default function AdminOrdersPage() {
       <div className="flex flex-col sm:flex-row gap-3 mb-4 flex-wrap">
         <div className="relative flex-1 min-w-[200px]">
           <label htmlFor="order-search" className="sr-only">
-            {t({ en: 'Search orders', fr: 'Rechercher des commandes' })}
+            Search orders
           </label>
           <Search
             className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-dark/30 pointer-events-none"
@@ -170,10 +168,7 @@ export default function AdminOrdersPage() {
           <input
             id="order-search"
             type="text"
-            placeholder={t({
-              en: 'Search by ref, name, phone…',
-              fr: 'Rechercher par réf, nom, téléphone…',
-            })}
+            placeholder="Search by ref, name, phone…"
             value={search}
             onChange={e => setSearch(e.target.value)}
             className={`${inputCls} w-full pl-10`}
@@ -182,7 +177,7 @@ export default function AdminOrdersPage() {
 
         <div>
           <label htmlFor="order-status" className="sr-only">
-            {t({ en: 'Filter by status', fr: 'Filtrer par statut' })}
+            Filter by status
           </label>
           <select
             id="order-status"
@@ -193,10 +188,10 @@ export default function AdminOrdersPage() {
             }}
             className={inputCls}
           >
-            <option value="">{t({ en: 'All statuses', fr: 'Tous les statuts' })}</option>
+            <option value="">All statuses</option>
             {(Object.keys(ORDER_STATUS_LABELS) as OrderStatus[]).map(s => (
               <option key={s} value={s}>
-                {t(ORDER_STATUS_LABELS[s])}
+                {ORDER_STATUS_LABELS[s]}
               </option>
             ))}
           </select>
@@ -204,7 +199,7 @@ export default function AdminOrdersPage() {
 
         <div className="flex items-center gap-2">
           <label htmlFor="date-from" className="text-sm text-brand-dark/50 whitespace-nowrap">
-            {t({ en: 'From', fr: 'Du' })}
+            From
           </label>
           <input
             id="date-from"
@@ -214,7 +209,7 @@ export default function AdminOrdersPage() {
             className={inputCls}
           />
           <label htmlFor="date-to" className="text-sm text-brand-dark/50 whitespace-nowrap">
-            {t({ en: 'to', fr: 'au' })}
+            to
           </label>
           <input
             id="date-to"
@@ -231,7 +226,7 @@ export default function AdminOrdersPage() {
             className="flex items-center gap-1.5 rounded-xl border border-brand-grey/30 px-3 py-2 text-sm text-brand-dark/60 hover:bg-brand-grey/10 transition"
           >
             <X className="w-4 h-4" />
-            {t({ en: 'Clear', fr: 'Effacer' })}
+            Clear
           </button>
         )}
       </div>
@@ -241,13 +236,8 @@ export default function AdminOrdersPage() {
         <div className="flex items-center justify-between mb-4 text-sm text-brand-dark/50">
           <span>
             {totalCount > 0
-              ? t(
-                  {
-                    en: `Showing ${filtered.length} of ${totalCount} orders`,
-                    fr: `${filtered.length} commande(s) sur ${totalCount}`,
-                  },
-                )
-              : t({ en: 'No orders found', fr: 'Aucune commande trouvée' })}
+              ? `Showing ${filtered.length} of ${totalCount} orders`
+              : 'No orders found'}
           </span>
 
           {totalPages > 1 && (
@@ -256,7 +246,7 @@ export default function AdminOrdersPage() {
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page <= 1}
                 className="rounded-lg p-1.5 text-brand-dark/50 hover:text-brand-dark disabled:opacity-30 transition"
-                aria-label={t({ en: 'Previous page', fr: 'Page précédente' })}
+                aria-label="Previous page"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -267,7 +257,7 @@ export default function AdminOrdersPage() {
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
                 className="rounded-lg p-1.5 text-brand-dark/50 hover:text-brand-dark disabled:opacity-30 transition"
-                aria-label={t({ en: 'Next page', fr: 'Page suivante' })}
+                aria-label="Next page"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -284,22 +274,22 @@ export default function AdminOrdersPage() {
           <AlertTriangle className="mx-auto mb-3 h-8 w-8 text-red-400" />
           <p className="text-red-700 font-medium mb-2">
             {error === 'Session expired'
-              ? t({ en: 'Session expired. Please log in again.', fr: 'Session expirée. Reconnectez-vous.' })
-              : t({ en: 'Failed to load orders.', fr: 'Échec du chargement des commandes.' })}
+              ? 'Session expired. Please log in again.'
+              : 'Failed to load orders.'}
           </p>
           <button
             onClick={() => loadOrders()}
             className="inline-flex items-center gap-2 rounded-xl bg-brand-blue px-4 py-2 text-sm font-medium text-white hover:bg-brand-blue/90 transition"
           >
             <RefreshCw className="w-4 h-4" />
-            {t({ en: 'Try again', fr: 'Réessayer' })}
+            Try again
           </button>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-brand-grey/20 bg-white">
-          <table className="w-full min-w-[800px]" aria-label={t({ en: 'Orders list', fr: 'Liste des commandes' })}>
+          <table className="w-full min-w-[800px]" aria-label="Orders list">
             <caption className="sr-only">
-              {t({ en: 'List of all orders with filters', fr: 'Liste de toutes les commandes avec filtres' })}
+              List of all orders with filters
             </caption>
             <thead>
               <tr className="border-b border-brand-grey/20">
@@ -309,7 +299,7 @@ export default function AdminOrdersPage() {
                     scope="col"
                     className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-brand-dark/40"
                   >
-                    {t(h)}
+                    {h.label}
                   </th>
                 ))}
               </tr>
@@ -320,7 +310,7 @@ export default function AdminOrdersPage() {
                   <td colSpan={8} className="px-5 py-16 text-center">
                     <ShoppingBag className="mx-auto mb-3 h-10 w-10 text-brand-dark/20" />
                     <p className="text-brand-dark/40">
-                      {t({ en: 'No orders found', fr: 'Aucune commande trouvée' })}
+                      No orders found
                     </p>
                   </td>
                 </tr>
@@ -328,7 +318,7 @@ export default function AdminOrdersPage() {
                 filtered.map(order => {
                   const status = (order.status || 'pending') as OrderStatus
                   const colors = ORDER_STATUS_COLORS[status]
-                  const label = t(ORDER_STATUS_LABELS[status])
+                  const label = ORDER_STATUS_LABELS[status]
                   const isPending = status === 'pending'
                   const isCancelled = status === 'cancelled'
                   return (
@@ -352,7 +342,7 @@ export default function AdminOrdersPage() {
                         {order.city}
                       </td>
                       <td className="px-5 py-4 text-sm font-semibold text-brand-dark whitespace-nowrap">
-                        {order.total_price.toLocaleString('fr-FR')} FCFA
+                        {order.total_price.toLocaleString('en-US')} FCFA
                       </td>
                       <td className="px-5 py-4 whitespace-nowrap">
                         <span
@@ -362,7 +352,7 @@ export default function AdminOrdersPage() {
                         </span>
                       </td>
                       <td className="px-5 py-4 text-xs text-brand-dark/40 whitespace-nowrap">
-                        {order.created_at ? new Date(order.created_at).toLocaleDateString('fr-FR') : '—'}
+                        {order.created_at ? new Date(order.created_at).toLocaleDateString('en-US') : '—'}
                       </td>
                       <td className="px-5 py-4">
                         <Link

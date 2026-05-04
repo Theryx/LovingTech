@@ -9,7 +9,6 @@ import {
   ShoppingBag,
   LayoutDashboard,
   ArrowLeft,
-  Globe,
   Star,
   Tag,
   Truck,
@@ -20,41 +19,27 @@ import {
 } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 
-const labels = {
-  dashboard: { en: 'Dashboard', fr: 'Tableau de bord' },
-  products: { en: 'Products', fr: 'Produits' },
-  orders: { en: 'Orders', fr: 'Commandes' },
-  reviews: { en: 'Reviews', fr: 'Avis' },
-  promos: { en: 'Promos', fr: 'Codes' },
-  delivery: { en: 'Delivery', fr: 'Livraison' },
-  categories: { en: 'Categories', fr: 'Catégories' },
-  backToStore: { en: 'Back to Store', fr: 'Retour à la boutique' },
-} as const
-
-type LabelKey = keyof typeof labels
-
-const adminNav: { group: string; items: { href: string; labelKey: LabelKey; icon: React.ComponentType<{ className?: string }> }[] }[] = [
+const adminNav: { group: string; items: { href: string; label: string; icon: React.ComponentType<{ className?: string }> }[] }[] = [
   {
     group: 'commerce',
     items: [
-      { href: '/admin', labelKey: 'dashboard', icon: LayoutDashboard },
-      { href: '/admin/products', labelKey: 'products', icon: Package },
-      { href: '/admin/orders', labelKey: 'orders', icon: ShoppingBag },
-      { href: '/admin/delivery', labelKey: 'delivery', icon: Truck },
+      { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/admin/products', label: 'Products', icon: Package },
+      { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
+      { href: '/admin/delivery', label: 'Delivery', icon: Truck },
     ],
   },
   {
     group: 'content',
     items: [
-      { href: '/admin/reviews', labelKey: 'reviews', icon: Star },
-      { href: '/admin/promos', labelKey: 'promos', icon: Tag },
-      { href: '/admin/categories', labelKey: 'categories', icon: LayoutGrid },
+      { href: '/admin/reviews', label: 'Reviews', icon: Star },
+      { href: '/admin/promos', label: 'Promos', icon: Tag },
+      { href: '/admin/categories', label: 'Categories', icon: LayoutGrid },
     ],
   },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { language, toggleLanguage, t } = useLanguage()
   const pathname = usePathname()
   const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -89,7 +74,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 }`}
               >
                 <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                <span>{t(labels[item.labelKey])}</span>
+                <span>{item.label}</span>
               </Link>
             )
           })}
@@ -110,7 +95,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             className="flex items-center gap-2 text-brand-dark/50 transition hover:text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            <span className="hidden sm:inline text-sm font-medium whitespace-nowrap">{t(labels.backToStore)}</span>
+            <span className="hidden sm:inline text-sm font-medium whitespace-nowrap">Back to Store</span>
           </Link>
           <div className="hidden sm:block h-5 w-px bg-brand-grey/30" aria-hidden="true" />
           <Link
@@ -130,14 +115,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <div className="ml-2 flex items-center gap-1 shrink-0">
             <button
-              onClick={toggleLanguage}
-              aria-label={language === 'en' ? 'Passer en français' : 'Switch to English'}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-brand-dark/50 transition hover:bg-brand-grey/10 hover:text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
-            >
-              <Globe className="h-4 w-4" aria-hidden="true" />
-              <span className="uppercase text-xs font-bold">{language}</span>
-            </button>
-            <button
               onClick={logout}
               aria-label="Logout"
               className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-brand-dark/50 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
@@ -147,16 +124,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </div>
 
-        {/* Mobile hamburger + language + logout */}
+        {/* Mobile hamburger + logout */}
         <div className="flex sm:hidden items-center gap-1">
-          <button
-            onClick={toggleLanguage}
-            aria-label={language === 'en' ? 'Passer en français' : 'Switch to English'}
-            className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium text-brand-dark/50 transition hover:bg-brand-grey/10 hover:text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
-          >
-            <Globe className="h-4 w-4" aria-hidden="true" />
-            <span className="uppercase text-xs font-bold">{language}</span>
-          </button>
           <button
             onClick={logout}
             aria-label="Logout"
@@ -177,17 +146,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Mobile drawer overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[60] sm:hidden">
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/40"
             onClick={() => setMobileOpen(false)}
           />
-          {/* Drawer */}
           <div className="absolute right-0 top-0 bottom-0 w-64 bg-white shadow-2xl flex flex-col">
             <div className="flex items-center justify-between px-5 py-4 border-b border-brand-grey/20">
-              <span className="text-sm font-semibold text-brand-dark">
-                {t({ en: 'Menu', fr: 'Menu' })}
-              </span>
+              <span className="text-sm font-semibold text-brand-dark">Menu</span>
               <button
                 onClick={() => setMobileOpen(false)}
                 aria-label="Close menu"
@@ -206,7 +171,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 className="flex items-center gap-2 text-sm text-brand-dark/50 hover:text-brand-blue transition"
               >
                 <ArrowLeft className="h-4 w-4" />
-                {t(labels.backToStore)}
+                Back to Store
               </Link>
             </div>
           </div>

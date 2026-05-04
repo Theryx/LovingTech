@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef } from 'react'
 import { Upload, X, Image, GripVertical, Star } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { useLanguage } from '@/context/LanguageContext'
+
 
 interface ImageUploaderProps {
   images: string[]
@@ -12,37 +12,12 @@ interface ImageUploaderProps {
   folder?: string
 }
 
-const labels = {
-  dragDrop: {
-    en: 'Drag images here or click to upload',
-    fr: 'Glissez les images ici ou cliquez pour télécharger',
-  },
-  uploading: { en: 'Uploading...', fr: 'Téléchargement...' },
-  uploadFailed: {
-    en: 'Upload failed. Enter image URL below instead.',
-    fr: "Échec. Entrez l'URL de l'image ci-dessous.",
-  },
-  bucketMissing: {
-    en: 'Storage not configured. Use URL below instead.',
-    fr: "Stockage non configuré. Utilisez l'URL ci-dessous.",
-  },
-  mainImage: { en: 'Main', fr: 'Principal' },
-  remove: { en: 'Remove', fr: 'Supprimer' },
-  supportedFormats: {
-    en: 'Max: 5MB • 800-1200px • JPEG, PNG, WebP',
-    fr: 'Max: 5Mo • 800-1200px • JPEG, PNG, WebP',
-  },
-  previewFailed: { en: 'Preview not available', fr: 'Aperçu non disponible' },
-  orUrl: { en: 'Or enter image URL:', fr: "Ou entrez l'URL de l'image:" },
-}
-
 export default function ImageUploader({
   images,
   onChange,
   bucket = 'products',
   folder = 'images',
 }: ImageUploaderProps) {
-  const { t } = useLanguage()
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const [previewErrors, setPreviewErrors] = useState<Record<number, boolean>>({})
@@ -63,11 +38,11 @@ export default function ImageUploader({
 
       if (error) {
         if (error.message.includes('Bucket not found') || error.message.includes('bucket')) {
-          setUploadError(t(labels.bucketMissing))
+          setUploadError('Storage not configured. Use URL below instead.')
           return null
         }
         console.error('Upload error:', error)
-        setUploadError(t(labels.uploadFailed))
+        setUploadError('Upload failed. Enter image URL below instead.')
         return null
       }
 
@@ -77,9 +52,9 @@ export default function ImageUploader({
       return publicUrl
     } catch (err: any) {
       if (err?.message?.includes('Bucket not found')) {
-        setUploadError(t(labels.bucketMissing))
+          setUploadError('Storage not configured. Use URL below instead.')
       } else {
-        setUploadError(t(labels.uploadFailed))
+        setUploadError('Upload failed. Enter image URL below instead.')
       }
       return null
     }
@@ -184,7 +159,7 @@ export default function ImageUploader({
         htmlFor="image-upload-input"
         role="button"
         tabIndex={0}
-        aria-label={t(labels.dragDrop)}
+                aria-label="Drag images here or click to upload"
         onKeyDown={e => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault()
@@ -205,13 +180,13 @@ export default function ImageUploader({
         {uploading ? (
           <div className="flex items-center justify-center gap-2 text-brand-grey">
             <div className="h-5 w-5 animate-spin rounded-full border-2 border-brand-grey/40 border-t-brand-blue" />
-            {t(labels.uploading)}
+                        Uploading...
           </div>
         ) : (
           <>
             <Upload className="mx-auto mb-2 h-8 w-8 text-brand-blue" />
-            <p className="text-sm text-brand-grey">{t(labels.dragDrop)}</p>
-            <p className="mt-1 text-xs text-brand-grey">{t(labels.supportedFormats)}</p>
+            <p className="text-sm text-brand-grey">Drag images here or click to upload</p>
+            <p className="mt-1 text-xs text-brand-grey">Max: 5MB • 800-1200px • JPEG, PNG, WebP</p>
           </>
         )}
       </label>
@@ -235,7 +210,7 @@ export default function ImageUploader({
               Add
             </button>
           </div>
-          <p className="mt-2 text-xs text-brand-grey">{t(labels.orUrl)}</p>
+          <p className="mt-2 text-xs text-brand-grey">Or enter image URL:</p>
         </div>
       )}
 
@@ -252,7 +227,7 @@ export default function ImageUploader({
                 {previewErrors[index] ? (
                   <div className="flex h-full w-full items-center justify-center text-brand-grey">
                     <Image className="h-8 w-8" />
-                    <span className="text-xs ml-2">{t(labels.previewFailed)}</span>
+                    <span className="text-xs ml-2">Preview not available</span>
                   </div>
                 ) : (
                   <img
@@ -267,7 +242,7 @@ export default function ImageUploader({
                   {index === 0 ? (
                     <span className="flex items-center gap-1 rounded bg-brand-blue px-2 py-1 text-[10px] font-bold uppercase text-white">
                       <Star className="h-3 w-3" />
-                      {t(labels.mainImage)}
+                                            Main
                     </span>
                   ) : null}
                 </div>

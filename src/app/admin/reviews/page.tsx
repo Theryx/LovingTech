@@ -3,12 +3,11 @@
 import { useState, useEffect } from 'react'
 import { Star, CheckCircle, XCircle, Loader2 } from 'lucide-react'
 import { Review, ReviewStatus } from '@/lib/supabase'
-import { useLanguage } from '@/context/LanguageContext'
 
 const STATUS_STYLE: Record<ReviewStatus, { bg: string; text: string; label: string }> = {
-  pending: { bg: 'bg-amber-100', text: 'text-amber-800', label: 'En attente' },
-  approved: { bg: 'bg-green-100', text: 'text-green-800', label: 'Approuvé' },
-  rejected: { bg: 'bg-red-100', text: 'text-red-700', label: 'Rejeté' },
+  pending: { bg: 'bg-amber-100', text: 'text-amber-800', label: 'Pending' },
+  approved: { bg: 'bg-green-100', text: 'text-green-800', label: 'Approved' },
+  rejected: { bg: 'bg-red-100', text: 'text-red-700', label: 'Rejected' },
 }
 
 type FilterValue = ReviewStatus | ''
@@ -45,7 +44,6 @@ function ReviewSkeleton() {
 }
 
 export default function AdminReviewsPage() {
-  const { t } = useLanguage()
   const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<FilterValue>('pending')
@@ -82,19 +80,18 @@ export default function AdminReviewsPage() {
   const filtered = filter ? reviews.filter(r => r.status === filter) : reviews
 
   const FILTERS: { value: FilterValue; label: string }[] = [
-    { value: '', label: t({ en: 'All', fr: 'Tous' }) },
-    { value: 'pending', label: t({ en: 'Pending', fr: 'En attente' }) },
-    { value: 'approved', label: t({ en: 'Approved', fr: 'Approuvés' }) },
-    { value: 'rejected', label: t({ en: 'Rejected', fr: 'Rejetés' }) },
+    { value: '', label: 'All' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'approved', label: 'Approved' },
+    { value: 'rejected', label: 'Rejected' },
   ]
 
   return (
     <div className="max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-brand-dark">{t({ en: 'Reviews', fr: 'Avis' })}</h1>
+        <h1 className="text-3xl font-bold text-brand-dark">Reviews</h1>
         <span className="text-sm text-brand-dark/40">
-          {reviews.filter(r => r.status === 'pending').length}{' '}
-          {t({ en: 'pending', fr: 'en attente' })}
+          {reviews.filter(r => r.status === 'pending').length} pending
         </span>
       </div>
 
@@ -144,7 +141,7 @@ export default function AdminReviewsPage() {
                     </div>
                     {r.comment && <p className="text-sm text-brand-dark/70">{r.comment}</p>}
                     <p className="text-xs text-brand-dark/30 mt-2">
-                      {r.created_at ? new Date(r.created_at).toLocaleDateString('fr-FR') : ''}
+                      {r.created_at ? new Date(r.created_at).toLocaleDateString('en-US') : ''}
                     </p>
                   </div>
                   {r.status === 'pending' && (
@@ -152,7 +149,7 @@ export default function AdminReviewsPage() {
                       <button
                         onClick={() => handleStatus(r.id!, 'approved')}
                         disabled={updating === r.id}
-                        aria-label={t({ en: 'Approve review', fr: 'Approuver cet avis' })}
+                        aria-label="Approve review"
                         className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700 transition disabled:opacity-50"
                       >
                         {updating === r.id ? (
@@ -160,12 +157,12 @@ export default function AdminReviewsPage() {
                         ) : (
                           <CheckCircle className="w-3.5 h-3.5" aria-hidden="true" />
                         )}
-                        {t({ en: 'Approve', fr: 'Approuver' })}
+                        Approve
                       </button>
                       <button
                         onClick={() => handleStatus(r.id!, 'rejected')}
                         disabled={updating === r.id}
-                        aria-label={t({ en: 'Reject review', fr: 'Rejeter cet avis' })}
+                        aria-label="Reject review"
                         className="flex items-center gap-1.5 rounded-lg bg-red-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-600 transition disabled:opacity-50"
                       >
                         {updating === r.id ? (
@@ -173,7 +170,7 @@ export default function AdminReviewsPage() {
                         ) : (
                           <XCircle className="w-3.5 h-3.5" aria-hidden="true" />
                         )}
-                        {t({ en: 'Reject', fr: 'Rejeter' })}
+                        Reject
                       </button>
                     </div>
                   )}
@@ -182,9 +179,7 @@ export default function AdminReviewsPage() {
             )
           })}
           {filtered.length === 0 && (
-            <p className="py-12 text-center text-brand-dark/40">
-              {t({ en: 'No reviews found', fr: 'Aucun avis trouvé' })}
-            </p>
+            <p className="py-12 text-center text-brand-dark/40">No reviews found</p>
           )}
         </div>
       )}

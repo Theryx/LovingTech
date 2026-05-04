@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { Plus, Trash2, ToggleLeft, ToggleRight } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
 import { PromoCode } from '@/lib/supabase'
-import { useLanguage } from '@/context/LanguageContext'
 
 function PromoSkeleton() {
   return (
@@ -46,7 +45,6 @@ const EMPTY_FORM: Omit<PromoCode, 'id' | 'uses_count' | 'created_at'> = {
 }
 
 export default function AdminPromosPage() {
-  const { t } = useLanguage()
   const { confirm, error: notifyError, success } = useNotifications()
   const [promos, setPromos] = useState<PromoCode[]>([])
   const [loading, setLoading] = useState(true)
@@ -76,11 +74,11 @@ export default function AdminPromosPage() {
     e.preventDefault()
     setFormError('')
     if (!form.code.trim()) {
-      setFormError('Code requis / Code required')
+      setFormError('Code required')
       return
     }
     if (form.value <= 0) {
-      setFormError('Valeur invalide / Invalid value')
+      setFormError('Invalid value')
       return
     }
     setSaving(true)
@@ -98,9 +96,9 @@ export default function AdminPromosPage() {
       setPromos(prev => [created, ...prev])
       setShowForm(false)
       setForm({ ...EMPTY_FORM })
-      success(t({ en: 'Promo code created.', fr: 'Code promo créé.' }))
+      success('Promo code created.')
     } catch {
-      setFormError(t({ en: 'Failed to create promo code.', fr: 'Échec de création du code promo.' }))
+      setFormError('Failed to create promo code.')
     } finally {
       setSaving(false)
     }
@@ -114,38 +112,27 @@ export default function AdminPromosPage() {
         body: JSON.stringify({ is_active: !promo.is_active }),
       })
       setPromos(prev => prev.map(p => (p.id === promo.id ? { ...p, is_active: !p.is_active } : p)))
-      success(
-        t({
-          en: promo.is_active ? 'Promo code disabled.' : 'Promo code activated.',
-          fr: promo.is_active ? 'Code promo désactivé.' : 'Code promo activé.',
-        })
-      )
+      success(promo.is_active ? 'Promo code disabled.' : 'Promo code activated.')
     } catch (err: any) {
-      notifyError(
-        err?.message ||
-          t({ en: 'Failed to update promo code.', fr: 'Échec de mise à jour du code promo.' })
-      )
+      notifyError(err?.message || 'Failed to update promo code.')
     }
   }
 
   const handleDelete = async (id: string) => {
     const confirmed = await confirm({
-      title: t({ en: 'Delete this promo code?', fr: 'Supprimer ce code promo ?' }),
-      message: t({ en: 'This action cannot be undone.', fr: 'Cette action est définitive.' }),
-      confirmLabel: t({ en: 'Delete', fr: 'Supprimer' }),
-      cancelLabel: t({ en: 'Cancel', fr: 'Annuler' }),
+      title: 'Delete this promo code?',
+      message: 'This action cannot be undone.',
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
       tone: 'danger',
     })
     if (!confirmed) return
     try {
       await fetch(`/api/promo-codes/${id}`, { method: 'DELETE' })
       setPromos(prev => prev.filter(p => p.id !== id))
-      success(t({ en: 'Promo code deleted.', fr: 'Code promo supprimé.' }))
+      success('Promo code deleted.')
     } catch (err: any) {
-      notifyError(
-        err?.message ||
-          t({ en: 'Failed to delete promo code.', fr: 'Échec de suppression du code promo.' })
-      )
+      notifyError(err?.message || 'Failed to delete promo code.')
     }
   }
 
@@ -155,9 +142,7 @@ export default function AdminPromosPage() {
   return (
     <div className="max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-brand-dark">
-          {t({ en: 'Promo Codes', fr: 'Codes Promo' })}
-        </h1>
+        <h1 className="text-3xl font-bold text-brand-dark">Promo Codes</h1>
         <button
           onClick={() => {
             setShowForm(true)
@@ -167,7 +152,7 @@ export default function AdminPromosPage() {
           className="flex items-center gap-2 rounded-xl bg-brand-blue px-4 py-2.5 text-sm font-semibold text-white hover:brightness-95 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2"
         >
           <Plus className="w-4 h-4" aria-hidden="true" />
-          {t({ en: 'Create code', fr: 'Créer un code' })}
+          Create code
         </button>
       </div>
 
@@ -177,9 +162,7 @@ export default function AdminPromosPage() {
           onSubmit={handleCreate}
           className="mb-8 rounded-2xl border border-brand-grey/20 bg-white p-6 space-y-4"
         >
-          <h2 className="font-semibold text-brand-dark">
-            {t({ en: 'New Promo Code', fr: 'Nouveau code promo' })}
-          </h2>
+          <h2 className="font-semibold text-brand-dark">New Promo Code</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-brand-dark/60 mb-1">Code *</label>
@@ -192,9 +175,7 @@ export default function AdminPromosPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-brand-dark/60 mb-1">
-                {t({ en: 'Type', fr: 'Type' })} *
-              </label>
+              <label className="block text-xs font-medium text-brand-dark/60 mb-1">Type *</label>
               <select
                 value={form.type}
                 onChange={e =>
@@ -202,18 +183,12 @@ export default function AdminPromosPage() {
                 }
                 className={inputCls}
               >
-                <option value="percent">
-                  {t({ en: 'Percentage (%)', fr: 'Pourcentage (%)' })}
-                </option>
-                <option value="fixed">
-                  {t({ en: 'Fixed amount (FCFA)', fr: 'Montant fixe (FCFA)' })}
-                </option>
+                <option value="percent">Percentage (%)</option>
+                <option value="fixed">Fixed amount (FCFA)</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-brand-dark/60 mb-1">
-                {t({ en: 'Value', fr: 'Valeur' })} *
-              </label>
+              <label className="block text-xs font-medium text-brand-dark/60 mb-1">Value *</label>
               <input
                 type="number"
                 min={1}
@@ -225,7 +200,7 @@ export default function AdminPromosPage() {
             </div>
             <div>
               <label className="block text-xs font-medium text-brand-dark/60 mb-1">
-                {t({ en: 'Min. order (FCFA)', fr: 'Commande min. (FCFA)' })}
+                Min. order (FCFA)
               </label>
               <input
                 type="number"
@@ -238,10 +213,7 @@ export default function AdminPromosPage() {
             </div>
             <div>
               <label className="block text-xs font-medium text-brand-dark/60 mb-1">
-                {t({
-                  en: 'Max uses (blank = unlimited)',
-                  fr: 'Max utilisations (vide = illimité)',
-                })}
+                Max uses (blank = unlimited)
               </label>
               <input
                 type="number"
@@ -250,13 +222,13 @@ export default function AdminPromosPage() {
                 onChange={e =>
                   setForm(f => ({ ...f, max_uses: e.target.value ? Number(e.target.value) : null }))
                 }
-                placeholder={t({ en: 'Unlimited', fr: 'Illimité' })}
+                placeholder="Unlimited"
                 className={inputCls}
               />
             </div>
             <div>
               <label className="block text-xs font-medium text-brand-dark/60 mb-1">
-                {t({ en: 'Expiry date (optional)', fr: "Date d'expiration (optionnel)" })}
+                Expiry date (optional)
               </label>
               <input
                 type="datetime-local"
@@ -273,14 +245,14 @@ export default function AdminPromosPage() {
               disabled={saving}
               className="rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 disabled:opacity-50"
             >
-              {saving ? t({ en: 'Creating…', fr: 'Création…' }) : t({ en: 'Create', fr: 'Créer' })}
+              {saving ? 'Creating…' : 'Create'}
             </button>
             <button
               type="button"
               onClick={() => setShowForm(false)}
               className="rounded-xl border border-brand-grey/30 px-5 py-2.5 text-sm font-medium text-brand-dark hover:bg-brand-grey/10 transition"
             >
-              {t({ en: 'Cancel', fr: 'Annuler' })}
+              Cancel
             </button>
           </div>
         </form>
@@ -295,11 +267,11 @@ export default function AdminPromosPage() {
               <tr className="border-b border-brand-grey/20">
                 {[
                   'Code',
-                  t({ en: 'Type', fr: 'Type' }),
-                  t({ en: 'Value', fr: 'Valeur' }),
-                  t({ en: 'Uses', fr: 'Utilisations' }),
-                  t({ en: 'Expires', fr: 'Expire' }),
-                  t({ en: 'Status', fr: 'Statut' }),
+                  'Type',
+                  'Value',
+                  'Uses',
+                  'Expires',
+                  'Status',
                   '',
                 ].map(h => (
                   <th
@@ -321,34 +293,32 @@ export default function AdminPromosPage() {
                     {p.code}
                   </td>
                   <td className="px-5 py-4 text-sm text-brand-dark/60">
-                    {p.type === 'percent' ? '%' : 'FCFA fixe'}
+                    {p.type === 'percent' ? '%' : 'Fixed'}
                   </td>
                   <td className="px-5 py-4 text-sm font-semibold text-brand-dark">
                     {p.type === 'percent'
                       ? `${p.value}%`
-                      : `${p.value.toLocaleString('fr-FR')} FCFA`}
+                      : `${p.value.toLocaleString('en-US')} FCFA`}
                   </td>
                   <td className="px-5 py-4 text-sm text-brand-dark/60">
                     {p.uses_count}
                     {p.max_uses !== null ? `/${p.max_uses}` : ''}
                   </td>
                   <td className="px-5 py-4 text-xs text-brand-dark/40">
-                    {p.expires_at ? new Date(p.expires_at).toLocaleDateString('fr-FR') : '—'}
+                    {p.expires_at ? new Date(p.expires_at).toLocaleDateString('en-US') : '—'}
                   </td>
                   <td className="px-5 py-4">
                     <span
                       className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${p.is_active ? 'bg-green-100 text-green-800' : 'bg-brand-grey/20 text-brand-dark/40'}`}
                     >
-                      {p.is_active
-                        ? t({ en: 'Active', fr: 'Actif' })
-                        : t({ en: 'Inactive', fr: 'Inactif' })}
+                      {p.is_active ? 'Active' : 'Inactive'}
                     </span>
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => toggleActive(p)}
-                        aria-label={p.is_active ? 'Désactiver' : 'Activer'}
+                        aria-label={p.is_active ? 'Deactivate' : 'Activate'}
                         className="text-brand-dark/40 hover:text-brand-blue transition"
                       >
                         {p.is_active ? (
@@ -359,7 +329,7 @@ export default function AdminPromosPage() {
                       </button>
                       <button
                         onClick={() => handleDelete(p.id!)}
-                        aria-label="Supprimer"
+                        aria-label="Delete"
                         className="text-brand-dark/40 hover:text-red-500 transition"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -371,9 +341,7 @@ export default function AdminPromosPage() {
             </tbody>
           </table>
           {promos.length === 0 && (
-            <p className="py-12 text-center text-brand-dark/40">
-              {t({ en: 'No promo codes yet', fr: 'Aucun code promo' })}
-            </p>
+            <p className="py-12 text-center text-brand-dark/40">No promo codes yet</p>
           )}
         </div>
       )}

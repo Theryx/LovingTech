@@ -35,6 +35,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/politique-de-retour`, changeFrequency: 'monthly' as const, priority: 0.4 },
     { url: `${BASE_URL}/terms`, changeFrequency: 'monthly' as const, priority: 0.4 },
     { url: `${BASE_URL}/conditions`, changeFrequency: 'monthly' as const, priority: 0.4 },
+    { url: `${BASE_URL}/privacy-policy`, changeFrequency: 'monthly' as const, priority: 0.4 },
+    { url: `${BASE_URL}/confidentialite`, changeFrequency: 'monthly' as const, priority: 0.4 },
+    { url: `${BASE_URL}/faq`, changeFrequency: 'monthly' as const, priority: 0.5 },
+    { url: `${BASE_URL}/about`, changeFrequency: 'monthly' as const, priority: 0.5 },
+    { url: `${BASE_URL}/a-propos`, changeFrequency: 'monthly' as const, priority: 0.5 },
+    { url: `${BASE_URL}/contact`, changeFrequency: 'monthly' as const, priority: 0.5 },
+    { url: `${BASE_URL}/shipping`, changeFrequency: 'monthly' as const, priority: 0.5 },
+    { url: `${BASE_URL}/livraison`, changeFrequency: 'monthly' as const, priority: 0.5 },
     ...productUrls,
   ]
 }

@@ -358,6 +358,36 @@ export default function Home() {
                   {t({ en: 'Return Policy', fr: 'Politique de retour' })}
                 </Link>
                 <Link
+                  href="/shipping"
+                  className="transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded"
+                >
+                  {t({ en: 'Shipping', fr: 'Livraison' })}
+                </Link>
+                <Link
+                  href="/faq"
+                  className="transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded"
+                >
+                  {t({ en: 'FAQ', fr: 'FAQ' })}
+                </Link>
+                <Link
+                  href="/about"
+                  className="transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded"
+                >
+                  {t({ en: 'About', fr: 'À propos' })}
+                </Link>
+                <Link
+                  href="/contact"
+                  className="transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded"
+                >
+                  {t({ en: 'Contact', fr: 'Contact' })}
+                </Link>
+                <Link
+                  href="/privacy-policy"
+                  className="transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded"
+                >
+                  {t({ en: 'Privacy', fr: 'Confidentialité' })}
+                </Link>
+                <Link
                   href="/terms"
                   className="transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded"
                 >

@@ -1,11 +1,11 @@
 import type { OrderStatus } from '@/lib/supabase'
 
-export const ORDER_STATUS_LABELS: Record<OrderStatus, { en: string; fr: string }> = {
-  pending: { en: 'Pending', fr: 'En attente' },
-  confirmed: { en: 'Confirmed', fr: 'Confirmée' },
-  dispatched: { en: 'Dispatched', fr: 'Expédiée' },
-  delivered: { en: 'Delivered', fr: 'Livrée' },
-  cancelled: { en: 'Cancelled', fr: 'Annulée' },
+export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
+  pending: 'Pending',
+  confirmed: 'Confirmed',
+  dispatched: 'Dispatched',
+  delivered: 'Delivered',
+  cancelled: 'Cancelled',
 }
 
 export const ORDER_STATUS_COLORS: Record<OrderStatus, { bg: string; text: string }> = {
@@ -32,12 +32,12 @@ export const ALLOWED_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
 }
 
 export const TABLE_HEADERS = [
-  { key: 'order_ref', en: 'Ref', fr: 'Réf.' },
-  { key: 'product_name', en: 'Product', fr: 'Produit' },
-  { key: 'customer_name', en: 'Customer', fr: 'Client' },
-  { key: 'city', en: 'City', fr: 'Ville' },
-  { key: 'total_price', en: 'Total', fr: 'Total' },
-  { key: 'status', en: 'Status', fr: 'Statut' },
-  { key: 'created_at', en: 'Date', fr: 'Date' },
-  { key: 'actions', en: '', fr: '' },
+  { key: 'order_ref', label: 'Ref' },
+  { key: 'product_name', label: 'Product' },
+  { key: 'customer_name', label: 'Customer' },
+  { key: 'city', label: 'City' },
+  { key: 'total_price', label: 'Total' },
+  { key: 'status', label: 'Status' },
+  { key: 'created_at', label: 'Date' },
+  { key: 'actions', label: '' },
 ] as const

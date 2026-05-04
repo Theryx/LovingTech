@@ -3,16 +3,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Upload, Image, Loader2 } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
-import { useLanguage } from '@/context/LanguageContext'
 import type { Category } from '@/lib/supabase'
 
-const labelMap: Record<string, { en: string; fr: string }> = {
-  keyboard: { en: 'Keyboards', fr: 'Claviers' },
-  mouse: { en: 'Mice', fr: 'Souris' },
-  cable: { en: 'Cables', fr: 'Câbles' },
-  speaker: { en: 'Speakers', fr: 'Enceintes' },
-  solar_lamp: { en: 'Solar Lamps', fr: 'Lampes Solaires' },
-  others: { en: 'Others', fr: 'Autres' },
+const labelMap: Record<string, string> = {
+  keyboard: 'Keyboards',
+  mouse: 'Mice',
+  cable: 'Cables',
+  speaker: 'Speakers',
+  solar_lamp: 'Solar Lamps',
+  others: 'Others',
 }
 
 function CategorySkeleton() {
@@ -30,7 +29,6 @@ function CategorySkeleton() {
 }
 
 export default function AdminCategories() {
-  const { t } = useLanguage()
   const { error: notifyError, success } = useNotifications()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -46,15 +44,10 @@ export default function AdminCategories() {
       setCategories(data)
     } catch (e) {
       console.error(e)
-      notifyError(
-        t({
-          en: 'Failed to load categories.',
-          fr: 'Échec du chargement des catégories.',
-        })
-      )
+      notifyError('Failed to load categories.')
     }
     setLoading(false)
-  }, [t, notifyError])
+  }, [notifyError])
 
   useEffect(() => {
     loadCategories()
@@ -83,18 +76,10 @@ export default function AdminCategories() {
         prev.map(c => (c.slug === slug ? { ...c, image_url: result.image_url } : c))
       )
 
-      success(
-        t({
-          en: `Image updated for ${labelMap[slug]?.en || slug}.`,
-          fr: `Image mise à jour pour ${labelMap[slug]?.fr || slug}.`,
-        })
-      )
+      success(`Image updated for ${labelMap[slug] || slug}.`)
     } catch (e: any) {
       console.error(e)
-      notifyError(
-        e.message ||
-          t({ en: 'Upload failed.', fr: 'Échec du téléchargement.' })
-      )
+      notifyError(e.message || 'Upload failed.')
     }
 
     setUploading(null)
@@ -107,14 +92,9 @@ export default function AdminCategories() {
   return (
     <div className="mx-auto max-w-5xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-brand-dark">
-          {t({ en: 'Categories', fr: 'Catégories' })}
-        </h1>
+        <h1 className="text-3xl font-bold text-brand-dark">Categories</h1>
         <p className="mt-1 text-sm text-brand-dark/50">
-          {t({
-            en: 'Upload images for each category. They appear on the homepage "Shop by Category" section.',
-            fr: 'Téléchargez les images de chaque catégorie. Elles apparaissent dans la section "Parcourir par catégorie".',
-          })}
+          Upload images for each category. They appear on the homepage &ldquo;Shop by Category&rdquo; section.
         </p>
       </div>
 
@@ -150,9 +130,7 @@ export default function AdminCategories() {
                 </div>
 
                 <div className="p-4">
-                  <h3 className="font-semibold text-brand-dark mb-1">
-                    {t({ en: cat.label_en, fr: cat.label_fr })}
-                  </h3>
+                  <h3 className="font-semibold text-brand-dark mb-1">{cat.label_en}</h3>
                   <p className="text-xs text-brand-dark/40 mb-4">{cat.slug}</p>
 
                   <input
@@ -175,9 +153,7 @@ export default function AdminCategories() {
                     className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-brand-grey/30 px-4 py-2.5 text-sm font-medium text-brand-dark/60 transition hover:border-brand-blue hover:text-brand-blue disabled:opacity-50"
                   >
                     <Upload className="h-4 w-4" />
-                    {cat.image_url
-                      ? t({ en: 'Change image', fr: "Changer l'image" })
-                      : t({ en: 'Upload image', fr: 'Télécharger une image' })}
+                    {cat.image_url ? 'Change image' : 'Upload image'}
                   </button>
                 </div>
               </div>

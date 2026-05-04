@@ -2,13 +2,12 @@
 
 import { Plus, X, AlertTriangle } from 'lucide-react'
 import { ProductCondition, ProductCategory, Variant } from '@/lib/supabase'
-import { useLanguage } from '@/context/LanguageContext'
 import ImageUploader from '@/components/ImageUploader'
 
 export const WARRANTY_DEFAULTS: Record<ProductCondition, string> = {
-  new: 'Garantie fabricant / Manufacturer warranty',
-  refurbished: '30 jours / 30 days',
-  second_hand: 'Aucune garantie / No warranty',
+  new: 'Manufacturer warranty',
+  refurbished: '30 days',
+  second_hand: 'No warranty',
 }
 
 export interface ProductFormErrors {
@@ -126,7 +125,6 @@ export default function ProductForm({
   onRemoveVariantGroup,
   onImagesChange,
 }: ProductFormProps) {
-  const { t, language } = useLanguage()
   const hasVariants = variants.length > 0
   const specKeys = Object.keys(specs)
 
@@ -134,11 +132,9 @@ export default function ProductForm({
     <div className="space-y-6">
       {/* Condition & Category */}
       <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
-        <h2 className={sectionTitleCls}>
-          {t({ en: 'Classification', fr: 'Classification' })}
-        </h2>
+        <h2 className={sectionTitleCls}>Classification</h2>
         <div className="grid grid-cols-2 gap-4">
-          <Field label={t({ en: 'Condition', fr: 'État' })} required error={errors.condition}>
+          <Field label="Condition" required error={errors.condition}>
             <select
               value={condition}
               onChange={e => onConditionChange(e.target.value as ProductCondition)}
@@ -146,14 +142,12 @@ export default function ProductForm({
               aria-required="true"
               className={inputCls}
             >
-              <option value="new">{t({ en: 'New', fr: 'Neuf' })}</option>
-              <option value="refurbished">
-                {t({ en: 'Refurbished', fr: 'Reconditionné' })}
-              </option>
-              <option value="second_hand">{t({ en: 'Second-hand', fr: 'Occasion' })}</option>
+              <option value="new">New</option>
+              <option value="refurbished">Refurbished</option>
+              <option value="second_hand">Second-hand</option>
             </select>
           </Field>
-          <Field label={t({ en: 'Category', fr: 'Catégorie' })} required error={errors.category}>
+          <Field label="Category" required error={errors.category}>
             <select
               value={category}
               onChange={e => onChange({ category: e.target.value as ProductCategory })}
@@ -161,37 +155,28 @@ export default function ProductForm({
               aria-required="true"
               className={inputCls}
             >
-              <option value="keyboard">{t({ en: 'Keyboard', fr: 'Clavier' })}</option>
-              <option value="mouse">{t({ en: 'Mouse', fr: 'Souris' })}</option>
-              <option value="cable">{t({ en: 'Cable', fr: 'Câble' })}</option>
-              <option value="speaker">{t({ en: 'Speaker', fr: 'Enceinte' })}</option>
-              <option value="solar_lamp">{t({ en: 'Solar Lamp', fr: 'Lampe solaire' })}</option>
-              <option value="others">{t({ en: 'Others', fr: 'Autres' })}</option>
+              <option value="keyboard">Keyboard</option>
+              <option value="mouse">Mouse</option>
+              <option value="cable">Cable</option>
+              <option value="speaker">Speaker</option>
+              <option value="solar_lamp">Solar Lamp</option>
+              <option value="others">Others</option>
             </select>
           </Field>
         </div>
         {condition === 'second_hand' && (
           <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
             <AlertTriangle className="mt-0.5 w-4 h-4 shrink-0" aria-hidden="true" />
-            {t({
-              en: 'Second-hand products require at least 2 actual photos. No returns accepted.',
-              fr: "Les produits d'occasion nécessitent au moins 2 photos réelles. Aucun retour accepté.",
-            })}
+            Second-hand products require at least 2 actual photos. No returns accepted.
           </div>
         )}
       </div>
 
       {/* Basic Info */}
       <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
-        <h2 className={sectionTitleCls}>
-          {t({ en: 'Basic Information', fr: 'Informations de base' })}
-        </h2>
+        <h2 className={sectionTitleCls}>Basic Information</h2>
         <div className="space-y-4">
-          <Field
-            label={language === 'fr' ? 'Nom du produit' : 'Product Name'}
-            required
-            error={errors.name}
-          >
+          <Field label="Product Name" required error={errors.name}>
             <input
               type="text"
               value={name}
@@ -200,27 +185,21 @@ export default function ProductForm({
               aria-required="true"
               aria-invalid={!!errors.name}
               className={inputCls}
-              placeholder={
-                language === 'fr' ? 'Ex: Clavier mécanique RGB' : 'Ex: RGB Mechanical Keyboard'
-              }
+              placeholder="Ex: RGB Mechanical Keyboard"
             />
           </Field>
 
-          <Field label={language === 'fr' ? 'Description' : 'Description'} error={errors.description}>
+          <Field label="Description" error={errors.description}>
             <textarea
               value={description}
               onChange={e => onChange({ description: e.target.value })}
               rows={4}
               className={`${inputCls} resize-none`}
-              placeholder={
-                language === 'fr'
-                  ? 'Décrivez le produit en détail...'
-                  : 'Describe the product in detail...'
-              }
+              placeholder="Describe the product in detail..."
             />
           </Field>
 
-          <Field label={t({ en: 'Brand', fr: 'Marque' })} error={errors.brand}>
+          <Field label="Brand" error={errors.brand}>
             <input
               type="text"
               value={brand}
@@ -231,7 +210,7 @@ export default function ProductForm({
           </Field>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label={t({ en: 'Price (XAF)', fr: 'Prix (XAF)' })} required error={errors.price_xaf}>
+            <Field label="Price (XAF)" required error={errors.price_xaf}>
               <input
                 type="number"
                 value={price_xaf || ''}
@@ -244,7 +223,7 @@ export default function ProductForm({
                 placeholder="0"
               />
             </Field>
-            <Field label={t({ en: 'Compare-at Price (XAF)', fr: 'Prix barré (XAF)' })}>
+            <Field label="Compare-at Price (XAF)">
               <input
                 type="number"
                 value={compare_at_price ?? ''}
@@ -253,25 +232,25 @@ export default function ProductForm({
                 }
                 min="0"
                 className={inputCls}
-                placeholder={t({ en: 'Optional', fr: 'Optionnel' })}
+                placeholder="Optional"
               />
             </Field>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label={t({ en: 'Stock Status', fr: 'Statut du stock' })}>
+            <Field label="Stock Status">
               <select
                 value={stock_status}
                 onChange={e => onChange({ stock_status: e.target.value as any })}
                 className={inputCls}
               >
-                <option value="in_stock">{t({ en: 'In Stock', fr: 'En stock' })}</option>
-                <option value="out_of_stock">{t({ en: 'Out of Stock', fr: 'Rupture' })}</option>
-                <option value="pre_order">{t({ en: 'Pre-order', fr: 'Pré-commande' })}</option>
+                <option value="in_stock">In Stock</option>
+                <option value="out_of_stock">Out of Stock</option>
+                <option value="pre_order">Pre-order</option>
               </select>
             </Field>
             {!hasVariants && (
-              <Field label={t({ en: 'Stock Qty', fr: 'Quantité' })}>
+              <Field label="Stock Qty">
                 <input
                   type="number"
                   value={stock_qty ?? 0}
@@ -284,7 +263,7 @@ export default function ProductForm({
             )}
           </div>
 
-          <Field label={t({ en: 'Warranty', fr: 'Garantie' })}>
+          <Field label="Warranty">
             <input
               type="text"
               value={warranty_info}
@@ -302,7 +281,7 @@ export default function ProductForm({
               className="h-4 w-4 shrink-0 rounded border-brand-grey text-brand-blue focus:ring-brand-blue"
             />
             <label htmlFor="featured" className="text-sm font-medium text-brand-dark cursor-pointer">
-              {t({ en: 'Featured product', fr: 'Produit en vedette' })}
+              Featured product
             </label>
           </div>
         </div>
@@ -311,22 +290,19 @@ export default function ProductForm({
       {/* Variants */}
       <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className={sectionTitleCls}>{t({ en: 'Variants', fr: 'Variantes' })}</h2>
+          <h2 className={sectionTitleCls}>Variants</h2>
           <button
             type="button"
             onClick={onAddVariantGroup}
             className="flex items-center gap-1.5 rounded-lg border border-brand-grey/30 px-3 py-1.5 text-sm font-medium text-brand-grey transition hover:border-brand-blue hover:text-brand-blue"
           >
             <Plus className="w-4 h-4" aria-hidden="true" />
-            {t({ en: 'Add Group', fr: 'Ajouter groupe' })}
+            Add Group
           </button>
         </div>
         {variants.length === 0 ? (
           <p className="text-sm text-brand-dark/40">
-            {t({
-              en: 'No variants — uses stock qty above',
-              fr: 'Aucune variante — utilise la quantité ci-dessus',
-            })}
+            No variants — uses stock qty above
           </p>
         ) : (
           <div className="space-y-6">
@@ -338,17 +314,14 @@ export default function ProductForm({
                     value={variant.label}
                     onChange={e => onUpdateVariantLabel(vi, e.target.value)}
                     className={`${inputCls} flex-1`}
-                    placeholder={t({
-                      en: 'Group label (e.g. Color, Size)',
-                      fr: 'Nom du groupe (ex. Couleur, Taille)',
-                    })}
-                    aria-label={t({ en: 'Variant group name', fr: 'Nom du groupe de variante' })}
+                    placeholder="Group label (e.g. Color, Size)"
+                    aria-label="Variant group name"
                   />
                   <button
                     type="button"
                     onClick={() => onRemoveVariantGroup(vi)}
                     className="rounded-lg p-2 text-brand-grey transition hover:bg-red-50 hover:text-red-500"
-                    aria-label={t({ en: 'Remove variant group', fr: 'Supprimer le groupe' })}
+                    aria-label="Remove variant group"
                   >
                     <X className="w-4 h-4" aria-hidden="true" />
                   </button>
@@ -356,19 +329,16 @@ export default function ProductForm({
                 <div className="space-y-2">
                   <div className="grid grid-cols-[1fr_100px_120px_auto] gap-2 items-center">
                     <span className="text-xs font-medium text-brand-dark/40 px-1">
-                      {t({ en: 'Option', fr: 'Option' })}
+                      Option
                     </span>
                     <span className="text-xs font-medium text-brand-dark/40 px-1">
-                      {t({ en: 'Stock', fr: 'Stock' })}
+                      Stock
                     </span>
                     <span
                       className="text-xs font-medium text-brand-dark/40 px-1"
-                      title={t({
-                        en: 'Price delta: positive adds to base price, negative subtracts',
-                        fr: 'Delta prix : positif ajoute au prix de base, négatif soustrait',
-                      })}
+                      title="Price delta: positive adds to base price, negative subtracts"
                     >
-                      {t({ en: '± Price (XAF)', fr: '± Prix (XAF)' })}
+                      ± Price (XAF)
                       <span className="ml-1 text-brand-grey">?</span>
                     </span>
                     <span />
@@ -385,8 +355,8 @@ export default function ProductForm({
                           onUpdateVariantOption(vi, oi, { name: e.target.value })
                         }
                         className={inputCls}
-                        placeholder={t({ en: 'Option name', fr: 'Nom option' })}
-                        aria-label={t({ en: 'Option name', fr: 'Nom de l\'option' })}
+                        placeholder="Option name"
+                        aria-label="Option name"
                       />
                       <input
                         type="number"
@@ -397,7 +367,7 @@ export default function ProductForm({
                         min="0"
                         className={inputCls}
                         placeholder="0"
-                        aria-label={t({ en: 'Stock quantity', fr: 'Quantité en stock' })}
+                        aria-label="Stock quantity"
                       />
                       <input
                         type="number"
@@ -407,17 +377,14 @@ export default function ProductForm({
                         }
                         className={inputCls}
                         placeholder="±0"
-                        title={t({
-                          en: 'Positive adds to base price, negative subtracts',
-                          fr: 'Positif ajoute au prix de base, négatif soustrait',
-                        })}
-                        aria-label={t({ en: 'Price delta in XAF', fr: 'Delta prix en XAF' })}
+                        title="Positive adds to base price, negative subtracts"
+                        aria-label="Price delta in XAF"
                       />
                       <button
                         type="button"
                         onClick={() => onRemoveVariantOption(vi, oi)}
                         className="rounded-lg p-2 text-brand-grey transition hover:bg-red-50 hover:text-red-500"
-                        aria-label={t({ en: 'Remove option', fr: 'Supprimer l\'option' })}
+                        aria-label="Remove option"
                       >
                         <X className="w-3.5 h-3.5" aria-hidden="true" />
                       </button>
@@ -429,7 +396,7 @@ export default function ProductForm({
                     className="mt-1 flex items-center gap-1 text-xs text-brand-grey transition hover:text-brand-blue"
                   >
                     <Plus className="w-3 h-3" aria-hidden="true" />
-                    {t({ en: 'Add option', fr: 'Ajouter option' })}
+                    Add option
                   </button>
                 </div>
               </div>
@@ -441,14 +408,14 @@ export default function ProductForm({
       {/* Specs */}
       <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className={sectionTitleCls}>{t({ en: 'Specifications', fr: 'Spécifications' })}</h2>
+          <h2 className={sectionTitleCls}>Specifications</h2>
           <button
             type="button"
             onClick={onAddSpec}
             className="flex items-center gap-1.5 rounded-lg border border-brand-grey/30 px-3 py-1.5 text-sm font-medium text-brand-grey transition hover:border-brand-blue hover:text-brand-blue"
           >
             <Plus className="w-4 h-4" aria-hidden="true" />
-            {t({ en: 'Add Spec', fr: 'Ajouter' })}
+            Add Spec
           </button>
         </div>
         <div className="space-y-3">
@@ -459,8 +426,8 @@ export default function ProductForm({
                 value={key}
                 onChange={e => onSpecKeyChange(index, e.target.value)}
                 className="flex-1 rounded-xl border border-brand-grey/30 bg-white px-3 py-2 text-sm text-brand-dark outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
-                placeholder={t({ en: 'Spec name', fr: 'Nom spec' })}
-                aria-label={t({ en: 'Specification name', fr: 'Nom de la spécification' })}
+                placeholder="Spec name"
+                aria-label="Specification name"
               />
               <span className="text-brand-grey" aria-hidden="true">
                 :
@@ -470,14 +437,14 @@ export default function ProductForm({
                 value={specs[key] || ''}
                 onChange={e => onSpecValueChange(key, e.target.value)}
                 className="flex-1 rounded-xl border border-brand-grey/30 bg-white px-3 py-2 text-sm text-brand-dark outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
-                placeholder={t({ en: 'Value', fr: 'Valeur' })}
-                aria-label={t({ en: 'Specification value', fr: 'Valeur de la spécification' })}
+                placeholder="Value"
+                aria-label="Specification value"
               />
               <button
                 type="button"
                 onClick={() => onRemoveSpec(index)}
                 className="rounded-lg p-2 text-brand-grey transition hover:bg-red-50 hover:text-red-500"
-                aria-label={t({ en: 'Remove spec', fr: 'Supprimer la spec' })}
+                aria-label="Remove spec"
               >
                 <X className="w-4 h-4" aria-hidden="true" />
               </button>
@@ -485,7 +452,7 @@ export default function ProductForm({
           ))}
           {specKeys.length === 0 && (
             <p className="text-sm text-brand-dark/40">
-              {t({ en: 'No specifications added', fr: 'Aucune spécification ajoutée' })}
+              No specifications added
             </p>
           )}
         </div>
@@ -493,15 +460,15 @@ export default function ProductForm({
 
       {/* Key Specifications */}
       <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
-        <h2 className={sectionTitleCls}>{t({ en: 'Key Specifications', fr: 'Spécifications clés' })}</h2>
+        <h2 className={sectionTitleCls}>Key Specifications</h2>
         {specKeys.length === 0 ? (
           <p className="text-sm text-brand-dark/40">
-            {t({ en: 'Add specifications above to select key specs', fr: 'Ajoutez des spécifications ci-dessus pour sélectionner les spécifications clés' })}
+            Add specifications above to select key specs
           </p>
         ) : (
           <div>
             <p className="mb-3 text-xs text-brand-dark/60">
-              {t({ en: 'Select up to 4 specs to highlight on the product page', fr: 'Sélectionnez jusqu\'à 4 spécifications à mettre en évidence sur la page produit' })}
+              Select up to 4 specs to highlight on the product page
             </p>
             <div className="flex flex-wrap gap-2">
               {specKeys.map(key => (
@@ -530,7 +497,7 @@ export default function ProductForm({
             </div>
             {key_specs.length > 0 && (
               <p className="mt-2 text-xs text-brand-dark/40">
-                {key_specs.length} / 4 {t({ en: 'selected', fr: 'sélectionnées' })}
+                {key_specs.length} / 4 selected
               </p>
             )}
           </div>
@@ -539,102 +506,50 @@ export default function ProductForm({
 
       {/* What's in the Box */}
       <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
-        <h2 className={sectionTitleCls}>{t({ en: "What's in the Box", fr: 'Contenu du colis' })}</h2>
-        
-        {/* English */}
-        <div className="mb-4">
-          <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-brand-dark/60">
-            EN
-          </h3>
-          <div className="space-y-2">
-            {box_contents.map((item, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={item}
-                  onChange={e => {
-                    const newBox = [...box_contents]
-                    newBox[index] = e.target.value
-                    onChange({ box_contents: newBox })
-                  }}
-                  className="flex-1 rounded-xl border border-brand-grey/30 bg-white px-3 py-2 text-sm text-brand-dark outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
-                  placeholder={t({ en: 'e.g. 1x Wireless Mouse', fr: 'ex. 1x Souris sans fil' })}
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const newBox = box_contents.filter((_, i) => i !== index)
-                    onChange({ box_contents: newBox })
-                  }}
-                  className="rounded-lg p-2 text-brand-grey transition hover:bg-red-50 hover:text-red-500"
-                >
-                  <X className="w-4 h-4" aria-hidden="true" />
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={() => onChange({ box_contents: [...box_contents, ''] })}
-              className="flex items-center gap-1.5 rounded-lg border border-brand-grey/30 px-3 py-1.5 text-sm font-medium text-brand-grey transition hover:border-brand-blue hover:text-brand-blue"
-            >
-              <Plus className="w-4 h-4" aria-hidden="true" />
-              {t({ en: 'Add item', fr: 'Ajouter' })}
-            </button>
-          </div>
-        </div>
-
-        {/* French */}
-        <div>
-          <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-brand-dark/60">
-            FR
-          </h3>
-          <div className="space-y-2">
-            {box_contents_fr.map((item, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={item}
-                  onChange={e => {
-                    const newBox = [...box_contents_fr]
-                    newBox[index] = e.target.value
-                    onChange({ box_contents_fr: newBox })
-                  }}
-                  className="flex-1 rounded-xl border border-brand-grey/30 bg-white px-3 py-2 text-sm text-brand-dark outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
-                  placeholder={t({ en: 'e.g. 1x Souris sans fil', fr: 'ex. 1x Souris sans fil' })}
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const newBox = box_contents_fr.filter((_, i) => i !== index)
-                    onChange({ box_contents_fr: newBox })
-                  }}
-                  className="rounded-lg p-2 text-brand-grey transition hover:bg-red-50 hover:text-red-500"
-                >
-                  <X className="w-4 h-4" aria-hidden="true" />
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={() => onChange({ box_contents_fr: [...box_contents_fr, ''] })}
-              className="flex items-center gap-1.5 rounded-lg border border-brand-grey/30 px-3 py-1.5 text-sm font-medium text-brand-grey transition hover:border-brand-blue hover:text-brand-blue"
-            >
-              <Plus className="w-4 h-4" aria-hidden="true" />
-              {t({ en: 'Add item', fr: 'Ajouter' })}
-            </button>
-          </div>
+        <h2 className={sectionTitleCls}>What&apos;s in the Box</h2>
+        <div className="space-y-2">
+          {box_contents.map((item, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <input
+                type="text"
+                value={item}
+                onChange={e => {
+                  const newBox = [...box_contents]
+                  newBox[index] = e.target.value
+                  onChange({ box_contents: newBox })
+                }}
+                className="flex-1 rounded-xl border border-brand-grey/30 bg-white px-3 py-2 text-sm text-brand-dark outline-none transition focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20"
+                placeholder="e.g. 1x Wireless Mouse"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const newBox = box_contents.filter((_, i) => i !== index)
+                  onChange({ box_contents: newBox })
+                }}
+                className="rounded-lg p-2 text-brand-grey transition hover:bg-red-50 hover:text-red-500"
+              >
+                <X className="w-4 h-4" aria-hidden="true" />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => onChange({ box_contents: [...box_contents, ''] })}
+            className="flex items-center gap-1.5 rounded-lg border border-brand-grey/30 px-3 py-1.5 text-sm font-medium text-brand-grey transition hover:border-brand-blue hover:text-brand-blue"
+          >
+            <Plus className="w-4 h-4" aria-hidden="true" />
+            Add item
+          </button>
         </div>
       </div>
 
       {/* Images */}
       <div className="rounded-xl border border-brand-grey/20 bg-white p-6">
-        <h2 className={sectionTitleCls}>{t({ en: 'Images', fr: 'Images' })}</h2>
+        <h2 className={sectionTitleCls}>Images</h2>
         {condition === 'second_hand' && (
           <p className="mb-3 text-xs text-amber-700">
-            {t({
-              en: 'Min. 2 photos required for second-hand items',
-              fr: 'Min. 2 photos requises pour les articles d\'occasion',
-            })}
+            Min. 2 photos required for second-hand items
           </p>
         )}
         <ImageUploader images={images} onChange={onImagesChange} />

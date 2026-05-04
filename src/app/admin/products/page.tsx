@@ -15,46 +15,12 @@ import {
 } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
 import { Product } from '@/lib/supabase'
-import { useLanguage } from '@/context/LanguageContext'
 import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts'
 
 const CONDITION_STYLE: Record<string, { bg: string; text: string; label: string }> = {
-  new: { bg: '#D1FAE5', text: '#065F46', label: 'Neuf' },
-  refurbished: { bg: '#DBEAFE', text: '#1E3A8A', label: 'Reconditionné' },
-  second_hand: { bg: '#FEF3C7', text: '#92400E', label: 'Occasion' },
-}
-
-const labels = {
-  products: { en: 'Products', fr: 'Produits' },
-  addProduct: { en: 'Add Product', fr: 'Ajouter' },
-  searchProducts: { en: 'Search products...', fr: 'Rechercher...' },
-  allBrands: { en: 'All Brands', fr: 'Toutes' },
-  product: { en: 'Product', fr: 'Produit' },
-  brand: { en: 'Brand', fr: 'Marque' },
-  price: { en: 'Price', fr: 'Prix' },
-  stock: { en: 'Stock', fr: 'Stock' },
-  condition: { en: 'Condition', fr: 'État' },
-  featured: { en: 'Featured', fr: 'Vedette' },
-  actions: { en: 'Actions', fr: 'Actions' },
-  inStock: { en: 'In Stock', fr: 'En stock' },
-  outOfStock: { en: 'Out of Stock', fr: 'Rupture' },
-  preOrder: { en: 'Pre-order', fr: 'Pré-commande' },
-  noProducts: { en: 'No products found', fr: 'Aucun produit' },
-  loadingError: {
-    en: 'Failed to connect to database. Showing local products.',
-    fr: 'Connexion échouée. Affichage des produits locaux.',
-  },
-  retry: { en: 'Retry', fr: 'Réessayer' },
-  usingLocal: { en: 'Local Data', fr: 'Données locales' },
-  usingDb: { en: 'Database', fr: 'Base de données' },
-  deleteProduct: { en: 'Delete Product', fr: 'Supprimer le produit' },
-  deleteConfirm: {
-    en: 'Are you sure you want to delete this product? This action cannot be undone.',
-    fr: 'Voulez-vous vraiment supprimer ce produit ? Cette action est irréversible.',
-  },
-  delete: { en: 'Delete', fr: 'Supprimer' },
-  cancel: { en: 'Cancel', fr: 'Annuler' },
-  deleteSuccess: { en: 'Product deleted.', fr: 'Produit supprimé.' },
+  new: { bg: '#D1FAE5', text: '#065F46', label: 'New' },
+  refurbished: { bg: '#DBEAFE', text: '#1E3A8A', label: 'Refurbished' },
+  second_hand: { bg: '#FEF3C7', text: '#92400E', label: 'Second-hand' },
 }
 
 function ProductSkeleton() {
@@ -87,7 +53,6 @@ function ProductSkeleton() {
 }
 
 export default function AdminProductsPage() {
-  const { t } = useLanguage()
   const { confirm, error: notifyError, success } = useNotifications()
   const [search, setSearch] = useState('')
   const [filterBrand, setFilterBrand] = useState<string>('')
@@ -122,7 +87,7 @@ export default function AdminProductsPage() {
         setIsLocal(true)
       }
     } catch (err: any) {
-      setError(err.message || t(labels.loadingError))
+      setError(err.message || 'Failed to connect to database. Showing local products.')
       setProducts(LOCAL_PRODUCTS as unknown as Product[])
       setIsLocal(true)
     } finally {
@@ -134,10 +99,10 @@ export default function AdminProductsPage() {
     if (isLocal) return
     const confirmed = await confirm(
       {
-        title: t(labels.deleteProduct),
-        message: `${t(labels.deleteConfirm)}\n\n"${name}"`,
-        confirmLabel: t(labels.delete),
-        cancelLabel: t(labels.cancel),
+        title: 'Delete Product',
+        message: `Are you sure you want to delete this product? This action cannot be undone.\n\n"${name}"`,
+        confirmLabel: 'Delete',
+        cancelLabel: 'Cancel',
         tone: 'danger',
       }
     )
@@ -145,7 +110,7 @@ export default function AdminProductsPage() {
     try {
       await fetch(`/api/products/${id}`, { method: 'DELETE' })
       setProducts(products.filter(p => p.id !== id))
-      success(t(labels.deleteSuccess))
+      success('Product deleted.')
     } catch {
       notifyError('Failed to delete product.')
     }
@@ -162,21 +127,21 @@ export default function AdminProductsPage() {
   const brands = Array.from(new Set(products.map(p => p.brand).filter(Boolean)))
 
   const formatPrice = (price: number) =>
-    new Intl.NumberFormat('fr-CM', { style: 'currency', currency: 'XAF' }).format(price)
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'XAF' }).format(price)
 
   return (
     <div className="max-w-6xl mx-auto px-4">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-3xl font-bold text-brand-dark">{t(labels.products)}</h1>
+            <h1 className="text-3xl font-bold text-brand-dark">Products</h1>
             <span
               className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                 isLocal ? 'bg-brand-orange/15 text-brand-orange' : 'bg-brand-blue/15 text-brand-blue'
               }`}
             >
               {isLocal ? <AlertCircle className="w-3 h-3" /> : <Database className="w-3 h-3" />}
-              {isLocal ? t(labels.usingLocal) : t(labels.usingDb)}
+              {isLocal ? 'Local Data' : 'Database'}
             </span>
           </div>
           <p className="text-brand-grey">Manage your product catalog and inventory</p>
@@ -186,7 +151,7 @@ export default function AdminProductsPage() {
           className="flex items-center gap-2 rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 shrink-0"
         >
           <Plus className="w-4 h-4" aria-hidden="true" />
-          {t(labels.addProduct)}
+          Add Product
         </Link>
       </div>
 
@@ -198,7 +163,7 @@ export default function AdminProductsPage() {
             onClick={() => loadProducts()}
             className="shrink-0 rounded-lg border border-brand-orange/30 px-3 py-1.5 text-xs font-medium hover:bg-brand-orange/10 transition"
           >
-            {t(labels.retry)}
+            Retry
           </button>
         </div>
       )}
@@ -211,7 +176,7 @@ export default function AdminProductsPage() {
           />
           <input
             type="text"
-            placeholder={t(labels.searchProducts)}
+            placeholder="Search products..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full rounded-xl border border-brand-grey/30 bg-white py-2.5 pl-10 pr-4 text-brand-dark placeholder:text-brand-dark/30 focus:outline-none focus:ring-2 focus:ring-brand-blue"
@@ -227,7 +192,7 @@ export default function AdminProductsPage() {
             onChange={e => setFilterBrand(e.target.value)}
             className="w-full appearance-none rounded-xl border border-brand-grey/30 bg-white py-2.5 pl-10 pr-8 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-blue cursor-pointer"
           >
-            <option value="">{t(labels.allBrands)}</option>
+            <option value="">All Brands</option>
             {brands.map(brand => (
               <option key={brand} value={brand}>
                 {brand}
@@ -246,25 +211,25 @@ export default function AdminProductsPage() {
               <thead>
                 <tr className="border-b border-brand-grey/20">
                   <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-brand-dark/40">
-                    {t(labels.product)}
+                    Product
                   </th>
                   <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-brand-dark/40">
-                    {t(labels.brand)}
+                    Brand
                   </th>
                   <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-brand-dark/40">
-                    {t(labels.price)}
+                    Price
                   </th>
                   <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-brand-dark/40">
-                    {t(labels.condition)}
+                    Condition
                   </th>
                   <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-brand-dark/40">
-                    {t(labels.stock)}
+                    Stock
                   </th>
                   <th className="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-brand-dark/40">
-                    {t(labels.featured)}
+                    Featured
                   </th>
                   <th className="px-5 py-4 text-right text-xs font-semibold uppercase tracking-wider text-brand-dark/40">
-                    {t(labels.actions)}
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -273,7 +238,7 @@ export default function AdminProductsPage() {
                   <tr>
                     <td colSpan={7} className="px-5 py-16 text-center">
                       <Package className="mx-auto mb-3 h-10 w-10 text-brand-dark/20" />
-                      <p className="text-brand-dark/40">{t(labels.noProducts)}</p>
+                      <p className="text-brand-dark/40">No products found</p>
                     </td>
                   </tr>
                 ) : (
@@ -329,10 +294,10 @@ export default function AdminProductsPage() {
                           }`}
                         >
                           {product.stock_status === 'in_stock'
-                            ? t(labels.inStock)
+                            ? 'In Stock'
                             : product.stock_status === 'out_of_stock'
-                              ? t(labels.outOfStock)
-                              : t(labels.preOrder)}
+                              ? 'Out of Stock'
+                              : 'Pre-order'}
                         </span>
                       </td>
                       <td className="px-5 py-4 text-center">
@@ -350,7 +315,7 @@ export default function AdminProductsPage() {
                           <Link
                             href={`/admin/products/${product.id}`}
                             className="rounded-lg p-2 text-brand-dark/40 transition hover:bg-brand-grey/10 hover:text-brand-blue"
-                            aria-label={t({ en: 'Edit product', fr: 'Modifier' })}
+                            aria-label="Edit product"
                           >
                             <Pencil className="w-4 h-4" />
                           </Link>
@@ -358,7 +323,7 @@ export default function AdminProductsPage() {
                             <button
                               onClick={() => handleDelete(product.id, product.name)}
                               className="rounded-lg p-2 text-brand-dark/40 transition hover:bg-red-50 hover:text-red-500"
-                              aria-label={t({ en: 'Delete product', fr: 'Supprimer' })}
+                              aria-label="Delete product"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>

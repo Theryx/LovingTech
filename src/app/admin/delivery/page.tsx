@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { Pencil, Trash2, Plus, X, Check, MapPin } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
-import { useLanguage } from '@/context/LanguageContext'
 import { DeliveryZone, DeliverySettings } from '@/lib/supabase'
 
 const DOUALA_SORT_ORDER = 0
@@ -57,7 +56,6 @@ function DeliverySkeleton() {
 }
 
 export default function AdminDelivery() {
-  const { t } = useLanguage()
   const { error: notifyError, success } = useNotifications()
   const [zones, setZones] = useState<DeliveryZone[]>([])
   const [settings, setSettings] = useState<DeliverySettings | null>(null)
@@ -92,12 +90,7 @@ export default function AdminDelivery() {
       if (settingsData) setThreshold(String(settingsData.free_delivery_threshold))
     } catch (e) {
       console.error(e)
-      notifyError(
-        t({
-          en: 'Failed to load delivery settings.',
-          fr: 'Échec du chargement des paramètres de livraison.',
-        })
-      )
+      notifyError('Failed to load delivery settings.')
     }
     setLoading(false)
   }
@@ -154,17 +147,9 @@ export default function AdminDelivery() {
       }
       setShowForm(false)
       await load()
-      success(
-        t({
-          en: editingId ? 'Delivery zone updated.' : 'Delivery zone created.',
-          fr: editingId ? 'Zone de livraison mise à jour.' : 'Zone de livraison créée.',
-        })
-      )
+      success(editingId ? 'Delivery zone updated.' : 'Delivery zone created.')
     } catch (e: any) {
-      notifyError(
-        e.message ||
-          t({ en: 'Error saving zone.', fr: "Erreur lors de l'enregistrement de la zone." })
-      )
+      notifyError(e.message || 'Error saving zone.')
     }
     setSaving(false)
   }
@@ -174,12 +159,9 @@ export default function AdminDelivery() {
       await fetch(`/api/delivery-zones/${id}`, { method: 'DELETE' })
       setDeleteConfirm(null)
       await load()
-      success(t({ en: 'Delivery zone deleted.', fr: 'Zone de livraison supprimée.' }))
+      success('Delivery zone deleted.')
     } catch (e: any) {
-      notifyError(
-        e.message ||
-          t({ en: 'Error deleting zone.', fr: 'Erreur lors de la suppression de la zone.' })
-      )
+      notifyError(e.message || 'Error deleting zone.')
     }
   }
 
@@ -192,22 +174,9 @@ export default function AdminDelivery() {
         body: JSON.stringify({ is_available: !zone.is_available }),
       })
       await load()
-      success(
-        t({
-          en: zone.is_available ? 'City disabled for delivery.' : 'City enabled for delivery.',
-          fr: zone.is_available
-            ? 'Ville désactivée pour la livraison.'
-            : 'Ville activée pour la livraison.',
-        })
-      )
+      success(zone.is_available ? 'City disabled for delivery.' : 'City enabled for delivery.')
     } catch (e: any) {
-      notifyError(
-        e.message ||
-          t({
-            en: 'Failed to update availability.',
-            fr: 'Échec de mise à jour de la disponibilité.',
-          })
-      )
+      notifyError(e.message || 'Failed to update availability.')
     }
   }
 
@@ -221,15 +190,10 @@ export default function AdminDelivery() {
         body: JSON.stringify({ free_delivery_threshold: val }),
       })
       setThresholdSaved(true)
-      success(
-        t({ en: 'Free delivery threshold saved.', fr: 'Seuil de livraison gratuite enregistré.' })
-      )
+      success('Free delivery threshold saved.')
       setTimeout(() => setThresholdSaved(false), 2000)
     } catch (e: any) {
-      notifyError(
-        e.message ||
-          t({ en: 'Failed to save threshold.', fr: "Échec de l'enregistrement du seuil." })
-      )
+      notifyError(e.message || 'Failed to save threshold.')
     }
   }
 
@@ -239,28 +203,21 @@ export default function AdminDelivery() {
   return (
     <div className="mx-auto max-w-5xl">
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-brand-dark">
-          {t({ en: 'Delivery Zones', fr: 'Zones de livraison' })}
-        </h1>
+        <h1 className="text-3xl font-bold text-brand-dark">Delivery Zones</h1>
         <button
           onClick={openAdd}
           className="flex items-center gap-2 rounded-full bg-brand-blue px-5 py-2.5 text-sm font-medium text-white transition hover:bg-brand-blue/90"
         >
           <Plus className="h-4 w-4" />
-          {t({ en: 'Add city', fr: 'Ajouter une ville' })}
+          Add city
         </button>
       </div>
 
       {/* Free delivery threshold */}
       <div className="mb-8 rounded-xl border border-brand-grey/20 bg-white p-6">
-        <h2 className="mb-1 text-lg font-semibold text-brand-dark">
-          {t({ en: 'Free delivery from:', fr: 'Livraison gratuite à partir de:' })}
-        </h2>
+        <h2 className="mb-1 text-lg font-semibold text-brand-dark">Free delivery from:</h2>
         <p className="mb-4 text-sm text-brand-dark/50">
-          {t({
-            en: `Currently: free delivery from ${parseInt(threshold).toLocaleString('fr-FR')} FCFA`,
-            fr: `Actuellement: livraison gratuite à partir de ${parseInt(threshold).toLocaleString('fr-FR')} FCFA`,
-          })}
+          Currently: free delivery from {parseInt(threshold).toLocaleString('en-US')} FCFA
         </p>
         <div className="flex items-center gap-3">
           <input
@@ -274,9 +231,7 @@ export default function AdminDelivery() {
             onClick={saveThreshold}
             className={`rounded-full px-4 py-2 text-sm font-medium transition ${thresholdSaved ? 'bg-green-100 text-green-700' : 'bg-brand-blue text-white hover:bg-brand-blue/90'}`}
           >
-            {thresholdSaved
-              ? t({ en: 'Saved!', fr: 'Enregistré!' })
-              : t({ en: 'Save', fr: 'Enregistrer' })}
+            {thresholdSaved ? 'Saved!' : 'Save'}
           </button>
         </div>
       </div>
@@ -287,36 +242,19 @@ export default function AdminDelivery() {
       ) : zones.length === 0 ? (
         <div className="rounded-xl border border-dashed border-brand-grey/30 p-12 text-center text-brand-dark/40">
           <MapPin className="mx-auto mb-3 h-8 w-8 opacity-40" />
-          <p>
-            {t({
-              en: 'No delivery zones yet. Add Douala first.',
-              fr: 'Aucune zone. Commencez par ajouter Douala.',
-            })}
-          </p>
+          <p>No delivery zones yet. Add Douala first.</p>
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-brand-grey/20">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-brand-grey/20 bg-brand-grey/5 text-left">
-                <th className="px-4 py-3 font-medium text-brand-dark/60">
-                  {t({ en: 'City', fr: 'Ville' })}
-                </th>
-                <th className="px-4 py-3 font-medium text-brand-dark/60">
-                  {t({ en: 'Fee', fr: 'Frais' })}
-                </th>
-                <th className="px-4 py-3 font-medium text-brand-dark/60">
-                  {t({ en: 'Agencies', fr: 'Agences' })}
-                </th>
-                <th className="px-4 py-3 font-medium text-brand-dark/60">
-                  {t({ en: 'Delay', fr: 'Délai' })}
-                </th>
-                <th className="px-4 py-3 font-medium text-brand-dark/60">
-                  {t({ en: 'Available', fr: 'Disponible' })}
-                </th>
-                <th className="px-4 py-3 font-medium text-brand-dark/60">
-                  {t({ en: 'Actions', fr: 'Actions' })}
-                </th>
+                <th className="px-4 py-3 font-medium text-brand-dark/60">City</th>
+                <th className="px-4 py-3 font-medium text-brand-dark/60">Fee</th>
+                <th className="px-4 py-3 font-medium text-brand-dark/60">Agencies</th>
+                <th className="px-4 py-3 font-medium text-brand-dark/60">Delay</th>
+                <th className="px-4 py-3 font-medium text-brand-dark/60">Available</th>
+                <th className="px-4 py-3 font-medium text-brand-dark/60">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -334,18 +272,16 @@ export default function AdminDelivery() {
                       )}
                       {isDouala && (
                         <span className="ml-2 rounded-full bg-brand-blue/10 px-2 py-0.5 text-xs text-brand-blue">
-                          {t({ en: 'Default', fr: 'Par défaut' })}
+                          Default
                         </span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-brand-dark/70">
-                      {zone.delivery_fee.toLocaleString('fr-FR')} FCFA
+                      {zone.delivery_fee.toLocaleString('en-US')} FCFA
                     </td>
                     <td className="px-4 py-3 text-brand-dark/70">
                       {(zone.agencies || []).length === 0 ? (
-                        <span className="text-brand-dark/30 italic">
-                          {t({ en: 'None configured', fr: 'Aucune configurée' })}
-                        </span>
+                        <span className="text-brand-dark/30 italic">None configured</span>
                       ) : (
                         (zone.agencies || []).join(', ')
                       )}
@@ -358,9 +294,7 @@ export default function AdminDelivery() {
                         onClick={() => toggleAvailable(zone)}
                         role="switch"
                         aria-checked={zone.is_available}
-                        aria-label={zone.is_available
-                          ? t({ en: 'Disable delivery', fr: 'Désactiver la livraison' })
-                          : t({ en: 'Enable delivery', fr: 'Activer la livraison' })}
+                        aria-label={zone.is_available ? 'Disable delivery' : 'Enable delivery'}
                         className={`relative inline-flex h-5 w-9 items-center rounded-full transition ${zone.is_available ? 'bg-brand-blue' : 'bg-brand-grey/40'}`}
                       >
                         <span
@@ -420,9 +354,7 @@ export default function AdminDelivery() {
           <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
             <div className="mb-5 flex items-center justify-between">
               <h2 className="text-xl font-bold text-brand-dark">
-                {editingId
-                  ? t({ en: 'Edit city', fr: 'Modifier la ville' })
-                  : t({ en: 'Add city', fr: 'Ajouter une ville' })}
+                {editingId ? 'Edit city' : 'Add city'}
               </h2>
               <button
                 onClick={() => setShowForm(false)}
@@ -436,7 +368,7 @@ export default function AdminDelivery() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-brand-dark/60">
-                    Nom (FR) *
+                    Name (FR) *
                   </label>
                   <input
                     value={form.city_name_fr}
@@ -461,7 +393,7 @@ export default function AdminDelivery() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-brand-dark/60">
-                    {t({ en: 'Delivery fee (FCFA)', fr: 'Frais de livraison (FCFA)' })} *
+                    Delivery fee (FCFA) *
                   </label>
                   <input
                     type="number"
@@ -474,16 +406,14 @@ export default function AdminDelivery() {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-brand-dark/60">
-                    {t({ en: 'Available', fr: 'Disponible' })}
+                    Available
                   </label>
                   <div className="flex items-center gap-2 pt-2">
                     <button
                       onClick={() => setForm(f => ({ ...f, is_available: !f.is_available }))}
                       role="switch"
                       aria-checked={form.is_available}
-                      aria-label={form.is_available
-                        ? t({ en: 'Mark unavailable', fr: 'Marquer indisponible' })
-                        : t({ en: 'Mark available', fr: 'Marquer disponible' })}
+                      aria-label={form.is_available ? 'Mark unavailable' : 'Mark available'}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${form.is_available ? 'bg-brand-blue' : 'bg-brand-grey/40'}`}
                     >
                       <span
@@ -491,7 +421,7 @@ export default function AdminDelivery() {
                       />
                     </button>
                     <span className="text-sm text-brand-dark/60">
-                      {form.is_available ? t({ en: 'Yes', fr: 'Oui' }) : t({ en: 'No', fr: 'Non' })}
+                      {form.is_available ? 'Yes' : 'No'}
                     </span>
                   </div>
                 </div>
@@ -499,7 +429,7 @@ export default function AdminDelivery() {
 
               <div>
                 <label className="mb-1 block text-xs font-medium text-brand-dark/60">
-                  {t({ en: 'Estimated delay', fr: 'Délai estimé' })} *
+                  Estimated delay *
                 </label>
                 <input
                   value={form.estimated_days}
@@ -511,7 +441,7 @@ export default function AdminDelivery() {
 
               <div>
                 <label className="mb-2 block text-xs font-medium text-brand-dark/60">
-                  {t({ en: 'Bus agencies', fr: 'Agences de bus' })}
+                  Bus agencies
                 </label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {(form.agencies || []).map((ag, i) => (
@@ -540,10 +470,7 @@ export default function AdminDelivery() {
                       }
                     }}
                     className={inputCls}
-                    placeholder={t({
-                      en: 'Agency name (press Enter)',
-                      fr: "Nom de l'agence (Entrée)",
-                    })}
+                    placeholder="Agency name (press Enter)"
                   />
                   <button
                     onClick={addAgency}
@@ -560,16 +487,14 @@ export default function AdminDelivery() {
                 onClick={() => setShowForm(false)}
                 className="rounded-full border border-brand-grey/30 px-5 py-2 text-sm text-brand-dark hover:bg-brand-grey/10 transition"
               >
-                {t({ en: 'Cancel', fr: 'Annuler' })}
+                Cancel
               </button>
               <button
                 onClick={saveZone}
                 disabled={saving || !form.city_name_fr.trim() || !form.city_name_en.trim()}
                 className="rounded-full bg-brand-blue px-5 py-2 text-sm font-medium text-white transition hover:bg-brand-blue/90 disabled:opacity-50"
               >
-                {saving
-                  ? t({ en: 'Saving…', fr: 'Enregistrement…' })
-                  : t({ en: 'Save', fr: 'Enregistrer' })}
+                {saving ? 'Saving…' : 'Save'}
               </button>
             </div>
           </div>

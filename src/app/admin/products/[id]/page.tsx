@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { Save } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
 import { Product, ProductCondition, ProductCategory, Variant } from '@/lib/supabase'
-import { useLanguage } from '@/context/LanguageContext'
 import ProductForm, { WARRANTY_DEFAULTS } from '@/components/ProductForm'
 import { LOCAL_PRODUCTS } from '@/lib/localProducts'
 
@@ -40,7 +39,6 @@ interface ProductFormErrors {
 export default function AdminProductEditorPage() {
   const router = useRouter()
   const params = useParams()
-  const { t } = useLanguage()
   const { error: notifyError, success } = useNotifications()
   const productId = params.id as string
 
@@ -205,18 +203,13 @@ export default function AdminProductEditorPage() {
   const validate = (): boolean => {
     const errs: ProductFormErrors = {}
     if (!product.name.trim()) {
-      errs.name = t({ en: 'Product name is required', fr: 'Le nom du produit est requis' })
+      errs.name = 'Product name is required'
     }
     if (product.price_xaf <= 0) {
-      errs.price_xaf = t({ en: 'Price must be greater than 0', fr: 'Le prix doit être supérieur à 0' })
+      errs.price_xaf = 'Price must be greater than 0'
     }
     if (product.condition === 'second_hand' && product.images.length < 2) {
-      notifyError(
-        t({
-          en: 'Second-hand products require at least 2 photos.',
-          fr: 'Les produits d\'occasion nécessitent au moins 2 photos.',
-        })
-      )
+      notifyError('Second-hand products require at least 2 photos.')
       return false
     }
     setErrors(errs)
@@ -245,7 +238,7 @@ export default function AdminProductEditorPage() {
           throw new Error(err.error || 'Failed to update')
         }
       }
-      success(t({ en: 'Product saved successfully.', fr: 'Produit enregistré avec succès.' }))
+      success('Product saved successfully.')
       setTimeout(() => router.push('/admin/products'), 1200)
     } catch (error: any) {
       notifyError(`Failed to save: ${error.message || 'Unknown error'}`)
@@ -277,9 +270,7 @@ export default function AdminProductEditorPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
-          <h1 className="text-3xl font-bold text-brand-dark">
-            {t({ en: 'Edit Product', fr: 'Modifier le produit' })}
-          </h1>
+          <h1 className="text-3xl font-bold text-brand-dark">Edit Product</h1>
         </div>
         <button
           onClick={handleSave}
@@ -287,9 +278,7 @@ export default function AdminProductEditorPage() {
           className="flex items-center gap-2 rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 disabled:opacity-50"
         >
           <Save className="w-4 h-4" aria-hidden="true" />
-          {saving
-            ? t({ en: 'Saving…', fr: 'Enregistrement…' })
-            : t({ en: 'Save', fr: 'Enregistrer' })}
+          {saving ? 'Saving…' : 'Save'}
         </button>
       </div>
 
