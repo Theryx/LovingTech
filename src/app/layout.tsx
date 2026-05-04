@@ -7,6 +7,7 @@ import FloatingWhatsApp from '@/components/FloatingWhatsApp'
 import { NotificationProvider } from '@/components/NotificationProvider'
 import { LanguageProvider } from '@/context/LanguageContext'
 import { MetaPixel } from '@/components/MetaPixel'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -53,6 +54,7 @@ export default function RootLayout({
             <MetaPixel pixelId={process.env.NEXT_PUBLIC_META_PIXEL_ID!} />
           </LanguageProvider>
         </NotificationProvider>
+        <SpeedInsights />
       </body>
     </html>
   )
