@@ -326,6 +326,7 @@ export default function AdminProductEditorPage() {
         onRemoveVariantOption={removeVariantOption}
         onRemoveVariantGroup={removeVariantGroup}
         onImagesChange={images => setProduct(p => ({ ...p, images }))}
+        specKeys={specKeys}
         brands={brands}
       />
     </div>

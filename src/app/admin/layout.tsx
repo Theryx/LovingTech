@@ -16,6 +16,7 @@ import {
   LayoutGrid,
   Menu,
   X,
+  BarChart3,
 } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 
@@ -26,6 +27,7 @@ const adminNav: { group: string; items: { href: string; label: string; icon: Rea
       { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
       { href: '/admin/products', label: 'Products', icon: Package },
       { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
+      { href: '/admin/out-of-stock-demand', label: 'OOS Demand', icon: BarChart3 },
       { href: '/admin/delivery', label: 'Delivery', icon: Truck },
     ],
   },

@@ -25,7 +25,7 @@ export default function ProductTabs({ reviewsCount, children }: ProductTabsProps
   const [activeTab, setActiveTab] = useState('details')
 
   const tabs: Tab[] = [
-    { id: 'details', labelEn: 'Summary', labelFr: 'Résumé' },
+    { id: 'details', labelEn: 'Detail Description', labelFr: 'Description détaillée' },
     { id: 'specifications', labelEn: 'Specifications', labelFr: 'Spécifications' },
     { id: 'boxContents', labelEn: "What's in the box", labelFr: 'Contenu' },
     { id: 'reviews', labelEn: 'Reviews', labelFr: 'Avis', badge: reviewsCount },

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ShoppingCart } from 'lucide-react'
+import { MessageCircle } from 'lucide-react'
 import { ProductWithFeatured } from '@/lib/localProducts'
 import { useLanguage } from '@/context/LanguageContext'
 import LeadModal from './LeadModal'
@@ -24,7 +24,7 @@ export default function ProductDetailActions({ product }: ProductDetailActionsPr
         disabled={isOutOfStock}
         className="rounded-2xl py-5 text-lg font-bold active:scale-[0.98]"
       >
-        <ShoppingCart className="w-6 h-6" />
+        <MessageCircle className="w-6 h-6" />
         {isOutOfStock
           ? t({ en: 'Out of Stock', fr: 'Rupture de stock' })
           : t({ en: 'Order via WhatsApp', fr: 'Commander via WhatsApp' })}

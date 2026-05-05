@@ -23,6 +23,7 @@ interface CardProps {
   className?: string
   priority?: boolean
   href?: string
+  onClick?: () => void
 }
 
 const Card = ({
@@ -37,6 +38,7 @@ const Card = ({
   className,
   priority = false,
   href,
+  onClick,
 }: CardProps) => {
   const [imgSrc, setImgSrc] = useState(image || PLACEHOLDER)
 
@@ -90,6 +92,7 @@ const Card = ({
     return (
       <a
         href={href}
+        onClick={onClick}
         className={cn(
           'flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm border border-brand-grey/20 transition-all hover:scale-[1.01] hover:shadow-md',
           className

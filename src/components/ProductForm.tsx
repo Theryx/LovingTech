@@ -41,6 +41,7 @@ interface ProductFormProps {
   box_contents_fr?: string[]
   errors?: ProductFormErrors
   brands?: string[]
+  specKeys?: string[]
   onChange: (patch: Partial<ProductFormProps>) => void
   onConditionChange: (condition: ProductCondition) => void
   onSpecKeyChange: (index: number, value: string) => void
@@ -113,6 +114,7 @@ export default function ProductForm({
   box_contents_fr = [],
   errors = {},
   brands = [],
+  specKeys = [],
   onChange,
   onConditionChange,
   onSpecKeyChange,
@@ -128,7 +130,6 @@ export default function ProductForm({
   onImagesChange,
 }: ProductFormProps) {
   const hasVariants = variants.length > 0
-  const specKeys = Object.keys(specs)
 
   return (
     <div className="space-y-6">
@@ -202,21 +203,35 @@ export default function ProductForm({
           </Field>
 
           <Field label="Brand" error={errors.brand}>
-            <input
-              type="text"
-              value={brand}
-              onChange={e => onChange({ brand: e.target.value })}
+            <select
+              value={brands.includes(brand) ? brand : '__custom__'}
+              onChange={e => {
+                if (e.target.value === '__new__') {
+                  onChange({ brand: '' })
+                } else if (e.target.value !== '__custom__') {
+                  onChange({ brand: e.target.value })
+                }
+              }}
               className={inputCls}
-              placeholder="Logitech, Apple, Anker..."
-              list="brand-list"
-              autoComplete="off"
-            />
-            {brands.length > 0 && (
-              <datalist id="brand-list">
-                {brands.map(b => (
-                  <option key={b} value={b} />
-                ))}
-              </datalist>
+            >
+              {brands.map(b => (
+                <option key={b} value={b}>{b}</option>
+              ))}
+              {brand && !brands.includes(brand) && (
+                <option value="__custom__">{brand}</option>
+              )}
+              <option disabled>──────────</option>
+              <option value="__new__">+ New Brand</option>
+            </select>
+            {(!brands.includes(brand) || brand === '' && brands.length > 0) && brand !== '' && (
+              <input
+                type="text"
+                value={brand}
+                onChange={e => onChange({ brand: e.target.value })}
+                className={`${inputCls} mt-2`}
+                placeholder="Type new brand name..."
+                autoFocus
+              />
             )}
           </Field>
 
@@ -250,22 +265,40 @@ export default function ProductForm({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Stock Status">
-              <select
-                value={stock_status}
-                onChange={e => onChange({ stock_status: e.target.value as any })}
-                className={inputCls}
-              >
-                <option value="in_stock">In Stock</option>
-                <option value="out_of_stock">Out of Stock</option>
-                <option value="pre_order">Pre-order</option>
-              </select>
+              <div className={`${inputCls} flex items-center justify-between`}>
+                <span className="text-sm text-brand-dark/60">
+                  {stock_qty >= 1
+                    ? 'In Stock'
+                    : stock_status === 'pre_order'
+                      ? 'Pre-order'
+                      : 'Out of Stock'}
+                </span>
+                {stock_qty === 0 && stock_status !== 'pre_order' && (
+                  <button
+                    type="button"
+                    onClick={() => onChange({ stock_status: 'pre_order' })}
+                    className="text-xs text-brand-blue hover:underline"
+                  >
+                    Set Pre-order
+                  </button>
+                )}
+                {stock_status === 'pre_order' && stock_qty === 0 && (
+                  <button
+                    type="button"
+                    onClick={() => onChange({ stock_status: 'out_of_stock' })}
+                    className="text-xs text-brand-dark/40 hover:underline"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
             </Field>
             {!hasVariants && (
               <Field label="Stock Qty">
                 <input
                   type="number"
                   value={stock_qty ?? 0}
-                  onChange={e => onChange({ stock_qty: Number(e.target.value) })}
+                  onChange={e => onChange({ stock_qty: Number(e.target.value), stock_status: Number(e.target.value) > 0 ? 'in_stock' : stock_status === 'pre_order' ? 'pre_order' : 'out_of_stock' })}
                   min="0"
                   className={inputCls}
                   placeholder="0"

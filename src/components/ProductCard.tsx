@@ -18,10 +18,23 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const isOutOfStock = product.stock_status === 'out_of_stock'
 
+  const trackOutOfStockClick = () => {
+    if (!isOutOfStock) return
+    fetch('/api/out-of-stock-interactions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        product_id: product.id,
+        product_name: product.name,
+      }),
+    }).catch(() => {})
+  }
+
   return (
     <>
       <Card
         href={`/product/${product.id}`}
+        onClick={trackOutOfStockClick}
         image={product.images?.[0] || '/images/placeholder.svg'}
         name={product.name}
         price={product.price_xaf}

@@ -236,6 +236,7 @@ export default function NewProductPage() {
         onRemoveVariantOption={removeVariantOption}
         onRemoveVariantGroup={removeVariantGroup}
         onImagesChange={images => setProduct(p => ({ ...p, images }))}
+        specKeys={specKeys}
         brands={brands}
       />
     </div>

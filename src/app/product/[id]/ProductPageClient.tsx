@@ -21,88 +21,6 @@ const CONDITION_BADGE: Record<
   second_hand: { bg: '#FEF3C7', text: '#92400E', labelFr: 'Occasion', labelEn: 'Second-hand' },
 }
 
-// Summary tab content component
-function ProductSummary({ product, language }: { product: any; language: string }) {
-  const { t } = useLanguage()
-  
-  const boxItems =
-    language === 'fr' && product.box_contents_fr?.length
-      ? product.box_contents_fr
-      : product.box_contents || []
-
-  const keySpecs = (product.key_specs || [])
-    .filter((key: string) => product.specs && product.specs[key])
-    .slice(0, 4)
-
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      {/* Description column */}
-      <div className="lg:col-span-2">
-        <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-brand-blue">
-          {t({ en: 'About this product', fr: 'À propos de ce produit' })}
-        </h3>
-        <p className="text-sm leading-relaxed text-brand-dark/70">
-          {t({
-            en: product.description_en || product.description || '',
-            fr: product.description_fr || product.description || '',
-          }) || t({ en: product.name_en || product.name, fr: product.name_fr || product.name })}
-        </p>
-
-        {product.warranty_info && (
-          <div className="mt-6 rounded-xl border border-brand-grey/20 p-4">
-            <h4 className="mb-2 text-xs font-bold uppercase tracking-wider text-brand-dark/60">
-              {t({ en: 'Warranty', fr: 'Garantie' })}
-            </h4>
-            <p className="text-sm text-brand-dark/70">{product.warranty_info}</p>
-          </div>
-        )}
-      </div>
-
-      {/* Key specs and box contents sidebar */}
-      <div className="space-y-6">
-        {keySpecs.length > 0 && (
-          <div>
-            <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-brand-blue">
-              {t({ en: 'Key Specs', fr: 'Spécifications clés' })}
-            </h3>
-            <div className="space-y-2">
-              {keySpecs.map((key: string) => (
-                <div
-                  key={key}
-                  className="flex items-center justify-between rounded-lg border border-brand-grey/20 px-3 py-2.5"
-                >
-                  <span className="text-xs font-medium capitalize text-brand-dark/60">
-                    {key}
-                  </span>
-                  <span className="text-sm font-semibold text-brand-dark">
-                    {product.specs[key]}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {boxItems.length > 0 && (
-          <div>
-            <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-brand-blue">
-              {t({ en: "What's in the Box", fr: 'Contenu du colis' })}
-            </h3>
-            <ul className="space-y-2">
-              {boxItems.map((item: string, index: number) => (
-                <li key={index} className="flex items-center gap-2 text-sm text-brand-dark/70">
-                  <Check className="h-3.5 w-3.5 shrink-0 text-brand-blue" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
 export default function ProductPageClient({
   product,
   related,
@@ -163,40 +81,23 @@ export default function ProductPageClient({
           </div>
 
           <div className="mb-8">
-            <span
-              className={`inline-flex px-3 py-1.5 rounded-full text-sm font-medium ${
-                product.stock_status === 'in_stock'
-                  ? 'bg-brand-blue/15 text-brand-blue'
-                  : product.stock_status === 'out_of_stock'
-                    ? 'bg-brand-dark text-white ring-1 ring-brand-grey/20'
-                    : 'bg-brand-orange/15 text-brand-orange'
-              }`}
-            >
-              {product.stock_status === 'in_stock'
-                ? t({ en: 'In Stock', fr: 'En stock' })
-                : product.stock_status === 'out_of_stock'
-                  ? t({ en: 'Out of Stock', fr: 'En rupture' })
-                  : t({ en: 'Pre-order', fr: 'Pré-commande' })}
-            </span>
-            {typeof product.stock_qty === 'number' &&
-              product.stock_qty > 0 &&
-              product.stock_status === 'in_stock' && (
-                <p className="mt-2 text-sm text-brand-dark/60">
-                  {t({
-                    en: `${product.stock_qty.toLocaleString('en-US')} item${product.stock_qty > 1 ? 's' : ''} available`,
-                    fr: `${product.stock_qty.toLocaleString('fr-FR')} article${product.stock_qty > 1 ? 's' : ''} disponible${product.stock_qty > 1 ? 's' : ''}`,
-                  })}
-                </p>
-              )}
+            {product.stock_qty >= 1 ? (
+              <span className="inline-flex px-3 py-1.5 rounded-full text-sm font-medium border border-[#92400E] bg-[#FEF3C7]/60 text-[#92400E]">
+                {t({
+                  en: `In Stock (${product.stock_qty.toLocaleString('en-US')})`,
+                  fr: `En stock (${product.stock_qty.toLocaleString('fr-FR')})`,
+                })}
+              </span>
+            ) : product.stock_status === 'pre_order' ? (
+              <span className="inline-flex px-3 py-1.5 rounded-full text-sm font-medium bg-brand-orange/15 text-brand-orange">
+                {t({ en: 'Pre-order', fr: 'Pré-commande' })}
+              </span>
+            ) : (
+              <span className="inline-flex px-3 py-1.5 rounded-full text-sm font-medium bg-brand-dark text-white ring-1 ring-brand-grey/20">
+                {t({ en: 'Out of Stock', fr: 'En rupture' })}
+              </span>
+            )}
           </div>
-
-          {/* Brief description */}
-          <p className="mb-8 text-base leading-relaxed text-brand-dark/60">
-            {t({
-              en: product.description_en || product.description || '',
-              fr: product.description_fr || product.description || '',
-            })}
-          </p>
 
           <ProductDetailActions product={product} />
 
@@ -245,11 +146,27 @@ export default function ProductPageClient({
         </div>
       </section>
 
-      {/* Tabbed Section - Above "You might also like" */}
+      {/* Tabbed Section */}
       <section className="max-w-7xl mx-auto px-6 pb-12 border-t border-brand-grey/20 pt-12">
         <ProductTabs reviewsCount={approvedReviewsCount}>
           {{
-            details: <ProductSummary product={product} language={language} />,
+            details: (
+              <div>
+                {product.warranty_info && (
+                  <div className="rounded-xl border border-brand-grey/20 p-4">
+                    <h4 className="mb-2 text-xs font-bold uppercase tracking-wider text-brand-dark/60">
+                      {t({ en: 'Warranty', fr: 'Garantie' })}
+                    </h4>
+                    <p className="text-sm text-brand-dark/70">{product.warranty_info}</p>
+                  </div>
+                )}
+                {!product.warranty_info && (
+                  <p className="text-sm text-brand-dark/40">
+                    {t({ en: 'No additional details available.', fr: 'Aucun détail supplémentaire disponible.' })}
+                  </p>
+                )}
+              </div>
+            ),
             specifications: (
               <ProductSpecs 
                 specs={product.specs || {}} 
