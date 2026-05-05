@@ -16,7 +16,7 @@ interface ProductDetailActionsProps {
 export default function ProductDetailActions({ product }: ProductDetailActionsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [quantity, setQuantity] = useState(1)
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const { addItem } = useCart()
   const { success } = useNotifications()
   const isOutOfStock = product.stock_status === 'out_of_stock'
