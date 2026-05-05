@@ -72,7 +72,7 @@ const Card = ({
 
       {/* Content Area */}
       <div className="p-4 flex flex-col flex-grow">
-        <h3 className="mb-1 line-clamp-1 text-lg font-bold text-brand-dark">{name}</h3>
+        <h3 className="mb-1 line-clamp-1 text-lg text-brand-dark">{name}</h3>
 
         <div className="flex items-baseline gap-2 mb-4">
           <span className="text-xl font-bold text-brand-dark">{(price || 0).toLocaleString()} FCFA</span>

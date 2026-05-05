@@ -70,17 +70,6 @@ export default function ProductCard({ product }: ProductCardProps) {
                 {language === 'fr' ? 'Commander' : 'Order'}
               </Button>
             </span>
-            <Button
-              variant="secondary"
-              className="px-4 py-2 text-xs"
-              aria-label={
-                language === 'fr'
-                  ? `Voir les détails de ${product.name}`
-                  : `View details for ${product.name}`
-              }
-            >
-              {language === 'fr' ? 'Détails' : 'Details'}
-            </Button>
           </div>
         }
       />
