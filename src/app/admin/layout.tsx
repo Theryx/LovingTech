@@ -17,6 +17,7 @@ import {
   Menu,
   X,
   BarChart3,
+  Building2,
 } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 
@@ -37,6 +38,7 @@ const adminNav: { group: string; items: { href: string; label: string; icon: Rea
       { href: '/admin/reviews', label: 'Reviews', icon: Star },
       { href: '/admin/promos', label: 'Promos', icon: Tag },
       { href: '/admin/categories', label: 'Categories', icon: LayoutGrid },
+      { href: '/admin/brands', label: 'Brands', icon: Building2 },
     ],
   },
 ]

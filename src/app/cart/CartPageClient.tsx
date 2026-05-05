@@ -449,7 +449,8 @@ export default function CartPageClient() {
                     type="tel"
                     value={customerPhone}
                     onChange={e => {
-                      setCustomerPhone(e.target.value.replace(/\D/g, ''))
+                      const val = e.target.value.replace(/\D/g, '')
+                      setCustomerPhone(val)
                       setPhoneError('')
                     }}
                     placeholder="6XX XXX XXX"
@@ -458,8 +459,19 @@ export default function CartPageClient() {
                     required
                   />
                 </div>
+                {customerPhone.length > 0 && customerPhone.length !== 9 && (
+                  <p className="text-xs text-orange-500">
+                    {customerPhone.length} {language === 'fr' ? 'chiffres saisis' : 'digits entered'} — 9 {language === 'fr' ? 'chiffres requis' : 'required'}
+                  </p>
+                )}
+                {customerPhone.length === 9 && (
+                  <p className="text-xs text-green-600 flex items-center gap-1">
+                    <Check className="h-3 w-3" />
+                    {language === 'fr' ? 'Format valide' : 'Valid format'}
+                  </p>
+                )}
                 {phoneError && (
-                  <p className="text-xs text-red-500 -mt-2">{phoneError}</p>
+                  <p className="text-xs text-red-500">{phoneError}</p>
                 )}
                 <select
                   value={selectedCity}
@@ -475,7 +487,7 @@ export default function CartPageClient() {
                   </option>
                   {zones.map(z => (
                     <option key={z.city_name_fr} value={z.city_name_fr}>
-                      {language === 'fr' ? z.city_name_fr : z.city_name_en} — {z.delivery_fee.toLocaleString('fr-FR')} FCFA
+                      {language === 'fr' ? z.city_name_fr : z.city_name_en}
                     </option>
                   ))}
                 </select>

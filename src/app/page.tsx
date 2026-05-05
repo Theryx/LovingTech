@@ -145,6 +145,7 @@ const CATEGORIES = [
 export default function Home() {
   const { t } = useLanguage()
   const [products, setProducts] = useState<Product[]>(LOCAL_PRODUCTS as Product[])
+  const [brands, setBrands] = useState<{ id: string; name: string; logo_url: string | null; is_active: boolean }[]>([])
 
   useEffect(() => {
     productService
@@ -152,6 +153,10 @@ export default function Home() {
       .then(db => {
         if (db.length > 0) setProducts(db)
       })
+      .catch(() => {})
+    fetch('/api/brands')
+      .then(r => r.json())
+      .then(data => setBrands(Array.isArray(data) ? data : []))
       .catch(() => {})
   }, [])
 
@@ -197,19 +202,30 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-          {brandLogos.map(brand => (
+          {(brands.length > 0
+            ? brands.filter(b => b.is_active)
+            : brandLogos.map(name => ({ id: name, name, logo_url: null, is_active: true }))
+          ).map((brand: any) => (
             <Link
-              key={brand}
-              href={`/products?brand=${encodeURIComponent(brand)}`}
+              key={brand.id}
+              href={`/products?brand=${encodeURIComponent(brand.name)}`}
               className="group flex flex-col items-center gap-3"
             >
-              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-brand-grey/10 transition-all duration-300 group-hover:bg-brand-blue/10 group-hover:shadow-lg sm:h-28 sm:w-28">
-                <span className="text-lg font-bold text-brand-dark/70 transition-colors group-hover:text-brand-blue sm:text-xl">
-                  {brand}
-                </span>
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-brand-grey/10 transition-all duration-300 group-hover:bg-brand-blue/10 group-hover:shadow-lg sm:h-28 sm:w-28 overflow-hidden">
+                {brand.logo_url ? (
+                  <img
+                    src={brand.logo_url}
+                    alt={brand.name}
+                    className="h-full w-full object-contain p-4"
+                  />
+                ) : (
+                  <span className="text-lg font-bold text-brand-dark/70 transition-colors group-hover:text-brand-blue sm:text-xl">
+                    {brand.name}
+                  </span>
+                )}
               </div>
               <span className="text-sm font-medium text-brand-dark/60 transition-colors group-hover:text-brand-dark">
-                {brand}
+                {brand.name}
               </span>
             </Link>
           ))}
