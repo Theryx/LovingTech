@@ -7,9 +7,6 @@ import {
   CheckCircle2,
   Clock3,
   MessageCircle,
-  ShieldCheck,
-  ShoppingBag,
-  Truck,
 } from 'lucide-react'
 
 import ProductCard from '@/components/ProductCard'
@@ -20,7 +17,7 @@ import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts'
 import { Product, productService } from '@/lib/supabase'
 import { useLanguage } from '@/context/LanguageContext'
 
-const brandLogos = ['Logitech', 'Keychron', 'Anker']
+const brandLogos = ['Logitech', 'Keychron', 'Anker', 'Razer', 'SteelSeries', 'Corsair', 'HyperX', 'JBL']
 
 const CATEGORIES = [
   {
@@ -195,39 +192,50 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trust pillars */}
-      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-12 border-b border-brand-grey/20 px-6 py-20 md:grid-cols-3">
-        {[
-          {
-            icon: <ShieldCheck className="h-8 w-8" aria-hidden="true" />,
-            title: t({ en: 'Authenticity guaranteed', fr: 'Authenticité garantie' }),
-            body: t({
-              en: 'Premium brands, never counterfeits.',
-              fr: 'Des marques premium, jamais de contrefaçons.',
-            }),
-          },
-          {
-            icon: <Truck className="h-8 w-8" aria-hidden="true" />,
-            title: t({ en: 'Nationwide delivery', fr: 'Livraison nationale' }),
-            body: t({
-              en: 'Anywhere in Cameroon via bus agencies.',
-              fr: 'Partout au Cameroun via agences de bus.',
-            }),
-          },
-          {
-            icon: <ShoppingBag className="h-8 w-8" aria-hidden="true" />,
-            title: t({ en: 'Pay on delivery', fr: 'Paiement à la livraison' }),
-            body: t({ en: 'Inspect before you pay.', fr: 'Inspectez avant de payer.' }),
-          },
-        ].map((item, i) => (
-          <div key={i} className="rounded-3xl border border-brand-grey/20 bg-white p-8 shadow-sm">
-            <div className="mb-5 inline-flex rounded-2xl bg-brand-blue/10 p-4 text-brand-blue">
-              {item.icon}
-            </div>
-            <h3 className="text-xl font-semibold text-brand-dark">{item.title}</h3>
-            <p className="mt-3 text-brand-dark/60">{item.body}</p>
+      {/* Brands Section */}
+      <section className="mx-auto max-w-7xl border-b border-brand-grey/20 px-6 py-16">
+        <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-brand-dark sm:text-3xl">
+              {t({
+                en: 'The best brands gathered in one place',
+                fr: 'Les meilleures marques réunies en un seul endroit',
+              })}
+            </h2>
+            <p className="mt-2 text-brand-dark/60">
+              {t({
+                en: 'Discover our selection of premium brands for professionals and gamers.',
+                fr: 'Découvrez notre sélection de marques premium pour professionnels et gamers.',
+              })}
+            </p>
           </div>
-        ))}
+          <Link
+            href="/products"
+            className="inline-flex items-center gap-2 self-start rounded-full border border-brand-grey/30 px-5 py-2.5 text-sm font-medium text-brand-dark transition hover:bg-brand-grey/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2"
+          >
+            {t({ en: 'See all brands', fr: 'Voir toutes les marques' })}
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+          {brandLogos.map(brand => (
+            <Link
+              key={brand}
+              href={`/products?brand=${encodeURIComponent(brand)}`}
+              className="group flex flex-col items-center gap-3"
+            >
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-brand-grey/10 transition-all duration-300 group-hover:bg-brand-blue/10 group-hover:shadow-lg sm:h-28 sm:w-28">
+                <span className="text-lg font-bold text-brand-dark/70 transition-colors group-hover:text-brand-blue sm:text-xl">
+                  {brand}
+                </span>
+              </div>
+              <span className="text-sm font-medium text-brand-dark/60 transition-colors group-hover:text-brand-dark">
+                {brand}
+              </span>
+            </Link>
+          ))}
+        </div>
       </section>
 
       {/* Shop by Category */}
