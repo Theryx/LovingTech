@@ -6,6 +6,7 @@ import SplashScreen from '@/components/SplashScreen'
 import FloatingWhatsApp from '@/components/FloatingWhatsApp'
 import { NotificationProvider } from '@/components/NotificationProvider'
 import { LanguageProvider } from '@/context/LanguageContext'
+import { CartProvider } from '@/context/CartContext'
 import { MetaPixel } from '@/components/MetaPixel'
 import { Analytics } from '@vercel/analytics/react'
 
@@ -58,13 +59,15 @@ export default function RootLayout({
       <body className={inter.className}>
         <NotificationProvider>
           <LanguageProvider>
-            <SplashScreen />
-            {children}
-            <FloatingWhatsApp />
-            {process.env.NEXT_PUBLIC_META_PIXEL_ID && process.env.NEXT_PUBLIC_META_PIXEL_ID !== 'undefined' && (
-              <MetaPixel pixelId={process.env.NEXT_PUBLIC_META_PIXEL_ID} />
-            )}
-            <Analytics />
+            <CartProvider>
+              <SplashScreen />
+              {children}
+              <FloatingWhatsApp />
+              {process.env.NEXT_PUBLIC_META_PIXEL_ID && process.env.NEXT_PUBLIC_META_PIXEL_ID !== 'undefined' && (
+                <MetaPixel pixelId={process.env.NEXT_PUBLIC_META_PIXEL_ID} />
+              )}
+              <Analytics />
+            </CartProvider>
           </LanguageProvider>
         </NotificationProvider>
       </body>

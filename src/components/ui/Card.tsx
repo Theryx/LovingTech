@@ -92,7 +92,7 @@ const Card = ({
           )}
         </div>
 
-        {ctaSlot && <div className="mt-auto pt-2">{ctaSlot}</div>}
+        {ctaSlot && <div className="mt-auto pt-2" onClick={e => e.stopPropagation()}>{ctaSlot}</div>}
       </div>
     </>
   )
