@@ -98,8 +98,6 @@ export default function CartPageClient() {
     setPromoApplied(false)
   }
 
-  const isFormValid = customerName.trim() && customerPhone.trim() && selectedCity && (quartier.trim() || !selectedZone)
-
   const generateWhatsAppMessage = (mode: 'delivery' | 'appointment', orderRef: string) => {
     const fn = (v: number) => v.toLocaleString('fr-FR')
     const itemsList = items.map((item, i) =>
