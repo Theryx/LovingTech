@@ -170,28 +170,6 @@ export default function Home() {
 
       <HeroCarousel inStockCount={inStockCount} />
 
-      {/* Brand bar */}
-      <section className="border-b border-brand-grey/20 bg-white px-6 py-6">
-        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <p className="text-sm font-medium uppercase tracking-[0.22em] text-brand-dark/50">
-            {t({
-              en: 'Trusted brands available now',
-              fr: 'Marques fiables disponibles maintenant',
-            })}
-          </p>
-          <div className="flex flex-wrap gap-3">
-            {brandLogos.map(brand => (
-              <div
-                key={brand}
-                className="rounded-full border border-brand-grey/30 bg-white px-4 py-2 text-sm font-semibold text-brand-dark"
-              >
-                {brand}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Brands Section */}
       <section className="mx-auto max-w-7xl border-b border-brand-grey/20 px-6 py-16">
         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
