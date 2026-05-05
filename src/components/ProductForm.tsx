@@ -158,12 +158,12 @@ export default function ProductForm({
               aria-required="true"
               className={inputCls}
             >
-              <option value="keyboard">Keyboard</option>
-              <option value="mouse">Mouse</option>
-              <option value="cable">Cable</option>
-              <option value="speaker">Speaker</option>
-              <option value="solar_lamp">Solar Lamp</option>
-              <option value="others">Others</option>
+              <option value="keyboards">Keyboards</option>
+              <option value="mice">Mice</option>
+              <option value="audio">Audio</option>
+              <option value="charging-power">Charging & Power</option>
+              <option value="gaming">Gaming</option>
+              <option value="accessories">Accessories</option>
             </select>
           </Field>
         </div>

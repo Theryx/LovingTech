@@ -33,12 +33,12 @@ const STOCK_STATUS_OPTIONS = [
 
 const CATEGORY_OPTIONS = [
   { value: '', label: 'All Categories' },
-  { value: 'keyboard', label: 'Keyboards' },
-  { value: 'mouse', label: 'Mice' },
-  { value: 'cable', label: 'Cables' },
-  { value: 'speaker', label: 'Speakers' },
-  { value: 'solar_lamp', label: 'Solar Lamps' },
-  { value: 'others', label: 'Others' },
+  { value: 'keyboards', label: 'Keyboards' },
+  { value: 'mice', label: 'Mice' },
+  { value: 'audio', label: 'Audio' },
+  { value: 'charging-power', label: 'Charging & Power' },
+  { value: 'gaming', label: 'Gaming' },
+  { value: 'accessories', label: 'Accessories' },
 ]
 
 const CONDITION_OPTIONS = [

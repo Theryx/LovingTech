@@ -17,7 +17,7 @@ const SLIDES = [
     titleEn: 'Authentic gear for professionals and Gamers',
     subtitleFr: 'Logitech, Keychron, Anker — livrés partout au Cameroun',
     subtitleEn: 'Logitech, Keychron, Anker — delivered anywhere in Cameroon',
-    ctaHref: '/products?category=keyboard',
+    ctaHref: '/products?category=keyboards',
     ctaFr: 'Voir les claviers',
     ctaEn: 'Browse keyboards',
     bgColor: 'bg-brand-blue',

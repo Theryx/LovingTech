@@ -6,12 +6,12 @@ import { useNotifications } from '@/components/NotificationProvider'
 import type { Category } from '@/lib/supabase'
 
 const labelMap: Record<string, string> = {
-  keyboard: 'Keyboards',
-  mouse: 'Mice',
-  cable: 'Cables',
-  speaker: 'Speakers',
-  solar_lamp: 'Solar Lamps',
-  others: 'Others',
+  keyboards: 'Keyboards',
+  mice: 'Mice',
+  audio: 'Audio',
+  'charging-power': 'Charging & Power',
+  gaming: 'Gaming',
+  accessories: 'Accessories',
 }
 
 function CategorySkeleton() {
@@ -131,7 +131,10 @@ export default function AdminCategories() {
 
                 <div className="p-4">
                   <h3 className="font-semibold text-brand-dark mb-1">{cat.label_en}</h3>
-                  <p className="text-xs text-brand-dark/40 mb-4">{cat.slug}</p>
+                  <p className="text-xs text-brand-dark/40 mb-2">{cat.slug}</p>
+                  {cat.description_en && (
+                    <p className="text-xs text-brand-dark/60 mb-4 line-clamp-2">{cat.description_en}</p>
+                  )}
 
                   <input
                     ref={el => {

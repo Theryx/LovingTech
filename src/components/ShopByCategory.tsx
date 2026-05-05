@@ -2,75 +2,77 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Keyboard, Mouse, Cable, Speaker, Sun, Package } from 'lucide-react'
+import { ArrowRight, Keyboard, Mouse, Headphones, Cable, Gamepad2, Package } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 
 interface Category {
   slug: string
   labelEn: string
   labelFr: string
+  descriptionEn?: string
+  descriptionFr?: string
   image: string
-  icon: 'keyboard' | 'mouse' | 'cable' | 'speaker' | 'sun' | 'package'
+  icon: 'keyboard' | 'mouse' | 'headphones' | 'cable' | 'gamepad' | 'package'
 }
 
 const CATEGORY_ICONS = {
   keyboard: Keyboard,
   mouse: Mouse,
+  headphones: Headphones,
   cable: Cable,
-  speaker: Speaker,
-  sun: Sun,
+  gamepad: Gamepad2,
   package: Package,
 }
 
 const CATEGORY_COLORS = {
-  keyboard: 'from-blue-400 to-blue-500',
-  mouse: 'from-green-400 to-green-500',
-  cable: 'from-orange-400 to-orange-500',
-  speaker: 'from-purple-400 to-purple-500',
-  sun: 'from-yellow-400 to-yellow-500',
-  package: 'from-pink-400 to-pink-500',
+  keyboard: 'from-blue-500 to-blue-600',
+  mouse: 'from-emerald-500 to-emerald-600',
+  headphones: 'from-violet-500 to-violet-600',
+  cable: 'from-orange-500 to-orange-600',
+  gamepad: 'from-rose-500 to-rose-600',
+  package: 'from-slate-500 to-slate-600',
 }
 
 const FALLBACK_CATEGORIES: Category[] = [
   {
-    slug: 'keyboard',
+    slug: 'keyboards',
     labelEn: 'Keyboards',
     labelFr: 'Claviers',
     image: '',
     icon: 'keyboard',
   },
   {
-    slug: 'mouse',
+    slug: 'mice',
     labelEn: 'Mice',
     labelFr: 'Souris',
     image: '',
     icon: 'mouse',
   },
   {
-    slug: 'cable',
-    labelEn: 'Cables',
-    labelFr: 'Câbles',
+    slug: 'audio',
+    labelEn: 'Audio',
+    labelFr: 'Audio',
+    image: '',
+    icon: 'headphones',
+  },
+  {
+    slug: 'charging-power',
+    labelEn: 'Charging & Power',
+    labelFr: 'Chargeurs & Power',
     image: '',
     icon: 'cable',
   },
   {
-    slug: 'speaker',
-    labelEn: 'Speakers',
-    labelFr: 'Enceintes',
+    slug: 'gaming',
+    labelEn: 'Gaming',
+    labelFr: 'Gaming',
     image: '',
-    icon: 'speaker',
+    icon: 'gamepad',
   },
   {
-    slug: 'solar_lamp',
-    labelEn: 'Solar Lamps',
-    labelFr: 'Lampes Solaires',
-    image: '',
-    icon: 'sun',
-  },
-  {
-    slug: 'others',
-    labelEn: 'Others',
-    labelFr: 'Autres',
+    slug: 'accessories',
+    labelEn: 'Accessories',
+    labelFr: 'Accessoires',
     image: '',
     icon: 'package',
   },
@@ -83,21 +85,22 @@ export default function ShopByCategory() {
   useEffect(() => {
     fetch('/api/categories')
       .then(res => res.json())
-      .then((data: { slug: string; label_en: string; label_fr: string; image_url: string | null }[]) => {
+      .then((data: { slug: string; label_en: string; label_fr: string; description_en?: string; description_fr?: string; image_url: string | null }[]) => {
         if (Array.isArray(data) && data.length > 0) {
           setCategories(
             data.map(cat => ({
               slug: cat.slug,
               labelEn: cat.label_en,
               labelFr: cat.label_fr,
-              image: cat.image_url || FALLBACK_CATEGORIES.find(f => f.slug === cat.slug)?.image || '',
+              descriptionEn: cat.description_en,
+              descriptionFr: cat.description_fr,
+              image: cat.image_url || '',
               icon: (FALLBACK_CATEGORIES.find(f => f.slug === cat.slug)?.icon || 'package') as Category['icon'],
             }))
           )
         }
       })
       .catch(() => {
-        // Keep fallback data on error
       })
   }, [])
 

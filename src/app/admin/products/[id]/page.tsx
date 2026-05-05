@@ -22,7 +22,7 @@ const emptyProduct = {
   warranty_info: WARRANTY_DEFAULTS.new,
   featured: false,
   condition: 'new' as ProductCondition,
-  category: 'keyboard' as ProductCategory,
+  category: 'keyboards' as ProductCategory,
   variants: [] as Variant[],
   tags: [] as string[],
   key_specs: [] as string[],

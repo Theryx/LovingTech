@@ -21,7 +21,7 @@ const brandLogos = ['Logitech', 'Keychron', 'Anker', 'Razer', 'SteelSeries', 'Co
 
 const CATEGORIES = [
   {
-    slug: 'keyboard',
+    slug: 'keyboards',
     labelFr: 'Claviers',
     labelEn: 'Keyboards',
     icon: (
@@ -42,7 +42,7 @@ const CATEGORIES = [
     ),
   },
   {
-    slug: 'mouse',
+    slug: 'mice',
     labelFr: 'Souris',
     labelEn: 'Mice',
     icon: (
@@ -60,9 +60,28 @@ const CATEGORIES = [
     ),
   },
   {
-    slug: 'cable',
-    labelFr: 'Câbles',
-    labelEn: 'Cables',
+    slug: 'audio',
+    labelFr: 'Audio',
+    labelEn: 'Audio',
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className="h-8 w-8"
+        aria-hidden="true"
+      >
+        <rect x="5" y="2" width="14" height="20" rx="2" />
+        <circle cx="12" cy="15" r="3" />
+        <circle cx="12" cy="7" r="1" />
+      </svg>
+    ),
+  },
+  {
+    slug: 'charging-power',
+    labelFr: 'Chargeurs & Power',
+    labelEn: 'Charging & Power',
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -81,9 +100,9 @@ const CATEGORIES = [
     ),
   },
   {
-    slug: 'speaker',
-    labelFr: 'Enceintes',
-    labelEn: 'Speakers',
+    slug: 'gaming',
+    labelFr: 'Gaming',
+    labelEn: 'Gaming',
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -93,37 +112,15 @@ const CATEGORIES = [
         className="h-8 w-8"
         aria-hidden="true"
       >
-        <rect x="5" y="2" width="14" height="20" rx="2" />
-        <circle cx="12" cy="15" r="3" />
-        <circle cx="12" cy="7" r="1" />
+        <path d="M6 12h4M14 12h4M8 8l2 4 2-4M15 9a3 3 0 000 6M9 9a3 3 0 000 6" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M5 19a2 2 0 104 0M15 19a2 2 0 104 0" strokeLinecap="round" />
       </svg>
     ),
   },
   {
-    slug: 'solar_lamp',
-    labelFr: 'Lampes Solaires',
-    labelEn: 'Solar Lamps',
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        strokeWidth={1.5}
-        stroke="currentColor"
-        className="h-8 w-8"
-        aria-hidden="true"
-      >
-        <circle cx="12" cy="10" r="4" />
-        <path
-          d="M12 2v2M12 18v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 10h2M20 10h2M4.22 15.78l1.42-1.42M18.36 5.64l1.42-1.42M8 20h8"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    slug: 'others',
-    labelFr: 'Autres',
-    labelEn: 'Others',
+    slug: 'accessories',
+    labelFr: 'Accessoires',
+    labelEn: 'Accessories',
     icon: (
       <svg
         viewBox="0 0 24 24"

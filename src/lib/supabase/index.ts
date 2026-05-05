@@ -6,6 +6,8 @@ export type Category = {
   slug: string
   label_en: string
   label_fr: string
+  description_en: string
+  description_fr: string
   image_url: string | null
   created_at?: string
   updated_at?: string
@@ -39,7 +41,7 @@ export const categoryService = {
 }
 
 export type ProductCondition = 'new' | 'refurbished' | 'second_hand'
-export type ProductCategory = 'keyboard' | 'mouse' | 'cable' | 'speaker' | 'solar_lamp' | 'others'
+export type ProductCategory = 'keyboards' | 'mice' | 'audio' | 'charging-power' | 'gaming' | 'accessories'
 
 export type VariantOption = {
   name: string

@@ -12,12 +12,12 @@ import { useLanguage } from '@/context/LanguageContext'
 
 const CATEGORIES: { value: ProductCategory | ''; labelEn: string; labelFr: string }[] = [
   { value: '', labelEn: 'All', labelFr: 'Tout' },
-  { value: 'keyboard', labelEn: 'Keyboards', labelFr: 'Claviers' },
-  { value: 'mouse', labelEn: 'Mice', labelFr: 'Souris' },
-  { value: 'cable', labelEn: 'Cables', labelFr: 'Câbles' },
-  { value: 'speaker', labelEn: 'Speakers', labelFr: 'Enceintes' },
-  { value: 'solar_lamp', labelEn: 'Solar Lamps', labelFr: 'Lampes Solaires' },
-  { value: 'others', labelEn: 'Others', labelFr: 'Autres' },
+  { value: 'keyboards', labelEn: 'Keyboards', labelFr: 'Claviers' },
+  { value: 'mice', labelEn: 'Mice', labelFr: 'Souris' },
+  { value: 'audio', labelEn: 'Audio', labelFr: 'Audio' },
+  { value: 'charging-power', labelEn: 'Charging & Power', labelFr: 'Chargeurs & Power' },
+  { value: 'gaming', labelEn: 'Gaming', labelFr: 'Gaming' },
+  { value: 'accessories', labelEn: 'Accessories', labelFr: 'Accessoires' },
 ]
 
 const CONDITIONS: { value: ProductCondition | ''; labelEn: string; labelFr: string }[] = [

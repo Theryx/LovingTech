@@ -7,6 +7,8 @@ const updateSchema = z.object({
   image_url: z.string().nullable().optional(),
   label_en: z.string().optional(),
   label_fr: z.string().optional(),
+  description_en: z.string().optional(),
+  description_fr: z.string().optional(),
 })
 
 export async function PUT(
