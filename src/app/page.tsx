@@ -160,6 +160,12 @@ export default function Home() {
 
   const featuredProducts = products.filter(p => (p as ProductWithFeatured).featured).slice(0, 8)
 
+  const deals = products.filter(p => {
+    if (!p.compare_at_price || p.compare_at_price <= p.price_xaf) return false
+    const discount = ((p.compare_at_price - p.price_xaf) / p.compare_at_price) * 100
+    return discount >= 20 && p.stock_status === 'in_stock'
+  }).slice(0, 8)
+
   const inStockCount = products.filter(p => p.stock_status === 'in_stock').length
   return (
     <main className="min-h-screen bg-white text-brand-dark">
@@ -226,6 +232,38 @@ export default function Home() {
 
       {/* Shop by Category */}
       <ShopByCategory />
+
+      {/* Weekly Deals */}
+      {deals.length > 0 && (
+        <section className="mx-auto max-w-7xl px-6 py-16">
+          <div className="mb-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl flex-1">
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand-orange/70">
+                {t({ en: "This week's deals", fr: 'Les réductions de la semaine' })}
+              </p>
+              <h2 className="mt-3 text-4xl font-bold tracking-tight text-brand-dark">
+                {t({
+                  en: 'Discounts you don\'t want to miss',
+                  fr: 'Des réductions à ne pas manquer',
+                })}
+              </h2>
+            </div>
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 self-start rounded-full border border-brand-grey/30 px-5 py-2.5 text-sm font-medium text-brand-dark transition hover:bg-brand-grey/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2"
+            >
+              {t({ en: 'View all deals', fr: 'Voir toutes les promos' })}
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            {deals.map(product => (
+              <ProductCard key={product.id} product={product as ProductWithFeatured} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Featured products */}
       <section className="mx-auto max-w-7xl px-6 py-24">
@@ -362,6 +400,12 @@ export default function Home() {
                   className="transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded"
                 >
                   {t({ en: 'Shipping', fr: 'Livraison' })}
+                </Link>
+                <Link
+                  href="/about-us"
+                  className="transition hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded"
+                >
+                  {t({ en: 'About Us', fr: 'À propos' })}
                 </Link>
                 <Link
                   href="/faq"

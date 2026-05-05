@@ -76,10 +76,15 @@ const Card = ({
 
         <div className="flex items-baseline gap-2 mb-4">
           <span className="text-xl font-bold text-brand-dark">{(price || 0).toLocaleString()} FCFA</span>
-          {compareAtPrice && (
-            <span className="text-sm text-brand-dark/40 line-through">
-              {compareAtPrice.toLocaleString()} FCFA
-            </span>
+          {compareAtPrice && compareAtPrice > price && (
+            <>
+              <span className="text-sm text-brand-dark/40 line-through">
+                {compareAtPrice.toLocaleString()} FCFA
+              </span>
+              <span className="ml-auto text-xs font-bold text-red-500 bg-red-50 rounded-full px-2 py-0.5">
+                -{Math.round(((compareAtPrice - price) / compareAtPrice) * 100)}%
+              </span>
+            </>
           )}
         </div>
 
