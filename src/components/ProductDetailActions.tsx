@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageCircle, ShoppingCart, Minus, Plus } from 'lucide-react'
+import { ShoppingCart, Minus, Plus } from 'lucide-react'
 import { ProductWithFeatured } from '@/lib/localProducts'
 import { useLanguage } from '@/context/LanguageContext'
 import { useCart } from '@/context/CartContext'
@@ -77,7 +77,6 @@ export default function ProductDetailActions({ product }: ProductDetailActionsPr
             disabled={isOutOfStock}
             className="rounded-2xl py-5 text-base font-bold active:scale-[0.98] flex-1"
           >
-            <MessageCircle className="w-5 h-5" />
             {isOutOfStock
               ? t({ en: 'Out of Stock', fr: 'Rupture de stock' })
               : t({ en: 'Order via WhatsApp', fr: 'Commander via WhatsApp' })}
