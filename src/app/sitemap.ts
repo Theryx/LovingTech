@@ -8,6 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .from('products')
     .select('id, created_at')
     .eq('stock_status', 'in_stock')
+    .eq('published', true)
 
   const productUrls: MetadataRoute.Sitemap = (products || []).map(p => ({
     url: `${BASE_URL}/product/${p.id}`,
@@ -38,8 +39,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/privacy-policy`, changeFrequency: 'monthly' as const, priority: 0.4 },
     { url: `${BASE_URL}/confidentialite`, changeFrequency: 'monthly' as const, priority: 0.4 },
     { url: `${BASE_URL}/faq`, changeFrequency: 'monthly' as const, priority: 0.5 },
-    { url: `${BASE_URL}/about`, changeFrequency: 'monthly' as const, priority: 0.5 },
-    { url: `${BASE_URL}/a-propos`, changeFrequency: 'monthly' as const, priority: 0.5 },
     { url: `${BASE_URL}/about-us`, changeFrequency: 'monthly' as const, priority: 0.6 },
     { url: `${BASE_URL}/a-propos-de-nous`, changeFrequency: 'monthly' as const, priority: 0.6 },
     { url: `${BASE_URL}/contact`, changeFrequency: 'monthly' as const, priority: 0.5 },

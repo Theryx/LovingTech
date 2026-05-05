@@ -63,6 +63,7 @@ export type Product = {
   stock_status: 'in_stock' | 'out_of_stock' | 'pre_order'
   featured?: boolean
   created_at?: string
+  published?: boolean
   // Sprint 2 fields
   condition?: ProductCondition
   category?: ProductCategory
@@ -357,7 +358,11 @@ export const deliveryZoneService = {
 
 export const productService = {
   async getAll(): Promise<Product[]> {
-    const { data, error } = await supabase.from('products').select('*').order('name')
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('published', true)
+      .order('name')
     if (error) throw error
     return data || []
   },
@@ -367,6 +372,7 @@ export const productService = {
       .from('products')
       .select('*')
       .eq('name', name)
+      .eq('published', true)
       .order('updated_at', { ascending: false })
       .limit(1)
     if (error || !data?.length) return null
@@ -374,7 +380,12 @@ export const productService = {
   },
 
   async getById(id: string): Promise<Product | null> {
-    const { data, error } = await supabase.from('products').select('*').eq('id', id).single()
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .eq('published', true)
+      .single()
     if (error) return null
     return data
   },

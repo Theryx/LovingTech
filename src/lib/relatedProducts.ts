@@ -9,6 +9,7 @@ export async function getRelatedProducts(
     .from('products')
     .select('*')
     .eq('category', category)
+    .eq('published', true)
     .neq('id', productId)
     .limit(8)
 
