@@ -15,6 +15,16 @@ export const metadata: Metadata = {
   title: 'Loving Tech — Accessoires Tech Premium | Cameroun',
   description:
     'Achetez des accessoires tech authentiques (claviers, souris, câbles) livrés partout au Cameroun. Paiement à la livraison. WhatsApp: +237 655 163 248',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+    shortcut: '/favicon.ico',
+  },
+  manifest: '/site.webmanifest',
   openGraph: {
     title: 'Loving Tech',
     description: 'Accessoires tech premium livrés partout au Cameroun. Paiement à la livraison.',
