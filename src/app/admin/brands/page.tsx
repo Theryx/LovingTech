@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, Pencil, Trash2, Image as ImageIcon, Upload, Loader2, Database } from 'lucide-react'
+import { Plus, Trash2, Image as ImageIcon, Upload, Loader2, Link as LinkIcon, X } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
 
 interface Brand {
@@ -32,7 +32,9 @@ export default function AdminBrands() {
   const [uploading, setUploading] = useState<string | null>(null)
   const [showNewForm, setShowNewForm] = useState(false)
   const [newBrandName, setNewBrandName] = useState('')
+  const [newBrandLogoUrl, setNewBrandLogoUrl] = useState('')
   const [saving, setSaving] = useState(false)
+  const [urlInput, setUrlInput] = useState<Record<string, string>>({})
 
   const loadBrands = useCallback(async () => {
     setLoading(true)
@@ -41,6 +43,9 @@ export default function AdminBrands() {
       if (!res.ok) throw new Error('Failed to load')
       const data = await res.json()
       setBrands(data)
+      const urls: Record<string, string> = {}
+      data.forEach((b: Brand) => { urls[b.id] = b.logo_url || '' })
+      setUrlInput(urls)
     } catch {
       notifyError('Failed to load brands.')
     }
@@ -74,11 +79,28 @@ export default function AdminBrands() {
       })
 
       setBrands(prev => prev.map(b => (b.id === brandId ? { ...b, logo_url: url } : b)))
+      setUrlInput(prev => ({ ...prev, [brandId]: url }))
       success('Logo updated.')
     } catch {
       notifyError('Upload failed.')
     }
     setUploading(null)
+  }
+
+  const handleSetUrl = async (brandId: string) => {
+    const url = urlInput[brandId]?.trim() || ''
+    if (!url) return
+    try {
+      await fetch(`/api/brands/${brandId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ logo_url: url }),
+      })
+      setBrands(prev => prev.map(b => (b.id === brandId ? { ...b, logo_url: url } : b)))
+      success('Logo URL updated.')
+    } catch {
+      notifyError('Failed to update logo URL.')
+    }
   }
 
   const handleToggleActive = async (brand: Brand) => {
@@ -109,15 +131,20 @@ export default function AdminBrands() {
     if (!newBrandName.trim()) return
     setSaving(true)
     try {
+      const payload: Record<string, unknown> = { name: newBrandName.trim() }
+      if (newBrandLogoUrl.trim()) payload.logo_url = newBrandLogoUrl.trim()
+
       const res = await fetch('/api/brands', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newBrandName.trim() }),
+        body: JSON.stringify(payload),
       })
       if (!res.ok) throw new Error('Failed')
       const data = await res.json()
       setBrands(prev => [...prev, data])
+      setUrlInput(prev => ({ ...prev, [data.id]: data.logo_url || '' }))
       setNewBrandName('')
+      setNewBrandLogoUrl('')
       setShowNewForm(false)
       success('Brand added.')
     } catch {
@@ -145,28 +172,37 @@ export default function AdminBrands() {
       {showNewForm && (
         <div className="mb-8 rounded-xl border border-brand-grey/20 bg-white p-6">
           <h3 className="text-lg font-semibold text-brand-dark mb-4">New Brand</h3>
-          <div className="flex gap-3">
+          <div className="space-y-3">
             <input
               type="text"
               value={newBrandName}
               onChange={e => setNewBrandName(e.target.value)}
               placeholder="Brand name"
-              className="flex-1 rounded-lg border border-brand-grey/30 py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+              className="w-full rounded-lg border border-brand-grey/30 py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
               onKeyDown={e => e.key === 'Enter' && handleCreate()}
             />
-            <button
-              onClick={handleCreate}
-              disabled={!newBrandName.trim() || saving}
-              className="rounded-lg bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 disabled:opacity-50"
-            >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create'}
-            </button>
-            <button
-              onClick={() => setShowNewForm(false)}
-              className="rounded-lg border border-brand-grey/30 px-4 py-2.5 text-sm text-brand-dark/60 hover:bg-brand-grey/5 transition"
-            >
-              Cancel
-            </button>
+            <input
+              type="url"
+              value={newBrandLogoUrl}
+              onChange={e => setNewBrandLogoUrl(e.target.value)}
+              placeholder="Image URL (optional) — https://..."
+              className="w-full rounded-lg border border-brand-grey/30 py-2.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={handleCreate}
+                disabled={!newBrandName.trim() || saving}
+                className="rounded-lg bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 disabled:opacity-50"
+              >
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create'}
+              </button>
+              <button
+                onClick={() => { setShowNewForm(false); setNewBrandLogoUrl('') }}
+                className="rounded-lg border border-brand-grey/30 px-4 py-2.5 text-sm text-brand-dark/60 hover:bg-brand-grey/5 transition"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -189,6 +225,7 @@ export default function AdminBrands() {
                       src={brand.logo_url}
                       alt={brand.name}
                       className="h-20 w-20 rounded-full object-cover border border-brand-grey/20"
+                      onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
                     />
                   ) : (
                     <div className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-grey/10">
@@ -203,14 +240,33 @@ export default function AdminBrands() {
                 </div>
 
                 <h3 className="text-lg font-semibold text-brand-dark mb-1">{brand.name}</h3>
-                <p className="text-xs text-brand-dark/40 mb-4">
-                  {brand.logo_url ? 'Logo uploaded' : 'No logo'}
+                <p className="text-xs text-brand-dark/40 mb-1">
+                  {brand.logo_url ? 'Logo set' : 'No logo'}
                 </p>
+
+                {/* URL Input */}
+                <div className="w-full mb-4 flex gap-1.5">
+                  <input
+                    type="url"
+                    value={urlInput[brand.id] || ''}
+                    onChange={e => setUrlInput(prev => ({ ...prev, [brand.id]: e.target.value }))}
+                    placeholder="Paste image URL..."
+                    className="flex-1 rounded-lg border border-brand-grey/30 px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-blue"
+                    onKeyDown={e => e.key === 'Enter' && handleSetUrl(brand.id)}
+                  />
+                  <button
+                    onClick={() => handleSetUrl(brand.id)}
+                    disabled={!urlInput[brand.id]?.trim()}
+                    className="rounded-lg bg-brand-blue px-2.5 py-1.5 text-xs font-medium text-white transition hover:brightness-95 disabled:opacity-50 shrink-0"
+                  >
+                    Set
+                  </button>
+                </div>
 
                 <div className="flex items-center gap-2">
                   <label className="cursor-pointer rounded-lg bg-brand-grey/10 px-3 py-2 text-xs font-medium text-brand-dark/70 hover:bg-brand-grey/20 transition flex items-center gap-1.5">
                     <Upload className="h-3.5 w-3.5" />
-                    Upload Logo
+                    Upload File
                     <input
                       type="file"
                       accept="image/*"
