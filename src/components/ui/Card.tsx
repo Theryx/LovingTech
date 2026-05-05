@@ -74,17 +74,21 @@ const Card = ({
       <div className="p-4 flex flex-col flex-grow">
         <h3 className="mb-1 line-clamp-1 text-lg text-brand-dark">{name}</h3>
 
-        <div className="flex items-baseline gap-2 mb-4">
-          <span className="text-xl font-bold text-brand-dark">{(price || 0).toLocaleString()} FCFA</span>
-          {compareAtPrice && compareAtPrice > price && (
-            <>
-              <span className="text-sm text-brand-dark/40 line-through">
-                {compareAtPrice.toLocaleString()} FCFA
-              </span>
-              <span className="ml-auto text-xs font-bold text-red-500 bg-red-50 rounded-full px-2 py-0.5">
+        <div className="mb-4 space-y-1">
+          {/* Price row: current price + discount on right */}
+          <div className="flex items-center justify-between">
+            <span className="text-xl font-bold text-brand-dark">{(price || 0).toLocaleString()} FCFA</span>
+            {compareAtPrice && compareAtPrice > price && (
+              <span className="text-xs font-bold text-red-500 bg-red-50 rounded-full px-2 py-0.5">
                 -{Math.round(((compareAtPrice - price) / compareAtPrice) * 100)}%
               </span>
-            </>
+            )}
+          </div>
+          {/* Striked price on bottom */}
+          {compareAtPrice && compareAtPrice > price && (
+            <span className="text-sm text-brand-dark/40 line-through block">
+              {compareAtPrice.toLocaleString()} FCFA
+            </span>
           )}
         </div>
 

@@ -21,6 +21,12 @@ export default function Navbar() {
       </Link>
 
       <div className="flex items-center gap-4">
+        <Link
+          href="/about"
+          className="text-sm font-medium text-brand-dark/70 hover:text-brand-dark transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 rounded px-2 py-1"
+        >
+          {language === 'fr' ? 'À propos' : 'About Us'}
+        </Link>
         <LanguageToggle />
       </div>
     </nav>

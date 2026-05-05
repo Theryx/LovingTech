@@ -88,31 +88,32 @@ export default function HeroCarousel({ inStockCount }: { inStockCount: number })
       onMouseLeave={() => setPaused(false)}
       aria-label="Hero carousel"
     >
-      {/* Container with side margins */}
-      <div className="mx-4 sm:mx-6 lg:mx-8">
-      <AnimatePresence initial={false} custom={direction}>
-        <motion.div
-          key={slide.id}
-          custom={direction}
-          variants={variants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={{ duration: 0.5, ease: 'easeInOut' }}
-          className="absolute inset-0 rounded-lg sm:rounded-xl lg:rounded-2xl"
-          style={{
-            backgroundImage: `url(${slide.bg})`,
-            backgroundPosition: 'center center',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: 'cover',
-          }}
-        >
-          <div className="absolute inset-0 bg-[linear-gradient(120deg,_rgba(17,17,17,0.75),_rgba(17,17,17,0.45)_50%,_rgba(17,17,17,0.65))]" />
-        </motion.div>
-      </AnimatePresence>
+      {/* Container aligned with page content */}
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="relative overflow-hidden rounded-2xl">
+          <AnimatePresence initial={false} custom={direction}>
+            <motion.div
+              key={slide.id}
+              custom={direction}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.5, ease: 'easeInOut' }}
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `url(${slide.bg})`,
+                backgroundPosition: 'center center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'cover',
+              }}
+            >
+              <div className="absolute inset-0 bg-[linear-gradient(120deg,_rgba(17,17,17,0.75),_rgba(17,17,17,0.45)_50%,_rgba(17,17,17,0.65))]" />
+            </motion.div>
+          </AnimatePresence>
 
-      {/* Content */}
-      <div className="relative z-10 flex min-h-[65vh] flex-col justify-center pb-20 pt-10">
+          {/* Content */}
+          <div className="relative z-10 flex min-h-[65vh] flex-col justify-center pb-20 pt-10">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={slide.id}
@@ -174,8 +175,8 @@ export default function HeroCarousel({ inStockCount }: { inStockCount: number })
           </motion.div>
         </AnimatePresence>
 
-        {/* Controls */}
-        <div className="absolute bottom-8 left-4 right-4 sm:left-6 sm:right-6 flex items-center justify-between">
+          {/* Controls */}
+          <div className="absolute bottom-8 left-6 right-6 flex items-center justify-between">
           {/* Dots */}
           <div className="flex gap-2" role="tablist" aria-label="Carousel slides">
             {SLIDES.map((s, i) => (
@@ -211,7 +212,7 @@ export default function HeroCarousel({ inStockCount }: { inStockCount: number })
           </div>
         </div>
       </div>
-      </div>
+    </div>
     </section>
   )
 }
