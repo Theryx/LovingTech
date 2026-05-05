@@ -114,105 +114,104 @@ export default function HeroCarousel({ inStockCount }: { inStockCount: number })
 
           {/* Content */}
           <div className="relative z-10 flex min-h-[65vh] flex-col justify-center pb-20 pt-10">
-        <AnimatePresence mode="wait" custom={direction}>
-          <motion.div
-            key={slide.id}
-            custom={direction}
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
-            className="max-w-3xl"
-          >
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={slide.id}
+                custom={direction}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+                className="max-w-3xl"
+              >
+                <h1 className="max-w-2xl text-5xl font-black tracking-tight text-white sm:text-7xl">
+                  {t({ en: slide.titleEn, fr: slide.titleFr })}
+                </h1>
 
+                <p className="mt-6 max-w-xl text-lg leading-8 text-white/70">
+                  {t({ en: slide.subtitleEn, fr: slide.subtitleFr })}
+                </p>
 
-            <h1 className="max-w-2xl text-5xl font-black tracking-tight text-white sm:text-7xl">
-              {t({ en: slide.titleEn, fr: slide.titleFr })}
-            </h1>
+                <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+                  {slide.ctaExternal ? (
+                    <a
+                      href={slide.ctaHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 font-semibold text-brand-dark transition hover:bg-brand-grey focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-dark"
+                    >
+                      <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                      {t({ en: slide.ctaEn, fr: slide.ctaFr })}
+                    </a>
+                  ) : (
+                    <Link
+                      href={slide.ctaHref}
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 font-semibold text-brand-dark transition hover:bg-brand-grey focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-dark"
+                    >
+                      {t({ en: slide.ctaEn, fr: slide.ctaFr })}
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </Link>
+                  )}
+                </div>
 
-            <p className="mt-6 max-w-xl text-lg leading-8 text-white/70">
-              {t({ en: slide.subtitleEn, fr: slide.subtitleFr })}
-            </p>
-
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              {slide.ctaExternal ? (
-                <a
-                  href={slide.ctaHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 font-semibold text-brand-dark transition hover:bg-brand-grey focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-dark"
-                >
-                  <MessageCircle className="h-4 w-4" aria-hidden="true" />
-                  {t({ en: slide.ctaEn, fr: slide.ctaFr })}
-                </a>
-              ) : (
-                <Link
-                  href={slide.ctaHref}
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 font-semibold text-brand-dark transition hover:bg-brand-grey focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-dark"
-                >
-                  {t({ en: slide.ctaEn, fr: slide.ctaFr })}
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </Link>
-              )}
-            </div>
-
-            <div className="mt-12 flex flex-wrap gap-6 text-sm text-white/60">
-              <span>
-                <strong className="text-white">{inStockCount}+</strong>{' '}
-                {t({ en: 'Products', fr: 'Produits' })}
-              </span>
-              <span>·</span>
-              <span>
-                <strong className="text-white">2–3j</strong>{' '}
-                {t({ en: 'Delivery', fr: 'Livraison' })}
-              </span>
-              <span>·</span>
-              <span>
-                <strong className="text-white">100%</strong>{' '}
-                {t({ en: 'Inspect before paying', fr: 'Inspection avant paiement' })}
-              </span>
-            </div>
-          </motion.div>
-        </AnimatePresence>
+                <div className="mt-12 flex flex-wrap gap-6 text-sm text-white/60">
+                  <span>
+                    <strong className="text-white">{inStockCount}+</strong>{' '}
+                    {t({ en: 'Products', fr: 'Produits' })}
+                  </span>
+                  <span>·</span>
+                  <span>
+                    <strong className="text-white">2–3j</strong>{' '}
+                    {t({ en: 'Delivery', fr: 'Livraison' })}
+                  </span>
+                  <span>·</span>
+                  <span>
+                    <strong className="text-white">100%</strong>{' '}
+                    {t({ en: 'Inspect before paying', fr: 'Inspection avant paiement' })}
+                  </span>
+                </div>
+              </motion.div>
+          </AnimatePresence>
 
           {/* Controls */}
           <div className="absolute bottom-8 left-6 right-6 flex items-center justify-between">
-          {/* Dots */}
-          <div className="flex gap-2" role="tablist" aria-label="Carousel slides">
-            {SLIDES.map((s, i) => (
-              <button
-                key={s.id}
-                role="tab"
-                aria-selected={i === current}
-                onClick={() => go(i, i > current ? 1 : -1)}
-                className={`h-1.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
-                  i === current ? 'w-8 bg-white' : 'w-4 bg-white/30 hover:bg-white/60'
-                }`}
-                aria-label={`Slide ${i + 1}`}
-              />
-            ))}
-          </div>
+            {/* Dots */}
+            <div className="flex gap-2" role="tablist" aria-label="Carousel slides">
+              {SLIDES.map((s, i) => (
+                <button
+                  key={s.id}
+                  role="tab"
+                  aria-selected={i === current}
+                  onClick={() => go(i, i > current ? 1 : -1)}
+                  className={`h-1.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
+                    i === current ? 'w-8 bg-white' : 'w-4 bg-white/30 hover:bg-white/60'
+                  }`}
+                  aria-label={`Slide ${i + 1}`}
+                />
+              ))}
+            </div>
 
-          {/* Arrows */}
-          <div className="flex gap-2">
-            <button
-              onClick={prev}
-              aria-label="Slide précédent / Previous slide"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-            >
-              <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-            </button>
-            <button
-              onClick={next}
-              aria-label="Slide suivant / Next slide"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-            >
-              <ChevronRight className="h-5 w-5" aria-hidden="true" />
-            </button>
+            {/* Arrows */}
+            <div className="flex gap-2">
+              <button
+                onClick={prev}
+                aria-label="Slide précédent / Previous slide"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              >
+                <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+              </button>
+              <button
+                onClick={next}
+                aria-label="Slide suivant / Next slide"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              >
+                <ChevronRight className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    </section>
+  </section>
   )
 }
