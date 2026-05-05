@@ -9,6 +9,7 @@ import { LanguageProvider } from '@/context/LanguageContext'
 import { CartProvider } from '@/context/CartContext'
 import { MetaPixel } from '@/components/MetaPixel'
 import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -67,6 +68,7 @@ export default function RootLayout({
                 <MetaPixel pixelId={process.env.NEXT_PUBLIC_META_PIXEL_ID} />
               )}
               <Analytics />
+              <SpeedInsights />
             </CartProvider>
           </LanguageProvider>
         </NotificationProvider>
