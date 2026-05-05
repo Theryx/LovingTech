@@ -52,7 +52,7 @@ export default function ProductDetailActions({ product }: ProductDetailActionsPr
         <div className="flex flex-col sm:flex-row gap-3">
           <Button
             onClick={() => addItem(product, quantity)}
-            variant="outline"
+            variant="secondary"
             disabled={isOutOfStock}
             className="rounded-2xl py-5 text-base font-semibold active:scale-[0.98] flex-1"
           >
