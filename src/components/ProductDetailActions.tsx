@@ -5,6 +5,7 @@ import { MessageCircle, ShoppingCart, Minus, Plus } from 'lucide-react'
 import { ProductWithFeatured } from '@/lib/localProducts'
 import { useLanguage } from '@/context/LanguageContext'
 import { useCart } from '@/context/CartContext'
+import { useNotifications } from '@/components/NotificationProvider'
 import LeadModal from './LeadModal'
 import Button from './ui/Button'
 
@@ -17,7 +18,17 @@ export default function ProductDetailActions({ product }: ProductDetailActionsPr
   const [quantity, setQuantity] = useState(1)
   const { t } = useLanguage()
   const { addItem } = useCart()
+  const { success } = useNotifications()
   const isOutOfStock = product.stock_status === 'out_of_stock'
+
+  const handleAddToCart = () => {
+    addItem(product, quantity)
+    success(
+      language === 'fr'
+        ? 'Article ajouté dans votre panier avec succès'
+        : 'Item added to your cart successfully'
+    )
+  }
 
   return (
     <>
@@ -51,7 +62,7 @@ export default function ProductDetailActions({ product }: ProductDetailActionsPr
 
         <div className="flex flex-col sm:flex-row gap-3">
           <Button
-            onClick={() => addItem(product, quantity)}
+            onClick={handleAddToCart}
             variant="secondary"
             disabled={isOutOfStock}
             className="rounded-2xl py-5 text-base font-semibold active:scale-[0.98] flex-1"

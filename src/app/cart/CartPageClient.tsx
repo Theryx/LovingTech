@@ -8,7 +8,6 @@ import { useLanguage } from '@/context/LanguageContext'
 import { useCart } from '@/context/CartContext'
 import { useNotifications } from '@/components/NotificationProvider'
 import Navbar from '@/components/Navbar'
-import Button from '@/components/ui/Button'
 import { validatePromo } from '@/lib/validatePromo'
 
 const WHATSAPP_NUMBER = '237655163248'
@@ -44,10 +43,23 @@ export default function CartPageClient() {
   const [promoError, setPromoError] = useState('')
   const [promoApplied, setPromoApplied] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [orderSuccess, setOrderSuccess] = useState(false)
+  const [phoneError, setPhoneError] = useState('')
 
   const selectedZone = zones.find(z => z.city_name_fr === selectedCity || z.city_name_en === selectedCity)
   const deliveryFee = selectedZone && subtotal < freeDeliveryThreshold ? selectedZone.delivery_fee : 0
   const total = subtotal + deliveryFee - promoDiscount
+
+  const validatePhone = () => {
+    if (customerPhone.length !== 9) {
+      setPhoneError(language === 'fr' ? 'Le numéro doit contenir 9 chiffres' : 'Phone number must be 9 digits')
+      return false
+    }
+    setPhoneError('')
+    return true
+  }
+
+  const isFormValid = customerName.trim() && customerPhone.trim() && selectedCity && (quartier.trim() || !selectedZone) && customerPhone.length === 9
 
   useEffect(() => {
     fetch('/api/delivery-zones')
@@ -124,7 +136,8 @@ export default function CartPageClient() {
   }
 
   const handleCheckout = async (mode: 'delivery' | 'appointment') => {
-    if (!isFormValid) return
+    if (!validatePhone()) return
+    if (!customerName.trim() || !selectedCity || (!quartier.trim() && selectedZone)) return
     setLoading(true)
     try {
       const orderRef = generateOrderRef()
@@ -157,6 +170,7 @@ export default function CartPageClient() {
       const message = generateWhatsAppMessage(mode, orderRef)
       window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank')
       clearCart()
+      setOrderSuccess(true)
     } catch {
       notifyError(
         language === 'fr'
@@ -166,6 +180,41 @@ export default function CartPageClient() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (orderSuccess) {
+    return (
+      <main className="min-h-screen bg-white text-brand-dark">
+        <Navbar />
+        <section className="max-w-4xl mx-auto px-6 pt-32 pb-24 text-center">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-50">
+            <Check className="h-10 w-10 text-green-500" />
+          </div>
+          <h1 className="text-3xl font-bold text-brand-dark mb-3">
+            {t({ en: 'Order sent successfully!', fr: 'Commande envoyée avec succès !' })}
+          </h1>
+          <p className="text-brand-dark/60 mb-3 max-w-md mx-auto">
+            {t({
+              en: 'Your order has been saved and sent to WhatsApp.',
+              fr: 'Votre commande a été enregistrée et envoyée sur WhatsApp.',
+            })}
+          </p>
+          <p className="text-brand-dark/40 text-sm mb-10 max-w-md mx-auto">
+            {t({
+              en: 'Our team will contact you shortly to confirm the details.',
+              fr: 'Notre équipe vous contactera dans les plus brefs délais pour confirmer les détails.',
+            })}
+          </p>
+          <Link
+            href="/products"
+            className="inline-flex items-center gap-2 rounded-full bg-brand-blue px-8 py-3.5 text-base font-semibold text-white transition hover:brightness-95"
+          >
+            {t({ en: 'Browse products', fr: 'Voir les produits' })}
+            <ArrowRight className="h-5 w-5" />
+          </Link>
+        </section>
+      </main>
+    )
   }
 
   if (items.length === 0) {
@@ -401,12 +450,19 @@ export default function CartPageClient() {
                   <input
                     type="tel"
                     value={customerPhone}
-                    onChange={e => setCustomerPhone(e.target.value.replace(/\D/g, ''))}
+                    onChange={e => {
+                      setCustomerPhone(e.target.value.replace(/\D/g, ''))
+                      setPhoneError('')
+                    }}
                     placeholder="6XX XXX XXX"
+                    maxLength={9}
                     className="flex-1 py-2.5 px-3 text-sm placeholder:text-brand-dark/30 focus:outline-none"
                     required
                   />
                 </div>
+                {phoneError && (
+                  <p className="text-xs text-red-500 -mt-2">{phoneError}</p>
+                )}
                 <select
                   value={selectedCity}
                   onChange={e => {
