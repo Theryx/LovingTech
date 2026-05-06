@@ -11,6 +11,28 @@ const updateSchema = z.object({
   description_fr: z.string().optional(),
 })
 
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { slug: string } }
+) {
+  if (!(await isAdmin(request))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { slug } = params
+
+  const { error } = await getSupabaseServer()
+    .from('categories')
+    .delete()
+    .eq('slug', slug)
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json({ success: true })
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: { slug: string } }

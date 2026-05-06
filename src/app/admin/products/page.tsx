@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   Plus,
   Search,
@@ -88,6 +89,7 @@ function ProductSkeleton() {
 
 export default function AdminProductsPage() {
   const { confirm, error: notifyError, success } = useNotifications()
+  const router = useRouter()
   const [search, setSearch] = useState('')
   const [filterBrand, setFilterBrand] = useState<string>('')
   const [filterCategory, setFilterCategory] = useState('')
@@ -378,7 +380,8 @@ export default function AdminProductsPage() {
                   filteredProducts.map(product => (
                     <tr
                       key={product.id}
-                      className="border-b border-brand-grey/10 transition hover:bg-brand-grey/5"
+                      onClick={() => router.push(`/admin/products/${product.id}`)}
+                      className="border-b border-brand-grey/10 transition hover:bg-brand-grey/5 cursor-pointer"
                     >
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
@@ -454,7 +457,10 @@ export default function AdminProductsPage() {
                           </Link>
                           {!isLocal && (
                             <button
-                              onClick={() => handleDelete(product.id, product.name)}
+                              onClick={e => {
+                                e.stopPropagation()
+                                handleDelete(product.id, product.name)
+                              }}
                               className="rounded-lg p-2 text-brand-dark/40 transition hover:bg-red-50 hover:text-red-500"
                               aria-label="Delete product"
                             >
