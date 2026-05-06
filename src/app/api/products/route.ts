@@ -14,7 +14,7 @@ const createProductSchema = z.object({
   stock_status: z.enum(['in_stock', 'out_of_stock', 'pre_order']).optional().default('in_stock'),
   featured: z.boolean().optional().default(false),
   condition: z.enum(['new', 'refurbished', 'second_hand']).optional(),
-  category: z.enum(['keyboard', 'mouse', 'cable', 'speaker', 'solar_lamp', 'others']).optional(),
+  category: z.enum(['keyboards', 'mice', 'audio', 'charging-power', 'gaming', 'accessories']).optional(),
   name_fr: z.string().nullable().optional(),
   name_en: z.string().nullable().optional(),
   description_fr: z.string().nullable().optional(),

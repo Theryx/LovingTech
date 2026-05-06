@@ -54,7 +54,7 @@ export const mockValidProduct = {
   price_xaf: 45000,
   brand: 'Logitech',
   stock_status: 'in_stock' as const,
-  category: 'keyboard' as const,
+  category: 'keyboards' as const,
   condition: 'new' as const,
 }
 

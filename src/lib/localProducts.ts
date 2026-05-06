@@ -419,7 +419,7 @@ export const LOCAL_PRODUCTS: ProductWithFeatured[] = [
     stock_status: 'in_stock',
     featured: true,
     condition: 'new',
-    category: 'solar_lamp',
+    category: 'accessories',
     stock_qty: 10,
     low_stock_threshold: 3,
     variants: [],

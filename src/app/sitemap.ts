@@ -17,7 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
-  const categories = ['keyboard', 'mouse', 'cable', 'speaker', 'solar_lamp', 'others']
+  const categories = ['keyboards', 'mice', 'audio', 'charging-power', 'gaming', 'accessories']
 
   return [
     { url: BASE_URL, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },

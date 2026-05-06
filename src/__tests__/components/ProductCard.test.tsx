@@ -38,7 +38,7 @@ const mockProduct = {
   images: ['/test-image.jpg'],
   description: 'A great keyboard',
   specs: {},
-  category: 'keyboard' as const,
+  category: 'keyboards' as const,
 }
 
 describe('ProductCard', () => {
