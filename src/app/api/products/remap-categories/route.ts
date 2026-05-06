@@ -34,18 +34,8 @@ export async function POST(request: NextRequest) {
           .eq('category', oldValue)
 
         if (error) {
-          if (error.message?.includes('check constraint') || error.message?.includes('products_category_check')) {
-            return NextResponse.json(
-              {
-                error: 'Category constraint needs updating. Run the SQL from /api/products/fix-constraint first.',
-                fix: 'POST /api/products/fix-constraint',
-                sql: "ALTER TABLE products DROP CONSTRAINT IF EXISTS products_category_check;\nALTER TABLE products ADD CONSTRAINT products_category_check CHECK (category IN ('keyboards', 'mice', 'audio', 'charging-power', 'gaming', 'accessories'));",
-              },
-              { status: 409 }
-            )
-          }
           return NextResponse.json(
-            { error: `Failed to update ${oldValue}: ${error.message}` },
+            { error: `Failed to update ${oldValue} → ${newValue}: ${error.message}`, code: error.code, hint: error.hint, details: error.details },
             { status: 500 }
           )
         }
