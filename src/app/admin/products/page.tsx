@@ -14,6 +14,8 @@ import {
   Package,
   X,
   ArrowUpDown,
+  RefreshCw,
+  Loader2,
 } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
 import { Product } from '@/lib/supabase'
@@ -193,6 +195,23 @@ export default function AdminProductsPage() {
     setSort('newest')
   }
 
+  const [remapping, setRemapping] = useState(false)
+
+  async function handleRemapCategories() {
+    if (!confirm('This will remap old product categories (keyboard→keyboards, mouse→mice, cable→charging-power, speaker→audio, solar_lamp→accessories, others→accessories). Continue?')) return
+    setRemapping(true)
+    try {
+      const res = await fetch('/api/products/remap-categories', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed')
+      success(`Categories remapped. ${data.totalUpdated} products updated.`)
+      await loadProducts()
+    } catch (e: any) {
+      notifyError(e.message || 'Failed to remap categories.')
+    }
+    setRemapping(false)
+  }
+
   const formatPrice = (price: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'XAF' }).format(price)
 
@@ -216,13 +235,23 @@ export default function AdminProductsPage() {
           </div>
           <p className="text-brand-grey">Manage your product catalog and inventory</p>
         </div>
-        <Link
-          href="/admin/products/new"
-          className="flex items-center gap-2 rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 shrink-0"
-        >
-          <Plus className="w-4 h-4" aria-hidden="true" />
-          Add Product
-        </Link>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={handleRemapCategories}
+            disabled={remapping}
+            className="flex items-center gap-2 rounded-xl border border-brand-grey/30 px-4 py-2.5 text-sm font-medium text-brand-dark/70 transition hover:bg-brand-grey/10 hover:text-brand-dark disabled:opacity-50"
+          >
+            {remapping ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            Fix Categories
+          </button>
+          <Link
+            href="/admin/products/new"
+            className="flex items-center gap-2 rounded-xl bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95"
+          >
+            <Plus className="w-4 h-4" aria-hidden="true" />
+            Add Product
+          </Link>
+        </div>
       </div>
 
       {error && (
