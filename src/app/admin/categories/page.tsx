@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Upload, Image, Loader2 } from 'lucide-react'
+import { Upload, Image, Loader2, RefreshCw } from 'lucide-react'
 import { useNotifications } from '@/components/NotificationProvider'
 import type { Category } from '@/lib/supabase'
 
@@ -33,6 +33,7 @@ export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState<string | null>(null)
+  const [seeding, setSeeding] = useState(false)
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
 
   const loadCategories = useCallback(async () => {
@@ -89,13 +90,50 @@ export default function AdminCategories() {
     fileInputRefs.current[slug]?.click()
   }
 
+  async function handleSeed() {
+    if (!confirm('This will replace all existing categories with the new 6 categories (Keyboards, Mice, Audio, Charging & Power, Gaming, Accessories). Images will need to be re-uploaded. Continue?')) {
+      return
+    }
+
+    setSeeding(true)
+    try {
+      const res = await fetch('/api/categories/seed', { method: 'POST' })
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to seed categories')
+      }
+
+      success(`Successfully reset categories. ${data.categories?.length || 6} new categories created.`)
+      await loadCategories()
+    } catch (e: any) {
+      console.error(e)
+      notifyError(e.message || 'Failed to reset categories.')
+    }
+    setSeeding(false)
+  }
+
   return (
     <div className="mx-auto max-w-5xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-brand-dark">Categories</h1>
-        <p className="mt-1 text-sm text-brand-dark/50">
-          Upload images for each category. They appear on the homepage &ldquo;Shop by Category&rdquo; section.
-        </p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-brand-dark">Categories</h1>
+          <p className="mt-1 text-sm text-brand-dark/50">
+            Upload images for each category. They appear on the homepage &ldquo;Shop by Category&rdquo; section.
+          </p>
+        </div>
+        <button
+          onClick={handleSeed}
+          disabled={seeding}
+          className="flex items-center gap-2 rounded-xl border border-brand-grey/30 px-4 py-2 text-sm font-medium text-brand-dark/70 transition hover:bg-brand-grey/10 hover:text-brand-dark disabled:opacity-50"
+        >
+          {seeding ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <RefreshCw className="h-4 w-4" />
+          )}
+          Reset Categories
+        </button>
       </div>
 
       {loading ? (
