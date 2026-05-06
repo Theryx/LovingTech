@@ -11,6 +11,9 @@ import {
   Clock,
   AlertTriangle,
   RefreshCw,
+  Download,
+  Send,
+  MessageCircle,
 } from 'lucide-react'
 import { Order, OrderStatus } from '@/lib/supabase'
 import { useNotifications } from '@/components/NotificationProvider'
@@ -19,6 +22,7 @@ import {
   ORDER_STATUS_COLORS,
   ALLOWED_STATUS_TRANSITIONS,
 } from '@/lib/order-constants'
+import { formatWhatsAppOrderMessage, getWhatsAppShareUrl } from '@/lib/whatsapp-order'
 
 function DetailSkeleton() {
   return (
@@ -53,6 +57,8 @@ export default function OrderDetailPage() {
   const [prevOrderId, setPrevOrderId] = useState<string | null>(null)
   const [nextOrderId, setNextOrderId] = useState<string | null>(null)
   const [showUndoConfirm, setShowUndoConfirm] = useState(false)
+  const [receiptEmail, setReceiptEmail] = useState('')
+  const [sendingReceipt, setSendingReceipt] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -68,6 +74,7 @@ export default function OrderDetailPage() {
       setOrder(data)
       setNotes(data.admin_notes || '')
       setNotesDirty(false)
+      setReceiptEmail(data.customer_email || '')
 
       // Fetch neighbors
       fetch(`/api/orders?limit=2&page=1`)
@@ -153,6 +160,37 @@ export default function OrderDetailPage() {
       notifyError(e.message || 'Failed to save notes.')
     }
     setSavingNotes(false)
+  }
+
+  async function handleSendReceipt() {
+    if (!order || !receiptEmail.trim()) return
+    setSendingReceipt(true)
+    try {
+      const res = await fetch(`/api/orders/${order.id}/send-receipt`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: receiptEmail.trim() }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Send failed' }))
+        throw new Error(err.error || 'Send failed')
+      }
+      success(`Receipt sent to ${receiptEmail.trim()}.`)
+    } catch (e: any) {
+      notifyError(e.message || 'Failed to send receipt.')
+    }
+    setSendingReceipt(false)
+  }
+
+  function handleDownloadPdf() {
+    if (!order) return
+    window.open(`/api/orders/${order.id}/receipt`, '_blank')
+  }
+
+  function handleWhatsAppShare() {
+    if (!order) return
+    const message = formatWhatsAppOrderMessage(order)
+    window.open(getWhatsAppShareUrl(message), '_blank')
   }
 
   // Loading
@@ -391,8 +429,70 @@ export default function OrderDetailPage() {
               <div>
                 <p className={labelCls}>Unit price</p>
                 <p className={valueCls}>{(order.unit_price || 0).toLocaleString('en-US')} FCFA</p>
-              </div>
-            </div>
+      </div>
+
+      {/* Receipt */}
+      <div className={cardCls}>
+        <h2 className="text-sm font-semibold text-brand-dark mb-3 flex items-center gap-2">
+          <Send className="w-4 h-4 text-brand-dark/30" />
+          Send Receipt
+          {order.customer_email ? (
+            <span className="text-xs text-brand-dark/30 font-normal">
+              (on file: {order.customer_email})
+            </span>
+          ) : null}
+        </h2>
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
+          <div className="flex-1 w-full">
+            <label htmlFor="receipt-email" className="block text-xs text-brand-dark/40 font-medium uppercase tracking-wider mb-1">
+              Recipient Email
+            </label>
+            <input
+              id="receipt-email"
+              type="email"
+              value={receiptEmail}
+              onChange={e => setReceiptEmail(e.target.value)}
+              placeholder="client@example.com"
+              className="w-full rounded-xl border border-brand-grey/30 px-4 py-2.5 text-sm text-brand-dark placeholder:text-brand-dark/30 focus:outline-none focus:ring-2 focus:ring-brand-blue"
+            />
+          </div>
+          <button
+            onClick={handleSendReceipt}
+            disabled={sendingReceipt || !receiptEmail.trim()}
+            className="flex items-center gap-2 rounded-xl bg-brand-blue px-4 py-2.5 text-sm font-medium text-white transition hover:bg-brand-blue/90 disabled:opacity-40 shrink-0"
+          >
+            {sendingReceipt ? (
+              <>
+                <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                Sending…
+              </>
+            ) : (
+              <>
+                <Send className="w-4 h-4" />
+                Send PDF via Email
+              </>
+            )}
+          </button>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            onClick={handleDownloadPdf}
+            className="flex items-center gap-2 rounded-xl border border-brand-grey/30 px-4 py-2 text-sm font-medium text-brand-dark hover:bg-brand-grey/10 transition"
+          >
+            <Download className="w-4 h-4" />
+            Download PDF
+          </button>
+          <button
+            onClick={handleWhatsAppShare}
+            className="flex items-center gap-2 rounded-xl border border-green-300 bg-green-50 px-4 py-2 text-sm font-medium text-green-700 hover:bg-green-100 transition"
+          >
+            <MessageCircle className="w-4 h-4" />
+            Send via WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
           </div>
         </div>
 
