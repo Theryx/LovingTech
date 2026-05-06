@@ -13,6 +13,7 @@ import ProductCard from '@/components/ProductCard'
 import Navbar from '@/components/Navbar'
 import HeroCarousel from '@/components/HeroCarousel'
 import ShopByCategory from '@/components/ShopByCategory'
+import MobileCarousel from '@/components/MobileCarousel'
 import { LOCAL_PRODUCTS, ProductWithFeatured } from '@/lib/localProducts'
 import { Product, productService } from '@/lib/supabase'
 import { useLanguage } from '@/context/LanguageContext'
@@ -198,11 +199,14 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-          {(brands.length > 0
+                <MobileCarousel
+          items={brands.length > 0
             ? brands.filter(b => b.is_active)
             : brandLogos.map(name => ({ id: name, name, logo_url: null, is_active: true }))
-          ).map((brand: any) => (
+          }
+          slidesToScroll={1}
+          gap={16}
+          renderItem={(brand: any) => (
             <Link
               key={brand.id}
               href={`/products?brand=${encodeURIComponent(brand.name)}`}
@@ -225,8 +229,38 @@ export default function Home() {
                 {brand.name}
               </span>
             </Link>
-          ))}
-        </div>
+          )}
+        >
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            {(brands.length > 0
+              ? brands.filter(b => b.is_active)
+              : brandLogos.map(name => ({ id: name, name, logo_url: null, is_active: true }))
+            ).map((brand: any) => (
+              <Link
+                key={brand.id}
+                href={`/products?brand=${encodeURIComponent(brand.name)}`}
+                className="group flex flex-col items-center gap-3"
+              >
+                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-brand-grey/10 transition-all duration-300 group-hover:bg-brand-blue/10 group-hover:shadow-lg sm:h-28 sm:w-28 overflow-hidden">
+                  {brand.logo_url ? (
+                    <img
+                      src={brand.logo_url}
+                      alt={brand.name}
+                      className="h-full w-full object-contain p-4"
+                    />
+                  ) : (
+                    <span className="text-lg font-bold text-brand-dark/70 transition-colors group-hover:text-brand-blue sm:text-xl">
+                      {brand.name}
+                    </span>
+                  )}
+                </div>
+                <span className="text-sm font-medium text-brand-dark/60 transition-colors group-hover:text-brand-dark">
+                  {brand.name}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </MobileCarousel>
       </section>
 
       {/* Shop by Category */}

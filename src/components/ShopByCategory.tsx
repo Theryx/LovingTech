@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Keyboard, Mouse, Headphones, Cable, Gamepad2, Package } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
+import MobileCarousel from '@/components/MobileCarousel'
 
 interface Category {
   slug: string
@@ -124,8 +125,10 @@ export default function ShopByCategory() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        {categories.map(category => {
+            <MobileCarousel
+        items={categories}
+        slidesToScroll={2}
+        renderItem={(category, i) => {
           const IconComponent = CATEGORY_ICONS[category.icon as keyof typeof CATEGORY_ICONS]
           const colorClass = CATEGORY_COLORS[category.icon as keyof typeof CATEGORY_COLORS] || 'from-gray-400 to-gray-500'
           
@@ -133,7 +136,7 @@ export default function ShopByCategory() {
             <Link
               key={category.slug}
               href={`/products?category=${category.slug}`}
-              className="group relative overflow-hidden rounded-2xl border border-brand-grey/20 bg-white transition hover:shadow-lg hover:scale-[1.02]"
+              className="group relative overflow-hidden rounded-2xl border border-brand-grey/20 bg-white transition hover:shadow-lg hover:scale-[1.02] block h-full"
             >
               <div className="aspect-[4/3] overflow-hidden bg-brand-grey/10">
                 {category.image ? (
@@ -155,8 +158,42 @@ export default function ShopByCategory() {
               </div>
             </Link>
           )
-        })}
-      </div>
+        }}
+      >
+        <div className="grid grid-cols-3 lg:grid-cols-5 gap-4">
+          {categories.map(category => {
+            const IconComponent = CATEGORY_ICONS[category.icon as keyof typeof CATEGORY_ICONS]
+            const colorClass = CATEGORY_COLORS[category.icon as keyof typeof CATEGORY_COLORS] || 'from-gray-400 to-gray-500'
+            
+            return (
+              <Link
+                key={category.slug}
+                href={`/products?category=${category.slug}`}
+                className="group relative overflow-hidden rounded-2xl border border-brand-grey/20 bg-white transition hover:shadow-lg hover:scale-[1.02]"
+              >
+                <div className="aspect-[4/3] overflow-hidden bg-brand-grey/10">
+                  {category.image ? (
+                    <div
+                      className="h-full w-full bg-cover bg-center transition duration-300 group-hover:scale-105"
+                      style={{ backgroundImage: `url(${category.image})` }}
+                    />
+                  ) : (
+                    <div className={`h-full w-full bg-gradient-to-br ${colorClass} flex items-center justify-center`}>
+                      <IconComponent className="h-12 w-12 text-white opacity-80" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center justify-between p-4">
+                  <span className="font-semibold text-brand-dark text-sm">
+                    {t({ en: category.labelEn, fr: category.labelFr })}
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-brand-grey transition group-hover:text-brand-blue group-hover:translate-x-0.5" />
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+      </MobileCarousel>
     </section>
   )
 }
