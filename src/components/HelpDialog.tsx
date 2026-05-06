@@ -10,9 +10,8 @@ const WHATSAPP_NUMBER = '237655163248'
 const PRESET_QUESTIONS = [
   { en: 'How do I place an order?', fr: 'Comment passer une commande ?' },
   { en: 'What are the delivery times?', fr: 'Quels sont les délais de livraison ?' },
-  { en: 'Do you deliver to my city?', fr: 'Livrez-vous dans ma ville ?' },
+  { en: 'What are the towns you deliver to?', fr: 'Quelles sont les villes dans lesquelles vous livrez ?' },
   { en: 'How can I track my order?', fr: 'Comment suivre ma commande ?' },
-  { en: 'What is your return policy?', fr: 'Quelle est votre politique de retour ?' },
   { en: 'Are your products authentic?', fr: 'Vos produits sont-ils authentiques ?' },
 ]
 
