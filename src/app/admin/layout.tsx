@@ -8,7 +8,6 @@ import {
   Package,
   ShoppingBag,
   LayoutDashboard,
-  ArrowLeft,
   Star,
   Tag,
   Truck,
@@ -95,14 +94,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       >
         <div className="flex items-center gap-3 sm:gap-5">
           <Link
-            href="/"
-            className="flex items-center gap-2 text-brand-dark/50 transition hover:text-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            <span className="hidden sm:inline text-sm font-medium whitespace-nowrap">Back to Store</span>
-          </Link>
-          <div className="hidden sm:block h-5 w-px bg-brand-grey/30" aria-hidden="true" />
-          <Link
             href="/admin"
             className="flex items-center gap-2 text-lg font-black italic tracking-tighter text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue rounded"
           >
@@ -169,14 +160,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {renderNavItems(() => setMobileOpen(false))}
             </div>
             <div className="px-5 py-3 border-t border-brand-grey/10">
-              <Link
-                href="/"
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-2 text-sm text-brand-dark/50 hover:text-brand-blue transition"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Store
-              </Link>
+              <span className="text-xs text-brand-dark/30">{new Date().getFullYear()} Loving Tech</span>
             </div>
           </div>
         </div>
