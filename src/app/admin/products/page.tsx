@@ -198,7 +198,7 @@ export default function AdminProductsPage() {
   const [remapping, setRemapping] = useState(false)
 
   async function handleRemapCategories() {
-    if (!confirm('This will remap old product categories (keyboard→keyboards, mouse→mice, cable→charging-power, speaker→audio, solar_lamp→accessories, others→accessories). Continue?')) return
+    if (!window.confirm('This will remap old product categories (keyboard→keyboards, mouse→mice, cable→charging-power, speaker→audio, solar_lamp→accessories, others→accessories). Continue?')) return
     setRemapping(true)
     try {
       const res = await fetch('/api/products/remap-categories', { method: 'POST' })
